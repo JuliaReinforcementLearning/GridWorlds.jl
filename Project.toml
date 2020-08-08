@@ -1,0 +1,13 @@
+name = "Gridworld"
+uuid = "e15a9946-cd7f-4d03-83e2-6c30bacb0043"
+authors = ["Sriram"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
