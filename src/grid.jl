@@ -73,21 +73,21 @@ end
     :($i)
 end
 
-Base.setindex!(w::GridWorldBase, v::Bool, x::AbstractObject, I::CartesianIndex{2}) = setindex!(w.world, v, Base.to_index(w, x), I)
+Base.setindex!(w::GridWorldBase, v::Bool, x::AbstractObject, I...) = setindex!(w.world, v, Base.to_index(w, x), I...)
 
-function Base.setindex!(w::GridWorldBase, x::AbstractObject, I::CartesianIndex{2})
-    w[:, I] .= false
-    w[Base.to_index(w,x),I] = true
+function Base.setindex!(w::GridWorldBase, x::AbstractObject, I...)
+    w[:, I...] .= false
+    w[Base.to_index(w,x),I...] = true
 end
 
-function Base.setindex!(w::GridWorldBase, X::Tuple{Vararg{AbstractObject}}, I::CartesianIndex{2})
-    w[:, I] .= false
+function Base.setindex!(w::GridWorldBase, X::Tuple{Vararg{AbstractObject}}, I...)
+    w[:, I...] .= false
     for x in X
-        w[Base.to_index(w, x), I] = true
+        w[Base.to_index(w, x), I...] = true
     end
 end
 
-Base.getindex(w::GridWorldBase, x::AbstractObject, I::CartesianIndex{2}) = getindex(w.world, Base.to_index(w, x), I)
+Base.getindex(w::GridWorldBase, x::AbstractObject, I...) = getindex(w.world, Base.to_index(w, x), I...)
 
 function switch!(world::GridWorldBase, x::AbstractObject, src::CartesianIndex{2}, dest::CartesianIndex{2})
     world[x, src], world[x, dest] = world[x, dest], world[x, src]
@@ -114,3 +114,6 @@ function Random.rand(rng::AbstractRNG, f::Function, w::GridWorldBase, max_try=ty
     @warn "a rare case happened when sampling from GridWorldBase"
     return nothing
 end
+
+# coordinate transform for Makie.jl
+transform(x::Int) = p -> CartesianIndex(p[2], x-p[1]+1)
