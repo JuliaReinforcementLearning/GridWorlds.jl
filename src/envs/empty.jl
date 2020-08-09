@@ -1,34 +1,41 @@
 mutable struct EmptyGridWorld
-    world::GridWorldBase{Tuple{Empty,Wall}}
+    world::GridWorldBase{Tuple{Empty,Wall,Goal}}
     agent_pos::CartesianIndex{2}
-    agent_view::BitArray{3}
-    agent_direction::CartesianIndex{2}
+    agent_direction::LRUD
 end
 
 function EmptyGridWorld(;n=8, agent_start_pos=CartesianIndex(2,2), agent_view_size=7)
-    world = GridWorldBase(n, n, EMPTY, WALL)
+    objects = (EMPTY, WALL, GOAL)
+    world = GridWorldBase(n, n, objects)
     world[EMPTY, 2:n-1, 2:n-1] .= true
     world[WALL, [1,n], 1:n] .= true
     world[WALL, 1:n, [1,n]] .= true
-    agent_view = BitArray{3}(undef, 3, agent_view_size, agent_view_size)
-    EmptyGridWorld(world, agent_start_pos, agent_view, RIGHT)
+    world[GOAL, n-1, n-1] = true
+    EmptyGridWorld(world, agent_start_pos, RIGHT)
 end
 
-"""
-    (w::EmptyGridWorld)([UP,DOWN,LEFT,RIGHT])
+(w::EmptyGridWorld)(a::Union{TurnClockwise, TurnCounterclockwise}) = w.agent_direction = a(w.agent_direction)
+(w::EmptyGridWorld)(a::MoveForward) = w(w.agent_direction(w.agent_pos))
 
-Return `true` if action is executed successfully, otherwise return `false`.
-"""
 function (w::EmptyGridWorld)(action::CartesianIndex{2})
     dest = w.agent_pos + action
-    if w.world[WALL, dest]
-        false
-    else
-        # TODO:
-        # update w.agent_view
-        # https://github.com/maximecb/gym-minigrid/blob/master/gym_minigrid/minigrid.py#L1165
+    if !w.world[WALL, dest]
         w.agent_pos = dest
-        w.agent_direction = action
-        true
     end
 end
+
+# TODO:
+# update w.agent_view
+# https://github.com/maximecb/gym-minigrid/blob/master/gym_minigrid/minigrid.py#L1165
+function get_agent_view(w::EmptyGridWorld)
+end
+
+function get_agent_view!(buf::BitArray{3}, w)
+end
+
+#####
+# Visualization
+#####
+
+# TODO
+# use Makie
