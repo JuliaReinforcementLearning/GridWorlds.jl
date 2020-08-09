@@ -78,3 +78,36 @@ function init_screen(w::Observable{<:EmptyGridWorld}; resolution=(1000,1000))
     display(scene)
     scene
 end
+
+function play(::Val{:EmptyGridWorld})
+    print("""
+    Key bindings:
+    ←: TurnCounterclockwise
+    →: TurnClockwise
+    ↑: MoveForward
+    q: Quit
+    """)
+    w = EmptyGridWorld()
+    w_node = Node(w)
+    scene = init_screen(w_node)
+    is_quit = Ref(false)
+
+    on(scene.events.keyboardbuttons) do b
+        if ispressed(b, Keyboard.left)
+            w(TURN_COUNTERCLOCKWISE)
+            w_node[] = w
+        elseif ispressed(b, Keyboard.right)
+            w(TURN_CLOCKWISE)
+            w_node[] = w
+        elseif ispressed(b, Keyboard.up)
+            w(MOVE_FORWARD)
+            w_node[] = w
+        elseif ispressed(b, Keyboard.q)
+            is_quit[] = true
+        end
+    end
+
+    while !is_quit[]
+        sleep(0.5)
+    end
+end
