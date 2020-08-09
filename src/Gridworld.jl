@@ -1,5 +1,6 @@
 module Gridworld
 
-# Write your package code here.
+include("grid.jl")
+include("envs/envs.jl")
 
 end
