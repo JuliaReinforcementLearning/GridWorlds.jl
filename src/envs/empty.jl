@@ -10,7 +10,7 @@ function EmptyGridWorld(;n=8, agent_start_pos=CartesianIndex(2,2), agent_view_si
     world[EMPTY, 2:n-1, 2:n-1] .= true
     world[WALL, [1,n], 1:n] .= true
     world[WALL, 1:n, [1,n]] .= true
-    world[agent_start_pos] = AGENT
+    world[AGENT, agent_start_pos] = true
     agent_view = BitArray{3}(undef, 3, agent_view_size, agent_view_size)
     EmptyGridWorld(world, agent_start_pos, agent_view, RIGHT)
 end
@@ -28,7 +28,7 @@ function (w::EmptyGridWorld)(action::CartesianIndex{2})
         # TODO:
         # update w.agent_view
         # https://github.com/maximecb/gym-minigrid/blob/master/gym_minigrid/minigrid.py#L1165
-        switch!(w.world, (AGENT, EMPTY), w.agent_pos, dest)
+        switch!(w.world, AGENT, w.agent_pos, dest)
         w.agent_pos = dest
     end
 end
