@@ -1,6 +1,6 @@
 module Gridworld
 
-const GW = GridWorld
+const GW = Gridworld
 export GW
 
 include("grid.jl")
