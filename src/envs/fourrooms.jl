@@ -6,7 +6,7 @@ mutable struct FourRooms
     agent_direction::LRUD
 end
 
-function FourRooms(;n=30, agent_start_pos=CartesianIndex(2,2), agent_view_size=7)
+function FourRooms(;n=30, agent_start_pos=CartesianIndex(2,2))
     objects = (EMPTY, WALL, GOAL)
     world = GridWorldBase(n,n,objects)
     world[EMPTY, 2:n-1, 2:n-1] .= true
@@ -27,7 +27,7 @@ function (w::FourRooms)(::MoveForward)
     end
 end
 
-function get_agent_view(w::FourRooms)
+function get_agent_view(w::FourRooms, agent_view_size=7)
 end
 
 function get_agent_view!(buf::BitArray{3}, w)
