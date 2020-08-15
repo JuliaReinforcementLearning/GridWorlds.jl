@@ -1,6 +1,6 @@
 export FourRooms
 
-mutable struct FourRooms <: AbstractEnvironment
+mutable struct FourRooms <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty,Wall,Goal}}
     agent_pos::CartesianIndex{2}
     agent_direction::LRUD

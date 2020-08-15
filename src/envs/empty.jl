@@ -1,6 +1,6 @@
 export EmptyGridWorld
 
-mutable struct EmptyGridWorld <: AbstractEnvironment 
+mutable struct EmptyGridWorld <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty,Wall,Goal}}
     agent_pos::CartesianIndex{2}
     agent_direction::LRUD

@@ -1,6 +1,8 @@
+export play
+
 using Makie
 
-function init_screen(w::Observable{<:AbstractEnvironment}; resolution=(1000,1000))
+function init_screen(w::Observable{<:AbstractGridWorld}; resolution=(1000,1000))
     scene = Scene(resolution = resolution, raw = true, camera = campixel!)
 
     area = scene.px_area
@@ -39,7 +41,7 @@ function init_screen(w::Observable{<:AbstractEnvironment}; resolution=(1000,1000
     scene
 end
 
-function play(environment::AbstractEnvironment)
+function play(environment::AbstractGridWorld)
     print("""
     Key bindings:
     ←: TurnCounterclockwise

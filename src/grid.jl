@@ -54,7 +54,7 @@ const AGENT = Agent()
 struct Goal <: AbstractObject end
 const GOAL = Goal()
 
-abstract type AbstractEnvironment end
+abstract type AbstractGridWorld end
 
 struct GridWorldBase{O} <: AbstractArray{Bool, 3}
     world::BitArray{3}
