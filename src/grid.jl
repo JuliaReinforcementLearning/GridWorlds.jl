@@ -61,15 +61,21 @@ const DOOR = Door()
 ####
 # Colors
 ####
-struct Color <: AbstractObject
-    value::Array{Int}
-end
-const RED = Color([255,0,0])
-const GREEN = Color([0,255,0])
-const BLUE = Color([0,0,255])
-const PURPLE = Color([112, 39, 195])
-const YELLOW = Color([255,255,0])
-const GREY = Color([100,100,100])
+abstract type Color <: AbstractObject end
+
+struct Red <: Color end
+const RED = Red()
+struct Green <: Color end
+const GREEN = Green()
+struct Blue <: Color end
+const BLUE = Blue()
+struct Purple <: Color end
+const PURPLE = Purple()
+struct Yellow <: Color end
+const YELLOW = Yellow()
+struct Grey <: Color end
+const GREY = Grey()
+
 const COLORS = [RED,GREEN,BLUE,PURPLE,YELLOW,GREY]
 
 abstract type AbstractGridWorld end
