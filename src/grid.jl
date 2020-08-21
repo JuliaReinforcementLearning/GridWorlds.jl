@@ -54,7 +54,6 @@ struct Agent <: AbstractObject end
 const AGENT = Agent()
 struct Goal <: AbstractObject end
 const GOAL = Goal()
-struct DOOR <: AbstractObject end
 struct Door <: AbstractObject end
 const DOOR = Door()
 
