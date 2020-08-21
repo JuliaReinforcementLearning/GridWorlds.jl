@@ -1,5 +1,6 @@
 using MacroTools:@forward
 using Random
+using StatsBase
 
 #####
 # Actions
@@ -53,6 +54,23 @@ struct Agent <: AbstractObject end
 const AGENT = Agent()
 struct Goal <: AbstractObject end
 const GOAL = Goal()
+struct DOOR <: AbstractObject end
+struct Door <: AbstractObject end
+const DOOR = Door()
+
+####
+# Colors
+####
+struct Color <: AbstractObject
+    value::Array{Int}
+end
+const RED = Color([255,0,0])
+const GREEN = Color([0,255,0])
+const BLUE = Color([0,0,255])
+const PURPLE = Color([112, 39, 195])
+const YELLOW = Color([255,255,0])
+const GREY = Color([100,100,100])
+const COLORS = [RED,GREEN,BLUE,PURPLE,YELLOW,GREY]
 
 abstract type AbstractGridWorld end
 
