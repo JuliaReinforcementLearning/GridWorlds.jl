@@ -62,7 +62,7 @@ struct GridWorldBase{O} <: AbstractArray{Bool, 3}
 end
 
 function GridWorldBase(x::Int, y::Int, objects::Tuple{Vararg{AbstractObject}})
-    world = BitArray{3}(undef, length(objects), x, y)
+    world = BitArray{3}(undef, x, y, length(objects))
     fill!(world, false)
     GridWorldBase(world, objects)
 end
@@ -75,24 +75,26 @@ end
     :($i)
 end
 
-Base.setindex!(w::GridWorldBase, v::Bool, x::AbstractObject, I...) = setindex!(w.world, v, Base.to_index(w, x), I...)
 
-function Base.setindex!(w::GridWorldBase, x::AbstractObject, I...)
-    w[:, I...] .= false
-    w[Base.to_index(w,x),I...] = true
+
+Base.setindex!(w::GridWorldBase, v::Bool, x::Int, y::Int, o::AbstractObject) = setindex!(w.world, v, x, y, Base.to_index(w, o))
+
+function Base.setindex!(w::GridWorldBase, x::Int, y::Int, o::AbstractObject)
+    w[x,y, :] .= false
+    w[x,y, Base.to_index(w,x)] = true
 end
 
 function Base.setindex!(w::GridWorldBase, X::Tuple{Vararg{AbstractObject}}, I...)
-    w[:, I...] .= false
+    w[x,y, :] .= false
     for x in X
-        w[Base.to_index(w, x), I...] = true
+        w[x,y, Base.to_index(w, x)] = true
     end
 end
 
-Base.getindex(w::GridWorldBase, x::AbstractObject, I...) = getindex(w.world, Base.to_index(w, x), I...)
+Base.getindex(w::GridWorldBase, x::Int, y::Int, o::AbstractObject) = getindex(w.world, x, y, Base.to_index(w, o) )
 
 function switch!(world::GridWorldBase, x::AbstractObject, src::CartesianIndex{2}, dest::CartesianIndex{2})
-    world[x, src], world[x, dest] = world[x, dest], world[x, src]
+    world[src, x], world[dest, x] = world[dest, x], world[src, x]
 end
 
 function switch!(world::GridWorldBase, X::Tuple{Vararg{AbstractObject}}, src::CartesianIndex{2}, dest::CartesianIndex{2})
