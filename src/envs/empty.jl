@@ -9,10 +9,10 @@ end
 function EmptyGridWorld(;n=8, agent_start_pos=CartesianIndex(2,2), agent_view_size=7)
     objects = (EMPTY, WALL, GOAL)
     world = GridWorldBase(n, n, objects)
-    world[EMPTY, 2:n-1, 2:n-1] .= true
-    world[WALL, [1,n], 1:n] .= true
-    world[WALL, 1:n, [1,n]] .= true
-    world[GOAL, n-1, n-1] = true
+    world[2:n-1, 2:n-1, EMPTY] .= true
+    world[[1,n], 1:n, WALL] .= true
+    world[1:n, [1,n], WALL] .= true
+    world[n-1, n-1, GOAL] = true
     EmptyGridWorld(world, agent_start_pos, RIGHT)
 end
 
@@ -20,7 +20,7 @@ end
 
 function (w::EmptyGridWorld)(::MoveForward)
     dest = w.agent_direction(w.agent_pos)
-    if !w.world[WALL, dest]
+    if !w.world[dest[1], dest[2], WALL]
         w.agent_pos = dest
     end
 end
