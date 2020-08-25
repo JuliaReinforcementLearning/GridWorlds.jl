@@ -78,6 +78,7 @@ end
 
 
 Base.setindex!(w::GridWorldBase, v::Bool, x::Int, y::Int, o::AbstractObject) = setindex!(w.world, v, x, y, Base.to_index(w, o))
+Base.setindex!(w::GridWorldBase, v::Bool, i::CartesianIndex{2}, o::AbstractObject) = setindex!(w.world, v, i[1], i[2], Base.to_index(w, o))
 
 function Base.setindex!(w::GridWorldBase, x::Int, y::Int, o::AbstractObject)
     w[x,y, :] .= false
@@ -92,6 +93,7 @@ function Base.setindex!(w::GridWorldBase, X::Tuple{Vararg{AbstractObject}}, I...
 end
 
 Base.getindex(w::GridWorldBase, x::Int, y::Int, o::AbstractObject) = getindex(w.world, x, y, Base.to_index(w, o) )
+Base.getindex(w::GridWorldBase, i::CartesianIndex{2}, o::AbstractObject) = getindex(w.world, i[1], i[2], Base.to_index(w, o) )
 
 function switch!(world::GridWorldBase, x::AbstractObject, src::CartesianIndex{2}, dest::CartesianIndex{2})
     world[src, x], world[dest, x] = world[dest, x], world[src, x]

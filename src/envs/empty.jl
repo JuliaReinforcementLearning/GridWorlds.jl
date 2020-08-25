@@ -20,7 +20,7 @@ end
 
 function (w::EmptyGridWorld)(::MoveForward)
     dest = w.agent_direction(w.agent_pos)
-    if !w.world[dest[1], dest[2], WALL]
+    if !w.world[dest, WALL]
         w.agent_pos = dest
     end
 end
