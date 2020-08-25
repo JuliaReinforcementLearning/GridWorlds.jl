@@ -8,16 +8,16 @@ function init_screen(w::Observable{<:AbstractGridWorld}; resolution=(1000,1000))
     area = scene.px_area
     poly!(scene, area)
 
-    grid_size = @lift((widths($area)[1] / size($w.world, 2), widths($area)[2] / size($w.world, 3)))
-    T = transform(size(w[].world, 2))
+    grid_size = @lift((widths($area)[1] / size($w.world, 1), widths($area)[2] / size($w.world, 2)))
+    T = transform(size(w[].world, 1))
 
     # 1. paint walls
-    walls = @lift(findall(selectdim($w.world, 1, Base.to_index($w.world, WALL))))
+    walls = @lift(findall(selectdim($w.world, 3, Base.to_index($w.world, WALL))))
     wall_boxes = @lift([FRect2D((T(w).I .- (1,1)) .* $grid_size , $grid_size) for w in $walls])
     poly!(scene, wall_boxes, color=:gray)
 
     # 2. paint goal
-    goals = @lift(findall(selectdim($w.world, 1, Base.to_index($w.world, GOAL))))
+    goals = @lift(findall(selectdim($w.world, 3, Base.to_index($w.world, GOAL))))
     goal_boxes = @lift([FRect2D((T(w).I .- (1,1)) .* $grid_size , $grid_size) for w in $goals])
     poly!(scene, goal_boxes, color=:green)
 
