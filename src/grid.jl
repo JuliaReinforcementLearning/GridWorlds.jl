@@ -1,6 +1,5 @@
 using MacroTools:@forward
 using Random
-using StatsBase
 
 #####
 # Actions
@@ -76,6 +75,7 @@ struct Grey <: Color end
 const GREY = Grey()
 
 const COLORS = [RED,GREEN,BLUE,PURPLE,YELLOW,GREY]
+const typeCOLORS = [typeof(i) for i in COLORS]
 
 abstract type AbstractGridWorld end
 

@@ -1,7 +1,7 @@
 export GoToDoor
 
 mutable struct GoToDoor <: AbstractGridWorld
-    world::GridWorldBase{Tuple{Empty,Wall,Goal,Door,Color...}}
+    world::GridWorldBase{Tuple{Empty,Wall,Door,typeCOLORS...}}
     agent_pos::CartesianIndex{2}
     agent_direction::LRUD
 end
@@ -9,8 +9,8 @@ end
 function GoToDoor(;n=8, agent_start_pos=CartesianIndex(2,2), agent_view_size=7)
     objects = (EMPTY, WALL, DOOR, COLORS...)
     world = GridWorldBase(n, n, objects)
-    world[WALL, [1,n], 1:n] .= true
-    world[WALL, 1:n, [1,n]] .= true
+    world[[1,n], 1:n, WALL] .= true
+    world[1:n, [1,n], WALL] .= true
 
     door_pos = [(rand(2:n-1),1), (rand(2:n-1),n), (1,rand(2:n-1)), (n,rand(2:n-1))]
     door_colors = []
@@ -19,8 +19,9 @@ function GoToDoor(;n=8, agent_start_pos=CartesianIndex(2,2), agent_view_size=7)
         while color in door_colors
             color = rand(COLORS)
         end
-        world[DOOR,x,y] = true
-        world[color,x,y] = true
+        world[x,y,DOOR] = true
+        world[x,y,WALL] = false
+        world[x,y,color] = true
         push!(door_colors, color)
     end
     GoToDoor(world, agent_start_pos, RIGHT)
@@ -30,7 +31,7 @@ end
 
 function (w::GoToDoor)(::MoveForward)
     dest = w.agent_direction(w.agent_pos)
-    if !w.world[WALL, dest]
+    if !w.world[dest, WALL]
         w.agent_pos = dest
     end
 end
