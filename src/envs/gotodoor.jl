@@ -31,6 +31,9 @@ end
 
 function (w::GoToDoor)(::MoveForward)
     dest = w.agent_direction(w.agent_pos)
+    if !(1≤dest[1]≤size(w.world)[1] && 1≤dest[2]≤size(w.world)[2])
+        return
+    end
     if !w.world[dest, WALL]
         w.agent_pos = dest
     end

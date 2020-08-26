@@ -2,8 +2,8 @@ export play
 
 using Makie
 
-color2value = Dict{Union{COLORS...}, Symbol}(
-    RED    => :red
+color2value = Dict{Union{typeCOLORS...}, Symbol}(
+    RED    => :red,
     GREEN  => :green,
     BLUE   => :blue,
     PURPLE => :purple,
