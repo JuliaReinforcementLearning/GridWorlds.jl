@@ -53,6 +53,29 @@ struct Agent <: AbstractObject end
 const AGENT = Agent()
 struct Goal <: AbstractObject end
 const GOAL = Goal()
+struct Door <: AbstractObject end
+const DOOR = Door()
+
+####
+# Colors
+####
+abstract type Color <: AbstractObject end
+
+struct Red <: Color end
+const RED = Red()
+struct Green <: Color end
+const GREEN = Green()
+struct Blue <: Color end
+const BLUE = Blue()
+struct Purple <: Color end
+const PURPLE = Purple()
+struct Yellow <: Color end
+const YELLOW = Yellow()
+struct Grey <: Color end
+const GREY = Grey()
+
+const COLORS = [RED,GREEN,BLUE,PURPLE,YELLOW,GREY]
+const typeCOLORS = [typeof(i) for i in COLORS]
 
 abstract type AbstractGridWorld end
 

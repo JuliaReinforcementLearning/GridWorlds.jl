@@ -2,6 +2,15 @@ export play
 
 using Makie
 
+color2value = Dict{Union{typeCOLORS...}, Symbol}(
+    RED    => :red,
+    GREEN  => :green,
+    BLUE   => :blue,
+    PURPLE => :purple,
+    YELLOW => :yellow,
+    GREY   => :gray
+)
+
 function init_screen(w::Observable{<:AbstractGridWorld}; resolution=(1000,1000))
     scene = Scene(resolution = resolution, raw = true, camera = campixel!)
 
@@ -17,11 +26,24 @@ function init_screen(w::Observable{<:AbstractGridWorld}; resolution=(1000,1000))
     poly!(scene, wall_boxes, color=:gray)
 
     # 2. paint goal
-    goals = @lift(findall(selectdim($w.world, 3, Base.to_index($w.world, GOAL))))
-    goal_boxes = @lift([FRect2D((T(w).I .- (1,1)) .* $grid_size , $grid_size) for w in $goals])
-    poly!(scene, goal_boxes, color=:green)
+    if GOAL in w[].world.objects
+        goals = @lift(findall(selectdim($w.world, 3, Base.to_index($w.world, GOAL))))
+        goal_boxes = @lift([FRect2D((T(w).I .- (1,1)) .* $grid_size , $grid_size) for w in $goals])
+        poly!(scene, goal_boxes, color=:green)
+    end
 
-    # 3. paint agent
+    # 3. paint doors
+    if DOOR in w[].world.objects
+        doors = @lift(findall(selectdim($w.world, 3, Base.to_index($w.world, DOOR))))
+        for (x,y) in (p->Tuple(p)).(doors[])
+            color = findlast(selectdim(selectdim(w[].world,1,x),1,y))-Base.to_index(w[].world, COLORS[1])+1
+            color = color2value[COLORS[color]]
+            door_box = @lift(FRect2D((T((x,y)).I .- (1,1)) .* $grid_size , $grid_size))
+            poly!(scene, door_box, color=color)
+        end
+    end
+
+    # 4. paint agent
     agent_marker = @lift if $w.agent_direction === UP
         '▲'
     elseif $w.agent_direction === DOWN
