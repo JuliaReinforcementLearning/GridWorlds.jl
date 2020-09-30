@@ -6,10 +6,11 @@ version = "0.1.0"
 [deps]
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
-Makie = "0.11"
 MacroTools = "0.5"
+Makie = "0.11"
 julia = "1"
 
 [extras]

@@ -3,7 +3,7 @@ export FourRooms
 mutable struct FourRooms <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty,Wall,Goal}}
     agent_pos::CartesianIndex{2}
-    agent_direction::LRUD
+    agent_dir::LRUD
 end
 
 function FourRooms(;n=19, agent_start_pos=CartesianIndex(2,2))
@@ -18,17 +18,11 @@ function FourRooms(;n=19, agent_start_pos=CartesianIndex(2,2))
     FourRooms(world,agent_start_pos,RIGHT)
 end
 
-(w::FourRooms)(a::Union{TurnClockwise, TurnCounterclockwise}) = w.agent_direction = a(w.agent_direction)
+(w::FourRooms)(a::Union{TurnClockwise, TurnCounterclockwise}) = w.agent_dir = a(w.agent_dir)
 
 function (w::FourRooms)(::MoveForward)
-    dest = w.agent_direction(w.agent_pos)
+    dest = w.agent_dir(w.agent_pos)
     if !w.world[dest, WALL]
         w.agent_pos = dest
     end
-end
-
-function get_agent_view(w::FourRooms, agent_view_size=7)
-end
-
-function get_agent_view!(buf::BitArray{3}, w)
 end

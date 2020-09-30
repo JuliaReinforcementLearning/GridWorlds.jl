@@ -1,5 +1,8 @@
 export play
 
+# coordinate transform for Makie.jl
+transform(x::Int) = p -> CartesianIndex(p[2], x-p[1]+1)
+
 using Makie
 
 color2value = Dict{Union{typeCOLORS...}, Symbol}(
@@ -44,13 +47,13 @@ function init_screen(w::Observable{<:AbstractGridWorld}; resolution=(1000,1000))
     end
 
     # 4. paint agent
-    agent_marker = @lift if $w.agent_direction === UP
+    agent_marker = @lift if $w.agent_dir === UP
         '▲'
-    elseif $w.agent_direction === DOWN
+    elseif $w.agent_dir === DOWN
         '▼'
-    elseif $w.agent_direction === LEFT
+    elseif $w.agent_dir === LEFT
         '◀'
-    elseif $w.agent_direction === RIGHT
+    elseif $w.agent_dir === RIGHT
         '▶'
     else
         error("unknown direction")

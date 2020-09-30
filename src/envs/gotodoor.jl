@@ -3,7 +3,7 @@ export GoToDoor
 mutable struct GoToDoor <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty,Wall,Door,typeCOLORS...}}
     agent_pos::CartesianIndex{2}
-    agent_direction::LRUD
+    agent_dir::LRUD
 end
 
 function GoToDoor(;n=8, agent_start_pos=CartesianIndex(2,2), agent_view_size=7)
@@ -27,23 +27,14 @@ function GoToDoor(;n=8, agent_start_pos=CartesianIndex(2,2), agent_view_size=7)
     GoToDoor(world, agent_start_pos, RIGHT)
 end
 
-(w::GoToDoor)(a::Union{TurnClockwise, TurnCounterclockwise}) = w.agent_direction = a(w.agent_direction)
+(w::GoToDoor)(a::Union{TurnClockwise, TurnCounterclockwise}) = w.agent_dir = a(w.agent_dir)
 
 function (w::GoToDoor)(::MoveForward)
-    dest = w.agent_direction(w.agent_pos)
+    dest = w.agent_dir(w.agent_pos)
     if !(1≤dest[1]≤size(w.world)[1] && 1≤dest[2]≤size(w.world)[2])
         return
     end
     if !w.world[dest, WALL]
         w.agent_pos = dest
     end
-end
-
-# TODO:
-# update w.agent_view
-# https://github.com/maximecb/gym-minigrid/blob/master/gym_minigrid/minigrid.py#L1165
-function get_agent_view(w::GoToDoor)
-end
-
-function get_agent_view!(buf::BitArray{3}, w)
 end

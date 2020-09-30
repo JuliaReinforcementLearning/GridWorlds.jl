@@ -3,33 +3,33 @@ export EmptyGridWorld
 mutable struct EmptyGridWorld <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty,Wall,Goal}}
     agent_pos::CartesianIndex{2}
-    agent_direction::LRUD
+    agent_dir::LRUD
+    agent_view::BitArray{3}
 end
 
-function EmptyGridWorld(;n=8, agent_start_pos=CartesianIndex(2,2), agent_view_size=7)
+function EmptyGridWorld(;n=8, agent_view_size=7, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RIGHT)
     objects = (EMPTY, WALL, GOAL)
-    world = GridWorldBase(n, n, objects)
-    world[2:n-1, 2:n-1, EMPTY] .= true
-    world[[1,n], 1:n, WALL] .= true
-    world[1:n, [1,n], WALL] .= true
-    world[n-1, n-1, GOAL] = true
-    EmptyGridWorld(world, agent_start_pos, RIGHT)
+    w = GridWorldBase(objects, n, n)
+    w[EMPTY, 2:n-1, 2:n-1] .= true
+    w[WALL, [1,n], 1:n] .= true
+    w[WALL, 1:n, [1,n]] .= true
+    w[GOAL, n-1, n-1] = true
+    w[EMPTY, n-1, n-1] = false
+    v = BitArray{3}(undef, length(objects), agent_view_size, agent_view_size)
+    fill!(v, false)
+    get_agent_view!(v, w, agent_start_pos, agent_start_dir)
+    EmptyGridWorld(w, agent_start_pos, agent_start_dir, v)
 end
 
-(w::EmptyGridWorld)(a::Union{TurnClockwise, TurnCounterclockwise}) = w.agent_direction = a(w.agent_direction)
+function (w::EmptyGridWorld)(a::Union{TurnClockwise, TurnCounterclockwise})
+    w.agent_dir = a(w.agent_dir)
+    get_agent_view!(w.agent_view, w.world, w.agent_pos, w.agent_dir)
+end
 
 function (w::EmptyGridWorld)(::MoveForward)
-    dest = w.agent_direction(w.agent_pos)
-    if !w.world[dest, WALL]
+    dest = w.agent_dir(w.agent_pos)
+    if !w.world[WALL, dest]
         w.agent_pos = dest
     end
-end
-
-# TODO:
-# update w.agent_view
-# https://github.com/maximecb/gym-minigrid/blob/master/gym_minigrid/minigrid.py#L1165
-function get_agent_view(w::EmptyGridWorld)
-end
-
-function get_agent_view!(buf::BitArray{3}, w)
+    get_agent_view!(w.agent_view, w.world, w.agent_pos, w.agent_dir)
 end
