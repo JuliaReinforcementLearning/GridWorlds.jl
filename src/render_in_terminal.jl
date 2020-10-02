@@ -6,9 +6,9 @@ function Base.show(io::IO, gw::AbstractGridWorld)
     for i in 1:size(w, 2)
         for j in 1:size(w, 3)
             if i == p[1] && j == p[2]
-                print(io, (AGENT, d))
+                print(io, get_agent(gw))
             else
-                print(io, w.objects[w.world[:, i, j]])
+                print(io, get_object(gw)[findfirst(w.world[:, i, j])])
             end
         end
         println(io)
@@ -19,11 +19,15 @@ function Base.show(io::IO, gw::AbstractGridWorld)
     v = get_agent_view(gw)
     for i in 1:size(v, 2)
         for j in 1:size(v, 3)
-            o = w.objects[v[:, i, j]]
-            if o isa Tuple{}
-                print(io, '_')
+            if i == 1 && j == size(v, 3) ÷ 2 + 1
+                print(io, Agent(dir=DOWN))
             else
-                print(io, o)
+                x = findfirst(v[:, i, j])
+                if isnothing(x)
+                    print(io, '_')
+                else
+                    print(io, get_object(gw)[x])
+                end
             end
         end
         println(io)

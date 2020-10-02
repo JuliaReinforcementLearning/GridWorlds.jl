@@ -13,6 +13,8 @@ struct GridWorldBase{O} <: AbstractArray{Bool, 3}
     objects::O
 end
 
+get_object(w::GridWorldBase) = w.objects
+
 function GridWorldBase(objects::Tuple{Vararg{AbstractObject}}, x::Int, y::Int)
     world = BitArray{3}(undef, length(objects), x, y)
     fill!(world, false)
@@ -59,97 +61,24 @@ end
 # get_agent_view
 #####
 
-"""
-⇤m⇥
-■■S⤒
-■■←n
-■■■⤓
-"""
-function get_agent_view!(v::AbstractArray{Bool,3}, a::AbstractArray{Bool,3}, p::CartesianIndex, ::Left)
-    fill!(v, false)
-    l, m, n = size(v)
-    start = p + CartesianIndex(-(n-1)÷2,0)
-    valid_inds = CartesianIndices((size(a,2),size(a,3)))
-    for j in 0:n-1
-        for i in 0:m-1
-            cur = start+CartesianIndex(j, -i)
-            if cur ∈ valid_inds
-                for k in 1:l
-                    v[k, i+1,j+1] = a[k, cur]
-                end
-            end
-        end
-    end
-    v
-end
+get_agent_view_inds((i, j), (m, n), ::Left) = CartesianIndices((i-(n-1)÷2:i+(n-(n-1)÷2)-1, j-m+1:j))
+get_agent_view_inds((i, j), (m, n), ::Right) = CartesianIndices((i-(n-1)÷2:i+(n-(n-1)÷2)-1, j:j+m-1))
+get_agent_view_inds((i, j), (m, n), ::Up) = CartesianIndices((i-m+1:i, j-(n-1)÷2:j+(n-(n-1)÷2)-1))
+get_agent_view_inds((i, j), (m, n), ::Down) = CartesianIndices((i:i+m-1, j-(n-1)÷2:j+(n-(n-1)÷2)-1))
 
-"""
-⤒■■■
-n→■■
-⤓S■■
- ⇤m⇥
-"""
-function get_agent_view!(v::AbstractArray{Bool,3}, a::AbstractArray{Bool,3}, p::CartesianIndex, ::Right)
-    fill!(v, false)
-    l, m, n = size(v)
-    start = p + CartesianIndex((n-1)÷2,0)
-    valid_inds = CartesianIndices((size(a,2),size(a,3)))
-    for j in 0:n-1
-        for i in 0:m-1
-            cur = start+CartesianIndex(-j, i)
-            if cur ∈ valid_inds
-                for k in 1:l
-                    v[k, i+1,j+1] = a[k, cur]
-                end
-            end
-        end
-    end
-    v
-end
+ind_map((i,j), (m, n), ::Left) = (m-j+1, i)
+ind_map((i,j), (m, n), ::Right) = (j, n-i+1)
+ind_map((i,j), (m, n), ::Up) = (m-i+1, n-j+1)
+ind_map((i,j), (m, n), ::Down) = (i,j)
 
-"""
-■■■⤒
-■■■m
-■↑S⤓
-⇤n⇥
-"""
-function get_agent_view!(v::AbstractArray{Bool,3}, a::AbstractArray{Bool,3}, p::CartesianIndex, ::Up)
-    fill!(v, false)
-    l, m, n = size(v)
-    start = p + CartesianIndex(0, (n-1)÷2)
-    valid_inds = CartesianIndices((size(a,2),size(a,3)))
-    for j in 0:n-1
-        for i in 0:m-1
-            cur = start+CartesianIndex(-i,-j)
-            if cur ∈ valid_inds
-                for k in 1:l
-                    v[k, i+1,j+1] = a[k, cur]
-                end
-            end
-        end
-    end
-    v
-end
-
-"""
- ⇤n⇥
-⤒S↓■
-m■■■
-⤓■■■
-"""
-function get_agent_view!(v::AbstractArray{Bool,3}, a::AbstractArray{Bool,3}, p::CartesianIndex, ::Down)
-    fill!(v, false)
-    l, m, n = size(v)
-    start = p + CartesianIndex(0, -(n-1)÷2)
-    valid_inds = CartesianIndices((size(a,2),size(a,3)))
-    for j in 0:n-1
-        for i in 0:m-1
-            cur = start+CartesianIndex(i,j)
-            if cur ∈ valid_inds
-                for k in 1:l
-                    v[k, i+1,j+1] = a[k, cur]
-                end
-            end
+function get_agent_view!(v::AbstractArray{Bool,3}, a::AbstractArray{Bool,3}, p::CartesianIndex, dir::LRUD)
+    view_size = (size(v, 2), size(v, 3))
+    grid_size = (size(a,2),size(a,3))
+    inds = get_agent_view_inds(p.I, view_size, dir)
+    valid_inds = CartesianIndices(grid_size)
+    for ind in CartesianIndices(inds)
+        if inds[ind] ∈ valid_inds
+            v[:, ind_map(ind.I, view_size, dir)...] .= a[:, inds[ind]]
         end
     end
     v

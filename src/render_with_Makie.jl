@@ -1,7 +1,9 @@
 export play
 
+using Colors
+
 # coordinate transform for Makie.jl
-transform(x::Int) = p -> CartesianIndex(p[3], x-p[2]+1)
+transform(x::Int) = p -> CartesianIndex(p[2], x-p[1]+1)
 
 using Makie
 
@@ -12,48 +14,41 @@ function init_screen(w::Observable{<:AbstractGridWorld}; resolution=(1000,1000))
     poly!(scene, area)
 
     grid_size = @lift((widths($area)[1] / size($w.world, 2), widths($area)[2] / size($w.world, 3)))
-    T = transform(size(w[].world, 1))
+    T = transform(size(w[].world, 2))
+
+    # 0. paint view
+    view_boxes = @lift([FRect2D((T(x).I .- (1,1)) .* $grid_size , $grid_size) for x in get_agent_view_inds($w) if x ∈ CartesianIndices((size($w.world, 2), size($w.world, 3)))])
+    poly!(scene, view_boxes, color=:dimgrey)
 
     # 1. paint walls
-    if WALL in w[].world.objects
+    if WALL in get_object(w[])
         walls = @lift(findall(view($w.world, Base.to_index($w.world, WALL), :, :)))
         wall_boxes = @lift([FRect2D((T(w).I .- (1,1)) .* $grid_size , $grid_size) for w in $walls])
-        poly!(scene, wall_boxes, color=:gray)
+        poly!(scene, wall_boxes, color=:darkgray)
     end
 
     # 2. paint goal
-    if GOAL in w[].world.objects
-        goals = @lift(findall(view($w.world, Base.to_index($w.world, GOAL), :, :)))
-        goal_boxes = @lift([FRect2D((T(w).I .- (1,1)) .* $grid_size , $grid_size) for w in $goals])
-        poly!(scene, goal_boxes, color=:green)
+    if GOAL in get_object(w[])
+        goal_pos = @lift(findall(view($w.world, Base.to_index($w.world, GOAL), :, :)))
+        goal_centers = @lift([(T(p).I .- (0.5,0.5)) .* $grid_size for p in $goal_pos])
+        scatter!(scene, goal_centers, color=get_color(GOAL), marker=convert(Char, GOAL), markersize=@lift(minimum($grid_size)))
     end
 
     # 3. paint doors
-    if DOOR in w[].world.objects
-        doors = @lift(findall(view($w.world, Base.to_index($w.world, DOOR), :, :)))
-        world_colors = [x for x in $w.objects if x isa AbstractColor]
-        world_colors_inds = [Base.to_index(w[].world, c) for c in world_colors]
-        for d in doors[]
-            c = w[].objects[findfirst(x -> x isa AbstractColor, @view(w[].world[:, d]))]
-            scatter!(scene, @lift((T(d).I .- (0.5, 0.5)).* $grid_size), color=:red, marker='🚪' , markersize=@lift(minimum($grid_size)))
-        end
-    end
+    # if DOOR in get_object(w[])
+    #     doors = @lift(findall(view($w.world, Base.to_index($w.world, DOOR), :, :)))
+    #     world_colors = [x for x in w[].objects if x isa AbstractColor]
+    #     world_colors_inds = [Base.to_index(w[].world, c) for c in world_colors]
+    #     for d in doors[]
+    #         c = w[].objects[findfirst(x -> x isa AbstractColor, @view(w[].world[:, d]))]
+    #         scatter!(scene, @lift((T(d).I .- (0.5, 0.5)).* $grid_size), color=:red, marker='🚪' , markersize=@lift(minimum($grid_size)))
+    #     end
+    # end
 
     # 4. paint agent
-    agent_marker = @lift if $w.agent_dir === UP
-        '▲'
-    elseif $w.agent_dir === DOWN
-        '▼'
-    elseif $w.agent_dir === LEFT
-        '◀'
-    elseif $w.agent_dir === RIGHT
-        '▶'
-    else
-        error("unknown direction")
-    end
-
-    agent_position = @lift((T($w.agent_pos).I .- (0.5, 0.5)).* $grid_size)
-    scatter!(scene, agent_position, color=:red, marker=agent_marker, markersize=@lift(minimum($grid_size)))
+    agent = @lift(get_agent($w))
+    agent_position = @lift((T(get_agent_pos($w)).I .- (0.5, 0.5)).* $grid_size)
+    scatter!(scene, agent_position, color=@lift(get_color($agent)), marker=@lift(convert(Char, $agent)), markersize=@lift(minimum($grid_size)))
 
     display(scene)
     scene

@@ -1,3 +1,8 @@
+using Crayons
+using Colors
+
+const COLORS = (:red, :green, :blue, :magenta, :yellow, :white)
+
 #####
 # Actions
 #####
@@ -40,57 +45,46 @@ const TURN_LEFT = TurnLeft()
 #####
 # Objects
 #####
+
 abstract type AbstractObject end
-Base.show(io::IO, x::Tuple{<:AbstractObject}) = show(io, x[1])
+
+Base.show(io::IO, x::AbstractObject) = print(io, Crayon(foreground=get_color(x)), convert(Char, x))
 
 struct Empty <: AbstractObject end
 const EMPTY = Empty()
-Base.show(io::IO, x::Empty) = print(io, '⋅')
+Base.convert(::Type{Char}, ::Empty) = '⋅'
+get_color(::Empty) = :white
 
 struct Wall <: AbstractObject end
 const WALL = Wall()
-Base.show(io::IO, x::Wall) = print(io, '█')
-
-struct Agent <: AbstractObject end
-const AGENT = Agent()
-Base.show(io::IO, x::Tuple{Agent,Up}) = print(io, '↑')
-Base.show(io::IO, x::Tuple{Agent,Down}) = print(io, '↓')
-Base.show(io::IO, x::Tuple{Agent,Left}) = print(io, '←')
-Base.show(io::IO, x::Tuple{Agent,Right}) = print(io, '→')
+Base.convert(::Type{Char}, ::Wall) = '█'
+get_color(::Wall) = :white
 
 struct Goal <: AbstractObject end
 const GOAL = Goal()
-Base.show(io::IO, x::Goal) = print(io, '♡')
+Base.convert(::Type{Char}, ::Goal) = '♥'
+get_color(::Goal) = :red
 
-struct Door <: AbstractObject end
-const DOOR = Door()
-Base.show(io::IO, x::Door) = print(io, '🚪')
+struct Door{C} <: AbstractObject end
+Base.convert(::Type{Char}, ::Door) = '🚪'
+get_color(::Door{C}) where C = C
 
-####
-# Colors
-####
-abstract type AbstractColor <: AbstractObject end
+Base.@kwdef mutable struct Agent <: AbstractObject
+    color::Symbol=:red
+    dir::LRUD
+end
+function Base.convert(::Type{Char}, a::Agent)
+    if        a.dir === UP
+        '↑'
+    elseif  a.dir === DOWN
+        '↓'
+    elseif  a.dir === LEFT
+        '←'
+    elseif a.dir === RIGHT
+        '→'
+    end
+end
+get_color(a::Agent) = a.color
+get_dir(a::Agent) = a.dir
+set_dir!(a::Agent, d) = a.dir = d
 
-struct Red <: AbstractColor end
-const RED = Red()
-Base.convert(Symbol, ::Red) = :red
-
-struct Green <: AbstractColor end
-const GREEN = Green()
-Base.convert(Symbol, ::Green) = :green
-
-struct Blue <: AbstractColor end
-const BLUE = Blue()
-Base.convert(Symbol, ::Blue) = :blue
-
-struct Purple <: AbstractColor end
-const PURPLE = Purple()
-Base.convert(Symbol, ::Purple) = :purple
-
-struct Yellow <: AbstractColor end
-const YELLOW = Yellow()
-Base.convert(Symbol, ::Yellow) = :yellow
-
-struct Grey <: AbstractColor end
-const GREY = Grey()
-Base.convert(Symbol, ::Grey) = :grey
