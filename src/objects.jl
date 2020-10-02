@@ -23,19 +23,19 @@ const RIGHT = Right()
 
 const LRUD = Union{Left, Right, Up, Down}
 
-struct TurnClockwise end
-const TURN_CLOCKWISE = TurnClockwise()
-struct TurnCounterclockwise end
-const TURN_COUNTERCLOCKWISE = TurnCounterclockwise()
+struct TurnRight end
+const TURN_RIGHT = TurnRight()
+struct TurnLeft end
+const TURN_LEFT = TurnLeft()
 
-(x::TurnClockwise)(::Left) = UP
-(x::TurnClockwise)(::Up) = RIGHT
-(x::TurnClockwise)(::Right) = DOWN
-(x::TurnClockwise)(::Down) = LEFT
-(x::TurnCounterclockwise)(::Left) = DOWN
-(x::TurnCounterclockwise)(::Up) = LEFT
-(x::TurnCounterclockwise)(::Right) = UP
-(x::TurnCounterclockwise)(::Down) = RIGHT
+(x::TurnRight)(::Left) = UP
+(x::TurnRight)(::Up) = RIGHT
+(x::TurnRight)(::Right) = DOWN
+(x::TurnRight)(::Down) = LEFT
+(x::TurnLeft)(::Left) = DOWN
+(x::TurnLeft)(::Up) = LEFT
+(x::TurnLeft)(::Right) = UP
+(x::TurnLeft)(::Down) = RIGHT
 
 #####
 # Objects
@@ -69,20 +69,28 @@ Base.show(io::IO, x::Door) = print(io, '🚪')
 ####
 # Colors
 ####
-abstract type Color <: AbstractObject end
+abstract type AbstractColor <: AbstractObject end
 
-struct Red <: Color end
+struct Red <: AbstractColor end
 const RED = Red()
-struct Green <: Color end
+Base.convert(Symbol, ::Red) = :red
+
+struct Green <: AbstractColor end
 const GREEN = Green()
-struct Blue <: Color end
+Base.convert(Symbol, ::Green) = :green
+
+struct Blue <: AbstractColor end
 const BLUE = Blue()
-struct Purple <: Color end
+Base.convert(Symbol, ::Blue) = :blue
+
+struct Purple <: AbstractColor end
 const PURPLE = Purple()
-struct Yellow <: Color end
+Base.convert(Symbol, ::Purple) = :purple
+
+struct Yellow <: AbstractColor end
 const YELLOW = Yellow()
-struct Grey <: Color end
+Base.convert(Symbol, ::Yellow) = :yellow
+
+struct Grey <: AbstractColor end
 const GREY = Grey()
-
-const COLORS = (RED,GREEN,BLUE,PURPLE,YELLOW,GREY)
-
+Base.convert(Symbol, ::Grey) = :grey

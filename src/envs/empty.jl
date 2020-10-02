@@ -21,7 +21,7 @@ function EmptyGridWorld(;n=8, agent_view_size=7, agent_start_pos=CartesianIndex(
     EmptyGridWorld(w, agent_start_pos, agent_start_dir, v)
 end
 
-function (w::EmptyGridWorld)(a::Union{TurnClockwise, TurnCounterclockwise})
+function (w::EmptyGridWorld)(a::Union{TurnRight, TurnLeft})
     w.agent_dir = a(w.agent_dir)
     get_agent_view!(w.agent_view, w.world, w.agent_pos, w.agent_dir)
 end

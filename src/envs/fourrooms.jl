@@ -18,7 +18,7 @@ function FourRooms(;n=19, agent_start_pos=CartesianIndex(2,2))
     FourRooms(world,agent_start_pos,RIGHT)
 end
 
-(w::FourRooms)(a::Union{TurnClockwise, TurnCounterclockwise}) = w.agent_dir = a(w.agent_dir)
+(w::FourRooms)(a::Union{TurnRight, TurnLeft}) = w.agent_dir = a(w.agent_dir)
 
 function (w::FourRooms)(::MoveForward)
     dest = w.agent_dir(w.agent_pos)

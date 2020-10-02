@@ -27,7 +27,7 @@ function GoToDoor(;n=8, agent_start_pos=CartesianIndex(2,2), agent_view_size=7)
     GoToDoor(world, agent_start_pos, RIGHT)
 end
 
-(w::GoToDoor)(a::Union{TurnClockwise, TurnCounterclockwise}) = w.agent_dir = a(w.agent_dir)
+(w::GoToDoor)(a::Union{TurnRight, TurnLeft}) = w.agent_dir = a(w.agent_dir)
 
 function (w::GoToDoor)(::MoveForward)
     dest = w.agent_dir(w.agent_pos)
