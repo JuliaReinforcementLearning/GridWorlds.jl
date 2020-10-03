@@ -15,7 +15,7 @@ w = EmptyGridWorld()
 
 w(MOVE_FORWARD)
 w(TURN_LEFT)
-w(RURN_RIGHT)
+w(TURN_RIGHT)
 
 # play interactively with Makie.
 # first time plot may be slow
