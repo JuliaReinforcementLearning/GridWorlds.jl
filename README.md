@@ -1,6 +1,37 @@
 # Gridworld
 
-[![Build Status](https://travis-ci.com/sriram13m/Gridworld.jl.svg?branch=master)](https://travis-ci.com/sriram13m/Gridworld.jl)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/sriram13m/Gridworld.jl?svg=true)](https://ci.appveyor.com/project/sriram13m/Gridworld-jl)
-[![Coverage](https://codecov.io/gh/sriram13m/Gridworld.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/sriram13m/Gridworld.jl)
-[![Coverage](https://coveralls.io/repos/github/sriram13m/Gridworld.jl/badge.svg?branch=master)](https://coveralls.io/github/sriram13m/Gridworld.jl?branch=master)
+This project aims to provide some simple grid world environments similar to [gym-minigrid]https://github.com/maximecb/gym-minigrid) for reinforcement learning research in Julia.
+
+## Design
+
+A `GridWorldBase` is used to represent the whole grid world. Inside of it, a 3-D `BitArray` of size `(n_objects, height, width)` is used to encode objects in each tile.
+
+## Usage
+
+```julia
+using Gridworld
+
+w = EmptyGridWorld()
+
+w(MOVE_FORWARD)
+w(TURN_LEFT)
+w(RURN_RIGHT)
+
+play(w)  # you can also play interactively with the help of Makie
+```
+
+## TODO
+
+### Environment list
+
+- [x] EmptyGridWorld
+- [x] FourRooms
+- [x] GoToDoor
+- 
+
+### Needs improvement
+
+- [ ] Add test cases
+- [ ] Benchmark (ensure our implementations do not have significant performance issues)
+- [ ] A wrapper for ReinforcementLearningBase.jl
+- [ ] Gif/Video writer
