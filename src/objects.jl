@@ -1,3 +1,5 @@
+export MOVE_FORWARD, TURN_LEFT, TURN_RIGHT
+
 using Crayons
 using Colors
 
