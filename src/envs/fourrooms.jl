@@ -22,7 +22,8 @@ function FourRooms(;n=19, agent_start_pos=CartesianIndex(2,2))
 end
 
 function (w::FourRooms)(::MoveForward)
-    dest = w.agent_dir(w.agent_pos)
+    dir = get_dir(w.agent)
+    dest = dir(w.agent_pos)
     if !w.world[WALL, dest]
         w.agent_pos = dest
     end

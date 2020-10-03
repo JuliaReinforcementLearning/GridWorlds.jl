@@ -17,7 +17,9 @@ w(MOVE_FORWARD)
 w(TURN_LEFT)
 w(RURN_RIGHT)
 
-play(w)  # you can also play interactively with the help of Makie
+# play interactively with Makie.
+# first time plot may be slow
+play(w;file_name="example.gif",frame_rate=5)
 ```
 
 ## TODO
@@ -25,8 +27,17 @@ play(w)  # you can also play interactively with the help of Makie
 ### Environment list
 
 - [x] EmptyGridWorld
+
+![Empty.gif](./docs/src/assets/img/Empty.gif)
+
 - [x] FourRooms
+
+![FourRooms.gif](./docs/src/assets/img/FourRooms.gif)
+
 - [x] GoToDoor
+
+![GoToDoor.gif](./docs/src/assets/img/GoToDoor.gif)
+
 - 
 
 ### Needs improvement
@@ -34,4 +45,4 @@ play(w)  # you can also play interactively with the help of Makie
 - [ ] Add test cases
 - [ ] Benchmark (ensure our implementations do not have significant performance issues)
 - [ ] A wrapper for ReinforcementLearningBase.jl
-- [ ] Gif/Video writer
+- [x] Gif/Video writer
