@@ -48,7 +48,7 @@ const TURN_LEFT = TurnLeft()
 
 abstract type AbstractObject end
 
-Base.show(io::IO, x::AbstractObject) = print(io, Crayon(foreground=get_color(x)), convert(Char, x))
+Base.show(io::IO, x::AbstractObject) = print(io, Crayon(foreground=get_color(x), reset=true), convert(Char, x))
 
 struct Empty <: AbstractObject end
 const EMPTY = Empty()
@@ -66,6 +66,7 @@ Base.convert(::Type{Char}, ::Goal) = '♥'
 get_color(::Goal) = :red
 
 struct Door{C} <: AbstractObject end
+Door(c) = Door{c}()
 Base.convert(::Type{Char}, ::Door) = '🚪'
 get_color(::Door{C}) where C = C
 

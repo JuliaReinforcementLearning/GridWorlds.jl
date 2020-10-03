@@ -14,10 +14,10 @@ function Base.show(io::IO, gw::AbstractGridWorld)
             end
             if i == p[1] && j == p[2]
                 agent = get_agent(gw)
-                print(io, Crayon(background=bg, foreground=get_color(agent)), convert(Char, agent))
+                print(io, Crayon(background=bg, foreground=get_color(agent),reset=true), convert(Char, agent))
             else
                 o = get_object(gw)[findfirst(w.world[:, i, j])]
-                print(io, Crayon(background=bg, foreground=get_color(o)),  convert(Char, o))
+                print(io, Crayon(background=bg, foreground=get_color(o),reset=true),  convert(Char, o))
             end
         end
         println(io, Crayon(reset=true))
