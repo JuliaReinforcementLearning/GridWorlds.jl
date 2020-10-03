@@ -9,49 +9,15 @@ A `GridWorldBase` is used to represent the whole grid world. Inside of it, a 3-D
 ## Usage
 
 ```julia
-julia> using Gridworld
+using Gridworld
 
-julia> w = EmptyGridWorld()
-World:
-████████
-█→⋅⋅⋅⋅⋅█
-█⋅⋅⋅⋅⋅⋅█
-█⋅⋅⋅⋅⋅⋅█
-█⋅⋅⋅⋅⋅⋅█
-█⋅⋅⋅⋅⋅⋅█
-█⋅⋅⋅⋅⋅♥█
-████████
+w = EmptyGridWorld()
 
-Agent's view:
-⋅⋅⋅↓█__
-⋅⋅⋅⋅█__
-⋅⋅⋅⋅█__
-⋅⋅⋅⋅█__
-⋅⋅⋅⋅█__
-⋅⋅⋅⋅█__
-█████__
+w(MOVE_FORWARD)
+w(TURN_LEFT)
+w(RURN_RIGHT)
 
-julia> w(MOVE_FORWARD)
-World:
-████████
-█⋅→⋅⋅⋅⋅█
-█⋅⋅⋅⋅⋅⋅█
-█⋅⋅⋅⋅⋅⋅█
-█⋅⋅⋅⋅⋅⋅█
-█⋅⋅⋅⋅⋅⋅█
-█⋅⋅⋅⋅⋅♥█
-████████
-
-Agent's view:
-⋅⋅⋅↓█__
-⋅⋅⋅⋅█__
-⋅⋅⋅⋅█__
-⋅⋅⋅⋅█__
-⋅⋅⋅⋅█__
-█████__
-_______
-
-julia> play(w)  # you can also play interactively with the help of Makie
+play(w)  # you can also play interactively with the help of Makie
 ```
 
 ## TODO
