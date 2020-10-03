@@ -34,6 +34,7 @@ Base.setindex!(w::GridWorldBase, v::Bool, o::AbstractObject, i::CartesianIndex{2
 
 Base.getindex(w::GridWorldBase, o::AbstractObject, x::Int, y::Int) = getindex(w.world, Base.to_index(w, o), x, y)
 Base.getindex(w::GridWorldBase, o::AbstractObject, i::CartesianIndex{2}) = getindex(w, o, i[1], i[2])
+Base.getindex(w::GridWorldBase, o::AbstractObject, x::Colon, y::Colon) = getindex(w.world, Base.to_index(w, o), x, y)
 
 #####
 # utils

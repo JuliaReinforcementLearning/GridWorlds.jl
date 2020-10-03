@@ -1,3 +1,5 @@
+using Crayons
+
 function Base.show(io::IO, gw::AbstractGridWorld)
     p, d = get_agent_pos(gw), get_agent_dir(gw)
     w = convert(GridWorldBase, gw)
@@ -5,13 +7,20 @@ function Base.show(io::IO, gw::AbstractGridWorld)
     println(io, "World:")
     for i in 1:size(w, 2)
         for j in 1:size(w, 3)
-            if i == p[1] && j == p[2]
-                print(io, get_agent(gw))
+            if CartesianIndex(i, j) ∈ get_agent_view_inds(gw)
+                bg = :dark_gray
             else
-                print(io, get_object(gw)[findfirst(w.world[:, i, j])])
+                bg = :black
+            end
+            if i == p[1] && j == p[2]
+                agent = get_agent(gw)
+                print(io, Crayon(background=bg, foreground=get_color(agent)), convert(Char, agent))
+            else
+                o = get_object(gw)[findfirst(w.world[:, i, j])]
+                print(io, Crayon(background=bg, foreground=get_color(o)),  convert(Char, o))
             end
         end
-        println(io)
+        println(io, Crayon(reset=true))
     end
     println(io)
 
