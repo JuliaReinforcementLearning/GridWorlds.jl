@@ -1,6 +1,6 @@
 # Gridworld
 
-This project aims to provide some simple grid world environments similar to [gym-minigrid]https://github.com/maximecb/gym-minigrid) for reinforcement learning research in Julia.
+This project aims to provide some simple grid world environments similar to [gym-minigrid](https://github.com/maximecb/gym-minigrid) for reinforcement learning research in Julia.
 
 ## Design
 
