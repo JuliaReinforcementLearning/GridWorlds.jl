@@ -15,7 +15,7 @@ ACTIONS = [TURN_LEFT, TURN_RIGHT, MOVE_FORWARD]
             @test 1 ≤ w.agent_pos[1] ≤ size(w.world.world, 2)
             @test 1 ≤ w.agent_pos[2] ≤ size(w.world.world, 3)
 
-            for _=1:5 
+            for _=1:1000
                 w = w(rand(ACTIONS))
                 @test 1 ≤ w.agent_pos[1] ≤ size(w.world.world, 2)
                 @test 1 ≤ w.agent_pos[2] ≤ size(w.world.world, 3)
