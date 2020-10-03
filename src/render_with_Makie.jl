@@ -48,7 +48,7 @@ function init_screen(w::Observable{<:AbstractGridWorld}; resolution=(1000,1000))
     scene
 end
 
-function play(environment::AbstractGridWorld)
+function play(environment::AbstractGridWorld;file_name=nothing,frame_rate=24)
     print("""
     Key bindings:
     ←: TurnLeft
@@ -60,6 +60,11 @@ function play(environment::AbstractGridWorld)
     w_node = Node(w)
     scene = init_screen(w_node)
     is_quit = Ref(false)
+
+    if !isnothing(file_name)
+        vs = VideoStream(scene)
+        recordframe!(vs)
+    end
 
     on(scene.events.keyboardbuttons) do b
         if ispressed(b, Keyboard.left)
@@ -74,9 +79,14 @@ function play(environment::AbstractGridWorld)
         elseif ispressed(b, Keyboard.q)
             is_quit[] = true
         end
+        isnothing(file_name) || recordframe!(vs)
     end
 
-    while !is_quit[]
-        sleep(0.5)
+    try
+        while !is_quit[]
+            sleep(0.5)
+        end
+    catch
     end
+    isnothing(file_name) || save(file_name, vs;framerate=frame_rate)
 end
