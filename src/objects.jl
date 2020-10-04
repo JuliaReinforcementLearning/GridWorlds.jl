@@ -69,7 +69,7 @@ get_color(::Goal) = :red
 
 struct Door{C} <: AbstractObject end
 Door(c) = Door{c}()
-Base.convert(::Type{Char}, ::Door) = '🚪'
+Base.convert(::Type{Char}, ::Door) = '⩎'
 get_color(::Door{C}) where C = C
 
 Base.@kwdef mutable struct Agent <: AbstractObject
