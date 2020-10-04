@@ -1,11 +1,11 @@
-using Gridworld
+using GridWorlds
 using Test
 using Random
 
 ENVS = [EmptyGridWorld, FourRooms, GoToDoor]
 ACTIONS = [TURN_LEFT, TURN_RIGHT, MOVE_FORWARD]
 
-@testset "Gridworld.jl" begin
+@testset "GridWorlds.jl" begin
     for env in ENVS
         @testset "$(env)" begin
             w = env()
