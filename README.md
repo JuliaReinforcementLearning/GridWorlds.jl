@@ -15,7 +15,7 @@ w = EmptyGridWorld()
 
 w(MOVE_FORWARD)
 w(TURN_LEFT)
-w(RURN_RIGHT)
+w(TURN_RIGHT)
 
 # play interactively with Makie.
 # first time plot may be slow
@@ -28,15 +28,15 @@ play(w;file_name="example.gif",frame_rate=5)
 
 - [x] EmptyGridWorld
 
-![Empty.gif](./docs/src/assets/img/Empty.gif)
+<img src="https://github.com/JuliaReinforcementLearning/Gridworld.jl/raw/master/docs/src/assets/img/Empty.gif" width="300px">
 
 - [x] FourRooms
 
-![FourRooms.gif](./docs/src/assets/img/FourRooms.gif)
+<img src="https://github.com/JuliaReinforcementLearning/Gridworld.jl/raw/master/docs/src/assets/img/FourRooms.gif" width="300px">
 
 - [x] GoToDoor
 
-![GoToDoor.gif](./docs/src/assets/img/GoToDoor.gif)
+<img src="https://github.com/JuliaReinforcementLearning/Gridworld.jl/raw/master/docs/src/assets/img/GoToDoor.gif" width="300px">
 
 - 
 
