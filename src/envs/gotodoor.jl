@@ -29,7 +29,7 @@ end
 function (w::GoToDoor)(::MoveForward)
     dir = get_dir(w.agent)
     dest = dir(w.agent_pos)
-    if !w.world[WALL,dest]
+    if dest ∈ CartesianIndices((size(w.world, 2), size(w.world, 3))) && !w.world[WALL,dest]
         w.agent_pos = dest
     end
     w
