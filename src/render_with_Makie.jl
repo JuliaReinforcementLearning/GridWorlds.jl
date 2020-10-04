@@ -89,4 +89,5 @@ function play(environment::AbstractGridWorld;file_name=nothing,frame_rate=24)
     catch
     end
     isnothing(file_name) || save(file_name, vs;framerate=frame_rate)
+    Makie.GLMakie.destroy!(Makie.GLMakie.global_gl_screen())
 end
