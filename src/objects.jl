@@ -74,6 +74,11 @@ Door(c) = Door{c}()
 Base.convert(::Type{Char}, ::Door) = '⩎'
 get_color(::Door{C}) where C = C
 
+struct Key{C} <: AbstractObject end
+Key(c) = Key{c}()
+Base.convert(::Type{Char}, ::Key) = '⚷'
+get_color(::Key{C}) where C = C
+
 Base.@kwdef mutable struct Agent <: AbstractObject
     color::Symbol=:red
     dir::LRUD
@@ -92,4 +97,3 @@ end
 get_color(a::Agent) = a.color
 get_dir(a::Agent) = a.dir
 set_dir!(a::Agent, d) = a.dir = d
-
