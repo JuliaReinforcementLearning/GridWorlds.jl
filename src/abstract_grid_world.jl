@@ -1,4 +1,4 @@
-export get_agent_view
+export get_agent_view, AbstractGridWorld
 abstract type AbstractGridWorld end
 
 function get_agent_view end

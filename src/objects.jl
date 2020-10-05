@@ -1,4 +1,6 @@
-export MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, LRUD, WALL
+export COLORS, MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, UP, DOWN, LEFT, RIGHT, LRUD, EMPTY, WALL, GOAL
+export MoveForward, AbstractObject, Empty, Wall, Goal, Door, Agent
+export get_color
 
 using Crayons
 using Colors

@@ -1,3 +1,5 @@
+export GridWorldBase
+
 using MacroTools:@forward
 using Random
 
