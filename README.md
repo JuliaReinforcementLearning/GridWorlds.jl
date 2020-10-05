@@ -6,6 +6,10 @@ This project aims to provide some simple grid world environments similar to [gym
 
 A `GridWorldBase` is used to represent the whole grid world. Inside of it, a 3-D `BitArray` of size `(n_objects, height, width)` is used to encode objects in each tile.
 
+While rendering a gridworld in the terminal, we display only one character per grid cell. If multiple objects are present in the same cell location, we go by a priority implied by the indices of the corresponding objects in the `objects` attribute (which is a tuple, and hence it is ordered) of the `GridWorldBase` instance.
+
+For example, if the value of the `objects` attribute is `(Agent, Door)` and if a cell contains both the agent and a door, then the character corresponding to the `Agent` will be displayed.
+
 ## Usage
 
 ```julia
