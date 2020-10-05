@@ -29,6 +29,8 @@ function init_screen(w::Observable{<:AbstractGridWorld}; resolution=(1000,1000))
             scatter!(scene, @lift(centers(findall($w.world[GOAL,:,:]), $tile_size)), color=get_color(GOAL), marker=convert(Char, GOAL), markersize=@lift(minimum($tile_size)))
         elseif o isa Door
             scatter!(scene, @lift(centers(findall($w.world[o,:,:]), $tile_size)), color=get_color(o), marker=convert(Char, o), markersize=@lift(minimum($tile_size)))
+        elseif o isa Key
+            scatter!(scene, @lift(centers(findall($w.world[o,:,:]), $tile_size)), color=get_color(o), marker=convert(Char, o), markersize=@lift(minimum($tile_size)))
         end
     end
 
