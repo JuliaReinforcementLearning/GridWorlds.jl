@@ -1,8 +1,8 @@
-module Gridworld
+module GridWorlds
 
 using Requires
 
-const GW = Gridworld
+const GW = GridWorlds
 export GW
 
 include("objects.jl")

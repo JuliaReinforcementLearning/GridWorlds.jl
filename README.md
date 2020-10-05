@@ -1,4 +1,4 @@
-# Gridworld
+# GridWorlds
 
 This project aims to provide some simple grid world environments similar to [gym-minigrid](https://github.com/maximecb/gym-minigrid) for reinforcement learning research in Julia.
 
@@ -9,7 +9,7 @@ A `GridWorldBase` is used to represent the whole grid world. Inside of it, a 3-D
 ## Usage
 
 ```julia
-using Gridworld
+using GridWorlds
 
 w = EmptyGridWorld()
 
@@ -28,15 +28,15 @@ play(w;file_name="example.gif",frame_rate=5)
 
 - [x] EmptyGridWorld
 
-<img src="https://github.com/JuliaReinforcementLearning/Gridworld.jl/raw/master/docs/src/assets/img/Empty.gif" width="300px">
+<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/Empty.gif" width="300px">
 
 - [x] FourRooms
 
-<img src="https://github.com/JuliaReinforcementLearning/Gridworld.jl/raw/master/docs/src/assets/img/FourRooms.gif" width="300px">
+<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/FourRooms.gif" width="300px">
 
 - [x] GoToDoor
 
-<img src="https://github.com/JuliaReinforcementLearning/Gridworld.jl/raw/master/docs/src/assets/img/GoToDoor.gif" width="300px">
+<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/GoToDoor.gif" width="300px">
 
 - 
 
