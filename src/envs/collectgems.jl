@@ -1,10 +1,5 @@
 export CollectGems
 
-struct Gem <: AbstractObject end
-const GEM = Gem()
-Base.convert(::Type{Char}, ::Gem) = '♦'
-get_color(::Gem) = :magenta
-
 mutable struct CollectGems <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty,Wall,Gem}}
     agent_pos::CartesianIndex{2}
