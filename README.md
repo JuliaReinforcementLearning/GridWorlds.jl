@@ -32,7 +32,7 @@ play(w;file_name="example.gif",frame_rate=5)
 
 - [x] EmptyGridWorld
 
-<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/Empty.gif" width="300px">
+<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/EmptyGridWorld.gif" width="300px">
 
 - [x] FourRooms
 
