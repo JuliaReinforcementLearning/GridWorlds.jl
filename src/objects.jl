@@ -1,5 +1,5 @@
-export COLORS, MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, UP, DOWN, LEFT, RIGHT, LRUD, EMPTY, WALL, GOAL
-export MoveForward, AbstractObject, Empty, Wall, Goal, Door, Agent
+export COLORS, MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, UP, DOWN, LEFT, RIGHT, LRUD, EMPTY, WALL, GOAL, GEM
+export MoveForward, AbstractObject, Empty, Wall, Goal, Door, Gem, Agent
 export get_color
 
 using Crayons
@@ -78,6 +78,11 @@ struct Key{C} <: AbstractObject end
 Key(c) = Key{c}()
 Base.convert(::Type{Char}, ::Key) = '⚷'
 get_color(::Key{C}) where C = C
+
+struct Gem <: AbstractObject end
+const GEM = Gem()
+Base.convert(::Type{Char}, ::Gem) = '♦'
+get_color(::Gem) = :magenta
 
 Base.@kwdef mutable struct Agent <: AbstractObject
     color::Symbol=:red
