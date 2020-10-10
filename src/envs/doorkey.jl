@@ -6,7 +6,6 @@ mutable struct DoorKey{W<:GridWorldBase} <: AbstractGridWorld
     world::W
     agent_pos::CartesianIndex{2}
     agent::Agent
-    has_key::Bool
 end
 
 function DoorKey(;n=8, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_RNG)
@@ -41,13 +40,14 @@ function (w::DoorKey)(::MoveForward)
     dest = dir(w.agent_pos)
 
     if w.world[Key(:yellow), dest]
-        w.has_key = true
-        w.world[Key(:yellow), dest] = false
-        w.world[EMPTY, dest] = true
+        if pickup(w.agent, Key(:yellow))
+            w.world[Key(:yellow), dest] = false
+            w.world[EMPTY, dest] = true
+        end
         w.agent_pos = dest
-    elseif w.world[Door(:yellow), dest] && w.has_key
+    elseif w.world[Door(:yellow), dest] && w.agent.inv == Key(:yellow)
         w.agent_pos = dest
-    elseif w.world[Door(:yellow), dest] && !w.has_key
+    elseif w.world[Door(:yellow), dest] && w.agent.inv == Key(:yellow)
         nothing
     elseif dest ∈ CartesianIndices((size(w.world, 2), size(w.world, 3))) && !w.world[WALL,dest]
         w.agent_pos = dest
