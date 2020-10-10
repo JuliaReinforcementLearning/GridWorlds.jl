@@ -120,6 +120,7 @@ function pickup(a::Agent, o::Item)
     end
     return false
 end
+pickup(a::Agent, o::AbstractObject) = nothing
 
 function drop(a::Agent)
     if a.item != NULL
