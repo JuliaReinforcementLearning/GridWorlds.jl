@@ -114,8 +114,8 @@ set_dir!(a::Agent, d) = a.dir = d
 #####
 
 function pickup(a::Agent, o::Item) 
-    if a.Item == NULL 
-        a.Item = o
+    if a.inv == NULL 
+        a.inv = o
         return true
     end
     return false
@@ -123,9 +123,9 @@ end
 pickup(a::Agent, o::AbstractObject) = nothing
 
 function drop(a::Agent)
-    if a.item != NULL
-        x = a.item
-        a.item = NULL
+    if a.inv != NULL
+        x = a.inv
+        a.inv = NULL
         return x
     end
     return nothing
