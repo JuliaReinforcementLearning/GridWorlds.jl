@@ -47,7 +47,7 @@ function (w::DoorKey)(::MoveForward)
         w.agent_pos = dest
     elseif w.world[Door(:yellow), dest] && w.agent.inv == Key(:yellow)
         w.agent_pos = dest
-    elseif w.world[Door(:yellow), dest] && w.agent.inv == Key(:yellow)
+    elseif w.world[Door(:yellow), dest] && w.agent.inv != Key(:yellow)
         nothing
     elseif dest ∈ CartesianIndices((size(w.world, 2), size(w.world, 3))) && !w.world[WALL,dest]
         w.agent_pos = dest
