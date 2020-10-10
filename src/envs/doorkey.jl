@@ -32,7 +32,7 @@ function DoorKey(;n=8, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_RN
     world[EMPTY, key_pos] = false
     world[Key(:yellow), key_pos] = true
 
-    DoorKey(world, agent_start_pos, Agent(dir=RIGHT),false)
+    DoorKey(world, agent_start_pos, Agent(dir=RIGHT))
 end
 
 function (w::DoorKey)(::MoveForward)
