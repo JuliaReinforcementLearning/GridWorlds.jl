@@ -48,3 +48,7 @@ function (w::CollectGems)(::MoveForward)
     end
     w
 end
+
+function get_terminal(w::CollectGems)
+    return w.num_gem_current <= 0
+end
