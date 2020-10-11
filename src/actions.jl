@@ -1,17 +1,19 @@
-export MoveForward, TurnLeft, TurnRight
+export AbstractGridWorldAction, MoveForward, TurnLeft, TurnRight
 export MOVE_FORWARD, TURN_LEFT, TURN_RIGHT
 
 #####
 # Actions
 #####
 
-struct MoveForward end
+abstract type AbstractGridWorldAction end
+
+struct MoveForward <: AbstractGridWorldAction end
 const MOVE_FORWARD = MoveForward()
 
-struct TurnRight end
+struct TurnRight <: AbstractGridWorldAction end
 const TURN_RIGHT = TurnRight()
 
-struct TurnLeft end
+struct TurnLeft <: AbstractGridWorldAction end
 const TURN_LEFT = TurnLeft()
 
 (x::TurnRight)(::Left) = UP
