@@ -1,4 +1,5 @@
 export get_agent_view, AbstractGridWorld
+export get_actions
 abstract type AbstractGridWorld end
 
 function get_agent_view end
@@ -21,9 +22,9 @@ function get_agent_view(w::AbstractGridWorld, agent_view_size=(7,7))
     get_agent_view!(v, w)
 end
 
-function (w::AbstractGridWorld)(dir::Union{TurnRight, TurnLeft})
+function (w::AbstractGridWorld)(action::Union{TurnRight, TurnLeft})
     a = get_agent(w)
-    set_dir!(a, dir(get_dir(a)))
+    set_dir!(a, action(get_dir(a)))
     w
 end
 
