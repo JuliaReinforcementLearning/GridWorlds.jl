@@ -53,10 +53,6 @@ const TURN_LEFT = TurnLeft()
 abstract type AbstractObject end
 abstract type Item <: AbstractObject end
 
-# Placeholder for empty inventory
-struct Null <: Item end
-const NULL = Null()
-
 Base.show(io::IO, x::AbstractObject) = print(io, Crayon(foreground=get_color(x), reset=true), convert(Char, x))
 
 struct Empty <: AbstractObject end
@@ -92,7 +88,7 @@ get_color(::Gem) = :magenta
 Base.@kwdef mutable struct Agent <: AbstractObject
     color::Symbol=:red
     dir::LRUD
-    inv::Item=NULL
+    inv::Union{Item, Nothing}
 end
 function Base.convert(::Type{Char}, a::Agent)
     if        a.dir === UP
@@ -114,7 +110,7 @@ set_dir!(a::Agent, d) = a.dir = d
 #####
 
 function pickup(a::Agent, o::Item) 
-    if a.inv == NULL 
+    if a.inv == nothing
         a.inv = o
         return true
     end
@@ -123,9 +119,9 @@ end
 pickup(a::Agent, o::AbstractObject) = nothing
 
 function drop(a::Agent)
-    if a.inv != NULL
+    if a.inv != nothing
         x = a.inv
-        a.inv = NULL
+        a.inv = nothing
         return x
     end
     return nothing
