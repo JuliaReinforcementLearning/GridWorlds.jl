@@ -127,7 +127,7 @@ function pickup(::Item, a::Agent, o::AbstractObject)
     end
     return false
 end
-pickup(a::Agent, ::Nonitem, o::AbstractObject) = nothing
+pickup(::Nonitem, a::Agent, o::AbstractObject) = nothing
 
 struct Drop end
 const DROP = Drop()
@@ -140,4 +140,3 @@ function (::Drop)(a::Agent)
     end
     return nothing
 end
-
