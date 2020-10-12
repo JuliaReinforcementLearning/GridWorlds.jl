@@ -114,7 +114,7 @@ const ITEM = Item()
 const NONITEM = Nonitem()
 isitem(::Type{Key{T}}) where T = ITEM
 isitem(::Type{Gem}) = ITEM
-isitem() = NONITEM
+isitem(x::AbstractObject) = isitem(typeof(x))
 
 struct Pickup end
 const PICKUP = Pickup()
