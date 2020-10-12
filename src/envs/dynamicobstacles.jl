@@ -1,5 +1,4 @@
 export DynamicObstacles
-
 using Random
 
 mutable struct DynamicObstacles <: AbstractGridWorld
@@ -8,9 +7,10 @@ mutable struct DynamicObstacles <: AbstractGridWorld
     agent::Agent
     num_obstacle::Int
     obs_pos_array::Array{CartesianIndex{2},1}
+    rng::AbstractRNG
 end
 
-function DynamicObstacles(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RIGHT)
+function DynamicObstacles(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RIGHT, num_obstacle=nothing, rng=Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, OBSTACLE, GOAL)
     w = GridWorldBase(objects, n, n)
 
@@ -20,15 +20,17 @@ function DynamicObstacles(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start
     w[GOAL, n-1, n-1] = true
     w[EMPTY, n-1, n-1] = false
 
-    w[OBSTACLE,1:n,1:n] .= false
+    #w[OBSTACLE,1:n,1:n] .= false
     #num obstacles is n-3 only for n=5 or n=6, it need not be a function of n otherwise
-    num_obstacle = n-3
-    
+    if num_obstacle === nothing
+        num_obstacle = n-3
+    end
+
     obs_pos_array = Array{CartesianIndex{2},1}(undef,num_obstacle)
     
     obstacles_placed = 0
     while obstacles_placed < num_obstacle
-        obs_pos = CartesianIndex(rand(2:n-1), rand(2:n-1))
+        obs_pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 2:n-1))
         if (obs_pos == agent_start_pos) || (w[OBSTACLE, obs_pos] == true)
             continue
         else
@@ -42,42 +44,40 @@ function DynamicObstacles(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start
     end
 
 
-    DynamicObstacles(w, agent_start_pos, Agent(dir=agent_start_dir), num_obstacle, obs_pos_array)
+    DynamicObstacles(w, agent_start_pos, Agent(dir=agent_start_dir), num_obstacle, obs_pos_array, rng)
 end
 
 function (w::DynamicObstacles)(::MoveForward)
     dir = get_dir(w.agent) 
     dest = dir(w.agent_pos)
     if !w.world[WALL, dest]
-        #if w.world[OBSTACLE, dest]
-        #    #end the game
-        #    println("You crashed")
-        #else
+        
         obstacles_replaced = 0
+        
         while obstacles_replaced < w.num_obstacle
             old_pos = w.obs_pos_array[obstacles_replaced+1]
-            next_pos = CartesianIndex(old_pos[1]+rand([-1,1]),old_pos[2]+rand([-1,1])) 
-            if w.world[WALL, next_pos] 
-                continue
-            else
+            next_pos = CartesianIndex(old_pos[1]+rand(w.rng, [-1,0,1]),old_pos[2]+rand(w.rng, [-1,0,1])) 
+            if !w.world[WALL, next_pos] 
                 flag = 0
-                for i = obstacles_replaced:0
-                    if (i < obstacles_replaced) && (w.obs_pos_array[i+1]==next_pos)
+                #flag indicated whether 
+                #1)the new-position of the kth obstacle overlaps the new-positions of [1,k-1] obstacles
+                #2)the new-position of an obstacle is the same as it's old position 
+                for i = obstacles_replaced:-1:0
+                    if w.obs_pos_array[i+1]==next_pos
+                        
                         flag = 1
                         break
                     end
                 end
-                if flag == 1
-                    continue
-                    println("obstacles are overlapping")
-                else
+
+                if flag == 0
+                    
                     w.obs_pos_array[obstacles_replaced+1] = next_pos
                     w.world[OBSTACLE, next_pos] = true
                     w.world[OBSTACLE, old_pos] = false
                     w.world[EMPTY, next_pos] = false
                     w.world[EMPTY, old_pos] = true
-                    obstacles_replaced += 1  
-            
+                    obstacles_replaced += 1   
                 end
             end   
         end
@@ -85,11 +85,12 @@ function (w::DynamicObstacles)(::MoveForward)
             #end the game
             println("You crashed")
         end
-        #end    
+            
         w.agent_pos = dest
     end
     w
 end
+
 
 
 
