@@ -69,6 +69,4 @@ function get_terminal(w::CollectGems)
     return w.num_gem_current <= 0
 end
 
-function get_reward(w::CollectGems)
-    return w.r
-end
+get_reward(w::CollectGems) = w.r
