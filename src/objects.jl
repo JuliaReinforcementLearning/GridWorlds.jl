@@ -51,7 +51,6 @@ const TURN_LEFT = TurnLeft()
 #####
 
 abstract type AbstractObject end
-abstract type Item <: AbstractObject end
 
 Base.show(io::IO, x::AbstractObject) = print(io, Crayon(foreground=get_color(x), reset=true), convert(Char, x))
 
@@ -75,12 +74,12 @@ Door(c) = Door{c}()
 Base.convert(::Type{Char}, ::Door) = '⩎'
 get_color(::Door{C}) where C = C
 
-struct Key{C} <: Item end
+struct Key{C} <: AbstractObject end
 Key(c) = Key{c}()
 Base.convert(::Type{Char}, ::Key) = '⚷'
 get_color(::Key{C}) where C = C
 
-struct Gem <: Item end
+struct Gem <: AbstractObject end
 const GEM = Gem()
 Base.convert(::Type{Char}, ::Gem) = '♦'
 get_color(::Gem) = :magenta
@@ -88,7 +87,7 @@ get_color(::Gem) = :magenta
 Base.@kwdef mutable struct Agent <: AbstractObject
     color::Symbol=:red
     dir::LRUD
-    inv::Union{Item, Nothing}
+    inv::Union{AbstractObject, Nothing}=nothing
 end
 function Base.convert(::Type{Char}, a::Agent)
     if        a.dir === UP
@@ -109,14 +108,23 @@ set_dir!(a::Agent, d) = a.dir = d
 # Pick Up and Drop
 #####
 
-function pickup(a::Agent, o::Item) 
+struct Item end
+struct Nonitem end
+const ITEM = Item()
+const NONITEM = Nonitem()
+isitem(::Type{Key{T}}) where T = ITEM
+isitem(::Type{Gem}) = ITEM
+isitem() = NONITEM
+
+pickup(a::Agent, o::T) where T = pickup(isitem(T), a, o)
+function pickup(::Item, a::Agent, o::AbstractObject) 
     if a.inv == nothing
         a.inv = o
         return true
     end
     return false
 end
-pickup(a::Agent, o::AbstractObject) = nothing
+pickup(a::Agent, ::Nonitem, o::AbstractObject) = nothing
 
 function drop(a::Agent)
     if a.inv != nothing
