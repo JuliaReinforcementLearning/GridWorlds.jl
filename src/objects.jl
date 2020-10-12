@@ -112,7 +112,7 @@ struct Item end
 struct Nonitem end
 const ITEM = Item()
 const NONITEM = Nonitem()
-isitem(::Type{Key{T}}) where T = ITEM
+isitem(::Type{<:Key}) = ITEM
 isitem(::Type{Gem}) = ITEM
 isitem(x::AbstractObject) = isitem(typeof(x))
 
