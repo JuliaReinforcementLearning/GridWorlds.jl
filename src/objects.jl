@@ -116,7 +116,10 @@ isitem(::Type{Key{T}}) where T = ITEM
 isitem(::Type{Gem}) = ITEM
 isitem() = NONITEM
 
-pickup(a::Agent, o::T) where T = pickup(isitem(T), a, o)
+struct Pickup end
+const PICKUP = Pickup()
+
+(::Pickup)(a::Agent, o::T) where T = pickup(isitem(T), a, o)
 function pickup(::Item, a::Agent, o::AbstractObject) 
     if a.inv == nothing
         a.inv = o
@@ -126,7 +129,10 @@ function pickup(::Item, a::Agent, o::AbstractObject)
 end
 pickup(a::Agent, ::Nonitem, o::AbstractObject) = nothing
 
-function drop(a::Agent)
+struct Drop end
+const DROP = Drop()
+
+function (::Drop)(a::Agent)
     if a.inv != nothing
         x = a.inv
         a.inv = nothing
