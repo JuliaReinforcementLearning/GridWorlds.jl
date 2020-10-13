@@ -7,6 +7,7 @@ mutable struct DynamicObstacles <: AbstractGridWorld
     agent::Agent
     num_obstacle::Int
     obs_pos_array::Array{CartesianIndex{2},1}
+    n::Int
     rng::AbstractRNG
 end
 
@@ -31,7 +32,7 @@ function DynamicObstacles(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start
     obstacles_placed = 0
     while obstacles_placed < num_obstacle
         obs_pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 2:n-1))
-        if (obs_pos == agent_start_pos) || (w[OBSTACLE, obs_pos] == true)
+        if (obs_pos == agent_start_pos) || (w[OBSTACLE, obs_pos] == true) || (obs_pos == CartesianIndex(n-1,n-1))
             continue
         else
             
@@ -44,7 +45,7 @@ function DynamicObstacles(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start
     end
 
 
-    DynamicObstacles(w, agent_start_pos, Agent(dir=agent_start_dir), num_obstacle, obs_pos_array, rng)
+    DynamicObstacles(w, agent_start_pos, Agent(dir=agent_start_dir), num_obstacle, obs_pos_array, n, rng)
 end
 
 function (w::DynamicObstacles)(::MoveForward)
@@ -57,7 +58,7 @@ function (w::DynamicObstacles)(::MoveForward)
         while obstacles_replaced < w.num_obstacle
             old_pos = w.obs_pos_array[obstacles_replaced+1]
             next_pos = CartesianIndex(old_pos[1]+rand(w.rng, [-1,0,1]),old_pos[2]+rand(w.rng, [-1,0,1])) 
-            if !w.world[WALL, next_pos] 
+            if (!w.world[WALL, next_pos]) && (next_pos != CartesianIndex(w.n-1,w.n-1))
                 flag = 0
                 #flag indicates whether 
                 #1)the new-position of the kth obstacle overlaps the new-positions of [1,k-1] obstacles
@@ -93,6 +94,7 @@ function (w::DynamicObstacles)(::MoveForward)
     end
     w
 end
+
 
 
 
