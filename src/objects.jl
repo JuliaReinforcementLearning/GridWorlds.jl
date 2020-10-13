@@ -50,17 +50,22 @@ const OBSTACLE = Obstacle()
 Base.convert(::Type{Char}, ::Obstacle) = '⊗'
 get_color(::Obstacle) = :blue    
 
+#####
+# Agent
+#####
+
 Base.@kwdef mutable struct Agent <: AbstractObject
     color::Symbol=:red
     dir::LRUD
+    inventory::Union{Nothing, AbstractObject, Vector}=nothing
 end
 
 function Base.convert(::Type{Char}, a::Agent)
-    if        a.dir === UP
+    if     a.dir === UP
         '↑'
-    elseif  a.dir === DOWN
+    elseif a.dir === DOWN
         '↓'
-    elseif  a.dir === LEFT
+    elseif a.dir === LEFT
         '←'
     elseif a.dir === RIGHT
         '→'
@@ -70,3 +75,51 @@ end
 get_color(a::Agent) = a.color
 get_dir(a::Agent) = a.dir
 set_dir!(a::Agent, d) = a.dir = d
+
+struct Transportable end
+struct Nontransportable end
+const TRANSPORTABLE = Transportable()
+const NONTRANSPORTABLE = Nontransportable()
+istransportable(::Type{<:Key}) = TRANSPORTABLE
+istransportable(::Type{Gem}) = TRANSPORTABLE
+istransportable(x::AbstractObject) = istransportable(typeof(x))
+
+(x::Pickup)(a::Agent, o) = x(istransportable(o), a, o)
+
+function (::Pickup)(::Transportable, a::Agent, o::AbstractObject) 
+    if isnothing(a.inventory)
+        a.inventory = o
+        true
+    elseif a.inventory isa Vector
+        i = findfirst(isnothing, a.v)
+        if isnothing(i)
+            false
+        else
+            a.inventory[i] = o
+            true
+        end
+    else
+        false
+    end
+end
+
+function (::Drop)(a::Agent)
+    if isnothing(a.inventory)
+        nothing
+    elseif a.inventory isa AbstractObject
+        x = a.inventory
+        a.inventory = nothing
+        x
+    elseif a.inventory isa Vector
+        i = findlast(x -> x isa AbstractObject, a.inventory)
+        if isnothing(i)
+            nothing
+        else
+            x = a.inventory[i]
+            a.inventory[i] = nothing
+            x
+        end
+    else
+        @error "unknown inventory type $(a.inventory)"
+    end
+end
