@@ -6,11 +6,9 @@ mutable struct CollectGems <: AbstractGridWorld
     agent::Agent
     num_gem_init::Int
     num_gem_current::Int
-    gem_reward::Float64
-    r::Float64
 end
 
-function CollectGems(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RIGHT)
+function CollectGems(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RIGHT, rng=Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, GEM)
     w = GridWorldBase(objects, n, n)
 
@@ -24,7 +22,7 @@ function CollectGems(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=
 
     gem_placed = 0
     while gem_placed < num_gem_init
-        gem_pos = CartesianIndex(rand(2:n-1), rand(2:n-1))
+        gem_pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 2:n-1))
         if (gem_pos == agent_start_pos) || (w[GEM, gem_pos] == true)
             continue
         else
@@ -34,37 +32,19 @@ function CollectGems(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=
         end
     end
 
-    gem_reward = 1.0
-    r = 0.0
-
-    CollectGems(w, agent_start_pos, Agent(dir=agent_start_dir), num_gem_init, num_gem_current, gem_reward, r)
+    CollectGems(w, agent_start_pos, Agent(dir=agent_start_dir), num_gem_init, num_gem_current)
 end
 
 function (w::CollectGems)(::MoveForward)
     dir = get_dir(w.agent)
     dest = dir(w.agent_pos)
-    w.r = 0.0
     if !w.world[WALL, dest]
         w.agent_pos = dest
         if w.world[GEM, dest]
             w.world[GEM, dest] = false
             w.world[EMPTY, dest] = true
             w.num_gem_current = w.num_gem_current - 1
-            w.r = w.gem_reward
         end
     end
     w
 end
-
-function (w::CollectGems)(action::Union{TurnRight, TurnLeft})
-    w.r = 0.0
-    agent = get_agent(w)
-    set_dir!(agent, action(get_dir(agent)))
-    w
-end
-
-function get_terminal(w::CollectGems)
-    return w.num_gem_current <= 0
-end
-
-get_reward(w::CollectGems) = w.r
