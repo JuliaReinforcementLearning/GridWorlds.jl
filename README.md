@@ -50,6 +50,10 @@ play(w;file_name="example.gif",frame_rate=5)
 
 <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/CollectGems.gif" width="300px">
 
+- [x] DynamicObstacles
+
+<img src="docs/src/assets/img/DynamicObstacles.gif" width="300px">
+
 ### Needs improvement
 
 - [ ] Add test cases
