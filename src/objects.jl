@@ -45,26 +45,22 @@ const GEM = Gem()
 Base.convert(::Type{Char}, ::Gem) = '♦'
 get_color(::Gem) = :magenta
 
-abstract type AbstractAgent <: AbstractObject end
+const INV = Union{Nothing, AbstractObject}
+const INVARRAY = Vector{Union{AbstractObject, Nothing}}
 
-Base.@kwdef mutable struct Agent <: AbstractAgent
-    color::Symbol=:red
+mutable struct Agent{I<:Union{INV, INVARRAY}} <: AbstractObject
+    color::Symbol
     dir::LRUD
-    inv::Union{AbstractObject, Nothing}=nothing
+    inv::I
 end
-
-Base.@kwdef mutable struct Array_agent <: AbstractAgent
-    color::Symbol=:red
-    dir::LRUD
-    inv::Vector{Union{AbstractObject, Nothing}}=[]
+Agent(dir::LRUD; inv::INV=nothing, color::Symbol=:red) = Agent{INV}(color, dir, inv)
+Agent(;dir::LRUD, inv::INV=nothing, color::Symbol=:red) = Agent{INV}(color, dir, inv)
+function Agent{INVARRAY}(dir::LRUD, len::Integer; color::Symbol=:red)
+    Agent{INVARRAY}(color, dir, INVARRAY(nothing, len))
 end
+Agent{INV}(dir::LRUD; inv::INV=nothing, color::Symbol=:red) = Agent{INV}(color, dir, inv)
 
-function Array_agent(dir::LRUD, len::Integer; color::Symbol=:red)
-    Array_agent(color, dir, Vector{Union{AbstractObject, Nothing}}(nothing, len))
-end
-
-function Base.convert(::Type{Char}, a::AbstractAgent)
-
+function Base.convert(::Type{Char}, a::Agent)
     if        a.dir === UP
         '↑'
     elseif  a.dir === DOWN
@@ -75,10 +71,9 @@ function Base.convert(::Type{Char}, a::AbstractAgent)
         '→'
     end
 end
-
-get_color(a::AbstractAgent) = a.color
-get_dir(a::AbstractAgent) = a.dir
-set_dir!(a::AbstractAgent, d) = a.dir = d
+get_color(a::Agent) = a.color
+get_dir(a::Agent) = a.dir
+set_dir!(a::Agent, d) = a.dir = d
 
 #####
 # Pick Up and Drop
@@ -98,15 +93,15 @@ const PICKUP = Pickup()
 struct Drop end
 const DROP = Drop()
 
-(::Pickup)(a::AbstractAgent, o::T) where T = PICKUP(istransportable(T), a, o)
-function (::Pickup)(::Transportable, a::Agent, o::AbstractObject) 
+(::Pickup)(a::Agent, o::T) where T = PICKUP(istransportable(T), a, o)
+function (::Pickup)(::Transportable, a::Agent{INV}, o::AbstractObject) 
     if a.inv == nothing
         a.inv = o
         return true
     end
     return false
 end
-function (::Pickup)(::Transportable, a::Array_agent, o::AbstractObject) 
+function (::Pickup)(::Transportable, a::Agent{INVARRAY}, o::AbstractObject) 
     for (i, v) in enumerate(a.inv) # Picked up objects go into the first empty index
         if v == nothing
             a.inv[i] = o
@@ -115,9 +110,9 @@ function (::Pickup)(::Transportable, a::Array_agent, o::AbstractObject)
     end
     return false
 end
-pickup(::Nontransportable, a::AbstractAgent, o::AbstractObject) = nothing
+pickup(::Nontransportable, a::Agent, o::AbstractObject) = nothing
 
-function (::Drop)(a::Agent)
+function (::Drop)(a::Agent{INV})
     if a.inv != nothing
         x = a.inv
         a.inv = nothing
@@ -125,7 +120,7 @@ function (::Drop)(a::Agent)
     end
     return nothing
 end
-function (::Drop)(a::Array_agent)
+function (::Drop)(a::Agent{INVARRAY})
     for (i, v) in Iterators.reverse(enumerate(a.inv)) # Most recently picked up objects are dropped first
         if typeof(v)<:AbstractObject
             a.inv[i] = nothing
