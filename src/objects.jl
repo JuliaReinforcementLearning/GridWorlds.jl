@@ -119,6 +119,9 @@ isitem(x::AbstractObject) = isitem(typeof(x))
 struct Pickup end
 const PICKUP = Pickup()
 
+struct Drop end
+const DROP = Drop()
+
 (::Pickup)(a::Agent, o::T) where T = pickup(isitem(T), a, o)
 function pickup(::Item, a::Agent, o::AbstractObject) 
     if a.inv == nothing
@@ -128,9 +131,6 @@ function pickup(::Item, a::Agent, o::AbstractObject)
     return false
 end
 pickup(::Nonitem, a::Agent, o::AbstractObject) = nothing
-
-struct Drop end
-const DROP = Drop()
 
 function (::Drop)(a::Agent)
     if a.inv != nothing
