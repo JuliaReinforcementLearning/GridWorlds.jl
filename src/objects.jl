@@ -1,5 +1,5 @@
-export COLORS, MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, UP, DOWN, LEFT, RIGHT, LRUD, EMPTY, WALL, GOAL, GEM
-export MoveForward, AbstractObject, Empty, Wall, Goal, Door, Gem, Agent
+export COLORS, MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, UP, DOWN, LEFT, RIGHT, LRUD, EMPTY, WALL, GOAL, GEM, PICKUP, DROP
+export MoveForward, AbstractObject, Empty, Wall, Goal, Door, Gem, Agent, Array_agent
 export get_color
 
 using Crayons
