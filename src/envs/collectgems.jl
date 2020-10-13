@@ -7,7 +7,6 @@ mutable struct CollectGems <: AbstractGridWorld
     num_gem_init::Int
     num_gem_current::Int
     gem_reward::Float64
-    default_reward::Float64
     r::Float64
 end
 
@@ -36,16 +35,15 @@ function CollectGems(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=
     end
 
     gem_reward = 1.0
-    default_reward = 0.0
-    r = default_reward
+    r = 0.0
 
-    CollectGems(w, agent_start_pos, Agent(dir=agent_start_dir), num_gem_init, num_gem_current, gem_reward, default_reward, r)
+    CollectGems(w, agent_start_pos, Agent(dir=agent_start_dir), num_gem_init, num_gem_current, gem_reward, r)
 end
 
 function (w::CollectGems)(::MoveForward)
     dir = get_dir(w.agent)
     dest = dir(w.agent_pos)
-    w.r = w.default_reward
+    w.r = 0.0
     if !w.world[WALL, dest]
         w.agent_pos = dest
         if w.world[GEM, dest]
@@ -59,7 +57,7 @@ function (w::CollectGems)(::MoveForward)
 end
 
 function (w::CollectGems)(action::Union{TurnRight, TurnLeft})
-    w.r = w.default_reward
+    w.r = 0.0
     agent = get_agent(w)
     set_dir!(agent, action(get_dir(agent)))
     w
