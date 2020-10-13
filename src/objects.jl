@@ -134,21 +134,39 @@ const PICKUP = Pickup()
 struct Drop end
 const DROP = Drop()
 
-(::Pickup)(a::Agent, o::T) where T = pickup(istransportable(T), a, o)
-function pickup(::Transportable, a::Agent, o::AbstractObject) 
+(::Pickup)(a::AbstractAgent, o::T) where T = PICKUP(istransportable(T), a, o)
+function (::Pickup)(::Transportable, a::Agent, o::AbstractObject) 
     if a.inv == nothing
         a.inv = o
         return true
     end
     return false
 end
-pickup(::Nontransportable, a::Agent, o::AbstractObject) = nothing
+function (::Pickup)(::Transportable, a::Array_agent, o::AbstractObject) 
+    for (i, v) in enumerate(a.inv) # Picked up objects go into the first empty index
+        if v == nothing
+            a.inv[i] = o
+            return true
+        end
+    end
+    return false
+end
+pickup(::Nontransportable, a::AbstractAgent, o::AbstractObject) = nothing
 
 function (::Drop)(a::Agent)
     if a.inv != nothing
         x = a.inv
         a.inv = nothing
         return x
+    end
+    return nothing
+end
+function (::Drop)(a::Array_agent)
+    for (i, v) in Iterators.reverse(enumerate(a.inv)) # Most recently picked up objects are dropped first
+        if typeof(v)<:AbstractObject
+            a.inv[i] = nothing
+            return v
+        end
     end
     return nothing
 end
