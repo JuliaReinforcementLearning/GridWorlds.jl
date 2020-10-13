@@ -5,7 +5,7 @@ using Colors
 # coordinate transform for Makie.jl
 transform(x::Int) = p -> CartesianIndex(p[2], x-p[1]+1)
 
-using Makie
+using .Makie
 
 function init_screen(w::Observable{<:AbstractGridWorld}; resolution=(1000,1000))
     scene = Scene(resolution = resolution, raw = true, camera = campixel!)
