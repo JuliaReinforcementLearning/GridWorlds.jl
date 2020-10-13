@@ -22,7 +22,10 @@ w(TURN_LEFT)
 w(TURN_RIGHT)
 
 # play interactively with Makie.
+# you need to manually install Makie with the following command first
+# ] add Makie
 # first time plot may be slow
+using Makie
 play(w;file_name="example.gif",frame_rate=5)
 ```
 
