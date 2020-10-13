@@ -40,12 +40,12 @@ function (w::DoorKey)(::MoveForward)
     dest = dir(w.agent_pos)
 
     if w.world[Key(:yellow), dest]
-        if PICKUP(w.agent, Key(:yellow))
+        if PICK_UP(w.agent, Key(:yellow))
             w.world[Key(:yellow), dest] = false
             w.world[EMPTY, dest] = true
         end
         w.agent_pos = dest
-    elseif w.world[Door(:yellow), dest] && w.agent.inv !== Key(:yellow)
+    elseif w.world[Door(:yellow), dest] && w.agent.inventory !== Key(:yellow)
         nothing
     elseif w.world[Door(:yellow), dest] && w.agent.inventory === Key(:yellow)
         w.agent_pos = dest

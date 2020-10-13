@@ -49,10 +49,10 @@ get_color(::Gem) = :magenta
 # Agent
 #####
 
-mutable struct Agent{I<:Union{Nothing, AbstractObject, Vector}} <: AbstractObject
+mutable struct Agent <: AbstractObject
     color::Symbol
     dir::LRUD
-    inventory::I
+    inventory::Union{Nothing, AbstractObject, Vector}
 end
 
 Agent(;dir::LRUD, inventory=nothing, color::Symbol=:red) = Agent(color, dir, inventory)
@@ -81,7 +81,7 @@ istransportable(::Type{<:Key}) = TRANSPORTABLE
 istransportable(::Type{Gem}) = TRANSPORTABLE
 istransportable(x::AbstractObject) = istransportable(typeof(x))
 
-(a::Pickup)(a::Agent, o) = a(istransportable(o), a, o)
+(x::Pickup)(a::Agent, o) = x(istransportable(o), a, o)
 
 function (::Pickup)(::Transportable, a::Agent, o::AbstractObject) 
     if isnothing(a.inventory)
@@ -101,22 +101,22 @@ function (::Pickup)(::Transportable, a::Agent, o::AbstractObject)
 end
 
 function (::Drop)(a::Agent)
-    if isnothing(a.inv)
+    if isnothing(a.inventory)
         nothing
-    elseif a.inv isa AbstractObject
-        x = a.inv
-        a.inv = nothing
+    elseif a.inventory isa AbstractObject
+        x = a.inventory
+        a.inventory = nothing
         x
-    elseif a.inv isa Vector
-        i = findlast(x -> x isa AbstractObject, a.inv)
+    elseif a.inventory isa Vector
+        i = findlast(x -> x isa AbstractObject, a.inventory)
         if isnothing(i)
             nothing
         else
-            x = a.inv[i]
-            a.inv[i] = nothing
+            x = a.inventory[i]
+            a.inventory[i] = nothing
             x
         end
     else
-        @error "unknown inventory type $(a.inv)"
+        @error "unknown inventory type $(a.inventory)"
     end
 end
