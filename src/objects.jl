@@ -84,12 +84,24 @@ const GEM = Gem()
 Base.convert(::Type{Char}, ::Gem) = '♦'
 get_color(::Gem) = :magenta
 
-Base.@kwdef mutable struct Agent <: AbstractObject
+abstract type AbstractAgent <: AbstractObject end
+
+Base.@kwdef mutable struct Agent <: AbstractAgent
     color::Symbol=:red
     dir::LRUD
     inv::Union{AbstractObject, Nothing}=nothing
 end
-function Base.convert(::Type{Char}, a::Agent)
+
+Base.@kwdef mutable struct Array_agent <: AbstractAgent
+    color::Symbol=:red
+    dir::LRUD
+    inv::Vector{Union{AbstractObject, Nothing}}=[]
+end
+function Array_agent(dir::LRUD, len::Integer; color::Symbol=:red)
+    Array_agent(color, dir, Vector{Union{AbstractObject, Nothing}}(nothing, len))
+end
+
+function Base.convert(::Type{Char}, a::AbstractAgent)
     if        a.dir === UP
         '↑'
     elseif  a.dir === DOWN
@@ -100,9 +112,9 @@ function Base.convert(::Type{Char}, a::Agent)
         '→'
     end
 end
-get_color(a::Agent) = a.color
-get_dir(a::Agent) = a.dir
-set_dir!(a::Agent, d) = a.dir = d
+get_color(a::AbstractAgent) = a.color
+get_dir(a::AbstractAgent) = a.dir
+set_dir!(a::AbstractAgent, d) = a.dir = d
 
 #####
 # Pick Up and Drop
