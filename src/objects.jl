@@ -1,5 +1,5 @@
-export COLORS, EMPTY, WALL, GOAL, GEM
-export AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Agent
+export COLORS, MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, UP, DOWN, LEFT, RIGHT, LRUD, EMPTY, WALL, GOAL, GEM, OBSTACLE
+export MoveForward, AbstractObject, Empty, Wall, Goal, Door, key, Gem, Obstacle, Agent
 export get_color, get_dir, set_dir!
 
 using Crayons
@@ -44,6 +44,11 @@ struct Gem <: AbstractObject end
 const GEM = Gem()
 Base.convert(::Type{Char}, ::Gem) = '♦'
 get_color(::Gem) = :magenta
+
+struct Obstacle <: AbstractObject end
+const OBSTACLE = Obstacle()
+Base.convert(::Type{Char}, ::Obstacle) = '⊗'
+get_color(::Obstacle) = :blue    
 
 Base.@kwdef mutable struct Agent <: AbstractObject
     color::Symbol=:red
