@@ -108,13 +108,13 @@ set_dir!(a::Agent, d) = a.dir = d
 # Pick Up and Drop
 #####
 
-struct Item end
-struct Nonitem end
-const ITEM = Item()
-const NONITEM = Nonitem()
-isitem(::Type{<:Key}) = ITEM
-isitem(::Type{Gem}) = ITEM
-isitem(x::AbstractObject) = isitem(typeof(x))
+struct Transportable end
+struct Nontransportable end
+const TRANSPORTABLE = Transportable()
+const NONTRANSPORTABLE = Nontransportable()
+istransportable(::Type{<:Key}) = TRANSPORTABLE
+istransportable(::Type{Gem}) = TRANSPORTABLE
+istransportable(x::AbstractObject) = istransportable(typeof(x))
 
 struct Pickup end
 const PICKUP = Pickup()
@@ -122,15 +122,15 @@ const PICKUP = Pickup()
 struct Drop end
 const DROP = Drop()
 
-(::Pickup)(a::Agent, o::T) where T = pickup(isitem(T), a, o)
-function pickup(::Item, a::Agent, o::AbstractObject) 
+(::Pickup)(a::Agent, o::T) where T = pickup(istransportable(T), a, o)
+function pickup(::Transportable, a::Agent, o::AbstractObject) 
     if a.inv == nothing
         a.inv = o
         return true
     end
     return false
 end
-pickup(::Nonitem, a::Agent, o::AbstractObject) = nothing
+pickup(::Nontransportable, a::Agent, o::AbstractObject) = nothing
 
 function (::Drop)(a::Agent)
     if a.inv != nothing
