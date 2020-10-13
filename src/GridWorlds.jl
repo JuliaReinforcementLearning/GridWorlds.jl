@@ -5,6 +5,8 @@ using Requires
 const GW = GridWorlds
 export GW
 
+include("directions.jl")
+include("actions.jl")
 include("objects.jl")
 include("grid_world_base.jl")
 include("abstract_grid_world.jl")

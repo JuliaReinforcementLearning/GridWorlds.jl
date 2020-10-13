@@ -11,3 +11,7 @@ Manifest.toml
 
 # Local History for Visual Studio Code
 .history/
+
+# vim temporary files
+*~
+*.swp

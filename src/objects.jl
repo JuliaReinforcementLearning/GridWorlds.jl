@@ -1,50 +1,11 @@
-export COLORS, MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, UP, DOWN, LEFT, RIGHT, LRUD, EMPTY, WALL, GOAL, GEM
-export MoveForward, AbstractObject, Empty, Wall, Goal, Door, Gem, Agent
-export get_color
+export COLORS, EMPTY, WALL, GOAL, GEM
+export AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Agent
+export get_color, get_dir, set_dir!
 
 using Crayons
 using Colors
 
 const COLORS = (:red, :green, :blue, :magenta, :yellow, :white)
-
-#####
-# Actions
-#####
-
-struct MoveForward end
-const MOVE_FORWARD = MoveForward()
-
-struct Up end
-const UP = Up()
-(x::Up)(p::CartesianIndex{2}) = p + CartesianIndex(-1, 0)
-
-struct Down end
-const DOWN = Down()
-(x::Down)(p::CartesianIndex{2}) = p + CartesianIndex(1, 0)
-
-struct Left end
-const LEFT = Left()
-(x::Left)(p::CartesianIndex{2}) = p + CartesianIndex(0, -1)
-
-struct Right end
-const RIGHT = Right()
-(x::Right)(p::CartesianIndex{2}) = p + CartesianIndex(0, 1)
-
-const LRUD = Union{Left, Right, Up, Down}
-
-struct TurnRight end
-const TURN_RIGHT = TurnRight()
-struct TurnLeft end
-const TURN_LEFT = TurnLeft()
-
-(x::TurnRight)(::Left) = UP
-(x::TurnRight)(::Up) = RIGHT
-(x::TurnRight)(::Right) = DOWN
-(x::TurnRight)(::Down) = LEFT
-(x::TurnLeft)(::Left) = DOWN
-(x::TurnLeft)(::Up) = LEFT
-(x::TurnLeft)(::Right) = UP
-(x::TurnLeft)(::Down) = RIGHT
 
 #####
 # Objects
@@ -97,11 +58,13 @@ Base.@kwdef mutable struct Array_agent <: AbstractAgent
     dir::LRUD
     inv::Vector{Union{AbstractObject, Nothing}}=[]
 end
+
 function Array_agent(dir::LRUD, len::Integer; color::Symbol=:red)
     Array_agent(color, dir, Vector{Union{AbstractObject, Nothing}}(nothing, len))
 end
 
 function Base.convert(::Type{Char}, a::AbstractAgent)
+
     if        a.dir === UP
         '↑'
     elseif  a.dir === DOWN
@@ -112,6 +75,7 @@ function Base.convert(::Type{Char}, a::AbstractAgent)
         '→'
     end
 end
+
 get_color(a::AbstractAgent) = a.color
 get_dir(a::AbstractAgent) = a.dir
 set_dir!(a::AbstractAgent, d) = a.dir = d
