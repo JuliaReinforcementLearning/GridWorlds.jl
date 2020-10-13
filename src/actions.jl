@@ -24,3 +24,9 @@ const TURN_LEFT = TurnLeft()
 (x::TurnLeft)(::Up) = LEFT
 (x::TurnLeft)(::Right) = UP
 (x::TurnLeft)(::Down) = RIGHT
+
+struct Pickup <: AbstractGridWorldAction end
+const PICK_UP = Pickup()
+
+struct Drop <: AbstractGridWorldAction end
+const DROP = Drop()

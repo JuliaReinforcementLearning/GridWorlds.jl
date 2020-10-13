@@ -32,7 +32,7 @@ function DoorKey(;n=8, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_RN
     world[EMPTY, key_pos] = false
     world[Key(:yellow), key_pos] = true
 
-    DoorKey(world, agent_start_pos, Agent(dir=RIGHT))
+    DoorKey(world, agent_start_pos, Agent(;dir=RIGHT))
 end
 
 function (w::DoorKey)(::MoveForward)
@@ -45,10 +45,10 @@ function (w::DoorKey)(::MoveForward)
             w.world[EMPTY, dest] = true
         end
         w.agent_pos = dest
-    elseif w.world[Door(:yellow), dest] && w.agent.inv == Key(:yellow)
-        w.agent_pos = dest
-    elseif w.world[Door(:yellow), dest] && w.agent.inv != Key(:yellow)
+    elseif w.world[Door(:yellow), dest] && w.agent.inv !== Key(:yellow)
         nothing
+    elseif w.world[Door(:yellow), dest] && w.agent.inventory === Key(:yellow)
+        w.agent_pos = dest
     elseif dest ∈ CartesianIndices((size(w.world, 2), size(w.world, 3))) && !w.world[WALL,dest]
         w.agent_pos = dest
     end

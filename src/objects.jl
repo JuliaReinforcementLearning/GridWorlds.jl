@@ -45,39 +45,33 @@ const GEM = Gem()
 Base.convert(::Type{Char}, ::Gem) = '♦'
 get_color(::Gem) = :magenta
 
-const INV = Union{Nothing, AbstractObject}
-const INVARRAY = Vector{Union{AbstractObject, Nothing}}
+#####
+# Agent
+#####
 
-mutable struct Agent{I<:Union{INV, INVARRAY}} <: AbstractObject
+mutable struct Agent{I<:Union{Nothing, AbstractObject, Vector}} <: AbstractObject
     color::Symbol
     dir::LRUD
-    inv::I
+    inventory::I
 end
-Agent(dir::LRUD; inv::INV=nothing, color::Symbol=:red) = Agent{INV}(color, dir, inv)
-Agent(;dir::LRUD, inv::INV=nothing, color::Symbol=:red) = Agent{INV}(color, dir, inv)
-function Agent{INVARRAY}(dir::LRUD, len::Integer; color::Symbol=:red)
-    Agent{INVARRAY}(color, dir, INVARRAY(nothing, len))
-end
-Agent{INV}(dir::LRUD; inv::INV=nothing, color::Symbol=:red) = Agent{INV}(color, dir, inv)
+
+Agent(;dir::LRUD, inventory=nothing, color::Symbol=:red) = Agent(color, dir, inventory)
 
 function Base.convert(::Type{Char}, a::Agent)
-    if        a.dir === UP
+    if     a.dir === UP
         '↑'
-    elseif  a.dir === DOWN
+    elseif a.dir === DOWN
         '↓'
-    elseif  a.dir === LEFT
+    elseif a.dir === LEFT
         '←'
     elseif a.dir === RIGHT
         '→'
     end
 end
+
 get_color(a::Agent) = a.color
 get_dir(a::Agent) = a.dir
 set_dir!(a::Agent, d) = a.dir = d
-
-#####
-# Pick Up and Drop
-#####
 
 struct Transportable end
 struct Nontransportable end
@@ -87,45 +81,42 @@ istransportable(::Type{<:Key}) = TRANSPORTABLE
 istransportable(::Type{Gem}) = TRANSPORTABLE
 istransportable(x::AbstractObject) = istransportable(typeof(x))
 
-struct Pickup end
-const PICKUP = Pickup()
+(a::Pickup)(a::Agent, o) = a(istransportable(o), a, o)
 
-struct Drop end
-const DROP = Drop()
-
-(::Pickup)(a::Agent, o::T) where T = PICKUP(istransportable(T), a, o)
-function (::Pickup)(::Transportable, a::Agent{INV}, o::AbstractObject) 
-    if a.inv == nothing
-        a.inv = o
-        return true
-    end
-    return false
-end
-function (::Pickup)(::Transportable, a::Agent{INVARRAY}, o::AbstractObject) 
-    for (i, v) in enumerate(a.inv) # Picked up objects go into the first empty index
-        if v == nothing
-            a.inv[i] = o
-            return true
+function (::Pickup)(::Transportable, a::Agent, o::AbstractObject) 
+    if isnothing(a.inventory)
+        a.inventory = o
+        true
+    elseif a.inventory isa Vector
+        i = findfirst(isnothing, a.v)
+        if isnothing(i)
+            false
+        else
+            a.inventory[i] = o
+            true
         end
+    else
+        false
     end
-    return false
 end
-pickup(::Nontransportable, a::Agent, o::AbstractObject) = nothing
 
-function (::Drop)(a::Agent{INV})
-    if a.inv != nothing
+function (::Drop)(a::Agent)
+    if isnothing(a.inv)
+        nothing
+    elseif a.inv isa AbstractObject
         x = a.inv
         a.inv = nothing
-        return x
-    end
-    return nothing
-end
-function (::Drop)(a::Agent{INVARRAY})
-    for (i, v) in Iterators.reverse(enumerate(a.inv)) # Most recently picked up objects are dropped first
-        if typeof(v)<:AbstractObject
+        x
+    elseif a.inv isa Vector
+        i = findlast(x -> x isa AbstractObject, a.inv)
+        if isnothing(i)
+            nothing
+        else
+            x = a.inv[i]
             a.inv[i] = nothing
-            return v
+            x
         end
+    else
+        @error "unknown inventory type $(a.inv)"
     end
-    return nothing
 end
