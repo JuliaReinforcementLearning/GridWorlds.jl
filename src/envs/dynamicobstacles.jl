@@ -59,11 +59,11 @@ function (w::DynamicObstacles)(::MoveForward)
             next_pos = CartesianIndex(old_pos[1]+rand(w.rng, [-1,0,1]),old_pos[2]+rand(w.rng, [-1,0,1])) 
             if !w.world[WALL, next_pos] 
                 flag = 0
-                #flag indicated whether 
+                #flag indicates whether 
                 #1)the new-position of the kth obstacle overlaps the new-positions of [1,k-1] obstacles
-                #2)the new-position of an obstacle is the same as it's old position 
-                for i = obstacles_replaced:-1:0
-                    if w.obs_pos_array[i+1]==next_pos
+                
+                for i = 0:obstacles_replaced-1
+                    if (w.obs_pos_array[i+1]==next_pos)
                         
                         flag = 1
                         break
@@ -73,13 +73,16 @@ function (w::DynamicObstacles)(::MoveForward)
                 if flag == 0
                     
                     w.obs_pos_array[obstacles_replaced+1] = next_pos
-                    w.world[OBSTACLE, next_pos] = true
                     w.world[OBSTACLE, old_pos] = false
-                    w.world[EMPTY, next_pos] = false
                     w.world[EMPTY, old_pos] = true
                     obstacles_replaced += 1   
                 end
             end   
+        end
+        #println(w.obs_pos_array)
+        for obs in w.obs_pos_array
+            w.world[OBSTACLE, obs] = true
+            w.world[EMPTY, obs] = false
         end
         if w.world[OBSTACLE, dest]
             #end the game
@@ -90,6 +93,8 @@ function (w::DynamicObstacles)(::MoveForward)
     end
     w
 end
+
+
 
 
 
