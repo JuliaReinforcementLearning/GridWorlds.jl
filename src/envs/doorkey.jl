@@ -14,7 +14,6 @@ function DoorKey(;n=8, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_RN
     world[EMPTY, 2:n-1, 2:n-1] .= true
     world[WALL, [1,n], 1:n] .= true
     world[WALL, 1:n, [1,n]] .= true
-    world[WALL, [1,n], 1:n] .= true
     world[EMPTY, n-1, n-1] = false
     world[GOAL, n-1, n-1] = true
 

@@ -22,7 +22,10 @@ w(TURN_LEFT)
 w(TURN_RIGHT)
 
 # play interactively with Makie.
+# you need to manually install Makie with the following command first
+# ] add Makie
 # first time plot may be slow
+using Makie
 play(w;file_name="example.gif",frame_rate=5)
 ```
 
@@ -49,6 +52,10 @@ play(w;file_name="example.gif",frame_rate=5)
 - [x] CollectGems
 
 <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/CollectGems.gif" width="300px">
+
+- [x] DynamicObstacles
+
+<img src="docs/src/assets/img/DynamicObstacles.gif" width="300px">
 
 ### Needs improvement
 

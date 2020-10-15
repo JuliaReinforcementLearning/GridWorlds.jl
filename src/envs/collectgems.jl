@@ -10,7 +10,7 @@ mutable struct CollectGems <: AbstractGridWorld
     r::Float64
 end
 
-function CollectGems(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RIGHT)
+function CollectGems(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RIGHT, rng=Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, GEM)
     w = GridWorldBase(objects, n, n)
 
@@ -24,7 +24,7 @@ function CollectGems(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=
 
     gem_placed = 0
     while gem_placed < num_gem_init
-        gem_pos = CartesianIndex(rand(2:n-1), rand(2:n-1))
+        gem_pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 2:n-1))
         if (gem_pos == agent_start_pos) || (w[GEM, gem_pos] == true)
             continue
         else
