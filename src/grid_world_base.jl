@@ -67,13 +67,13 @@ end
 radius(x, y) = √(x^2 + y^2)
 radius(p::Tuple) = radius(p[1], p[2])
 theta(x, y) = x == 0 ? sign(y)*π/2 : atan(y, x)
-theta(p::Tuple{<:Real}) = theta(p[1], p[2])
+theta(p::Tuple) = theta(p[1], p[2])
 
 struct PolarCoord
     θ::AbstractFloat
     r::AbstractFloat
 end
-PolarCoord(θ::AbstractFLoat, r::AbstractFLoat) = PolarCoord((θ + (r<0 && π)) % 2π, abs(r))
+PolarCoord(θ::Real, r::Real) = PolarCoord((θ + (r<0 && π)) % 2π, abs(r))
 PolarCoord(p::Tuple) = PolarCoord(theta(p), radius(p))
 PolarCoord(p::CartesianIndex) = PolarCoord(Tuple(p))
 
@@ -86,7 +86,7 @@ function Shadow(p::CartesianIndex)
     r = radius(Tuple(p))
     corners = [(p[1]+x, p[2]+y) for x in -.5:.5, y in -.5:.5]
     corners = theta.(corners)
-    Shadow(min(corners), max(corners), r)
+    Shadow(minimum(corners), maximum(corners), r)
 end
 
 """
@@ -95,7 +95,7 @@ occluded by the shadow `s` evaluating `v`
 """
 function (s::Shadow)(v::CartesianIndices)
     polar = PolarCoord.(v)
-    f(x) = x.r > s.r && s.minθ < x.θ <= s.maxθ
+    f(x) = x.r > s.r && s.minθ <= x.θ <= s.maxθ
     f.(polar)
 end
 
@@ -123,5 +123,6 @@ function get_agent_view!(v::AbstractArray{Bool,3}, a::AbstractArray{Bool,3}, p::
             v[:, ind_map(ind.I, view_size, dir)...] .= a[:, inds[ind]]
         end
     end
+
     v
 end
