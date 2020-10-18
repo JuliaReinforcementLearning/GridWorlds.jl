@@ -94,7 +94,7 @@ returns a 2D array of boolean values, where `true` represents an index which is
 occluded by the shadow `s` evaluating `v`
 """
 function (s::Shadow)(v::CartesianIndices)
-    polar = PolarCoord.(v)
+    polar = PolarCoord.(v)``
     f(x) = x.r > s.r && s.minθ <= x.θ <= s.maxθ
     f.(polar)
 end
