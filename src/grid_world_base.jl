@@ -122,16 +122,25 @@ Args:
     p::CartesianIndex: location of the agent
     dir::LRUD: direction the agent is looking
 """
-function get_agent_view!(v::AbstractArray{Bool,3}, a::AbstractArray{Bool,3}, p::CartesianIndex, dir::LRUD)
+function get_agent_view!(v::AbstractArray{Bool,3}, w::AbstractGridWorld; perspective::Bool=true)
+    a = convert(GridWorldBase, w)
+    p = get_agent_pos(w)
+    dir = get_agent_dir(w)
+
     view_size = (size(v, 2), size(v, 3))
     grid_size = (size(a,2),size(a,3))
-    inds = get_agent_view_inds(p.I, view_size, dir)
-    valid_inds = CartesianIndices(grid_size)
-    for ind in CartesianIndices(inds)
-        if inds[ind] ∈ valid_inds
-            v[:, ind_map(ind.I, view_size, dir)...] .= a[:, inds[ind]]
+    inds = get_agent_view_inds(p.I, view_size, dir) # indices of the visible points
+    valid_inds = CartesianIndices(grid_size) # CartesianIndices representing the whole environment
+
+    if perspective
+        
+    else
+        for ind in CartesianIndices(inds) # for every index in view...
+            if inds[ind] ∈ valid_inds # if it's within the environment...
+                # set its corresponding value in the view to the value in the environment
+                v[:, ind_map(ind.I, view_size, dir)...] .= a[:, inds[ind]]
+            end
         end
     end
-
     v
 end
