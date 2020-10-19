@@ -99,6 +99,15 @@ function (s::Shadow)(v::CartesianIndices)
     f.(polar)
 end
 
+function shadowmap(m::Matrix{Bool})
+    indices = CartesianIndices(((-1*size(m)[1]÷2):(size(m)[1]÷2), 0:(size(m)[2]-1)))
+    shadows = Shadow.(indices[m])
+    output = fill(false, size(a))
+    for s in shadows
+        output |= s(indices)
+    end
+    output
+end
 #####
 # get_agent_view
 #####
@@ -133,7 +142,20 @@ function get_agent_view!(v::AbstractArray{Bool,3}, w::AbstractGridWorld; perspec
     valid_inds = CartesianIndices(grid_size) # CartesianIndices representing the whole environment
 
     if perspective
-        
+        m = convert(Matrix{Bool}, copy(v))
+        shadows = []
+        for ind in CartesianIndices(inds) # for every index in view...
+            if inds[ind] ∈ valid_inds # if it's within the environment...
+                o = findfirst(w[:, inds[ind]]) # first object at the index
+                m[ind_map(ind.I, view_size, dir)...] .= isnothing(o) ? false : isopaque(w.objects[o]) <: Opaque
+            end
+        end
+        shadows = .!(shadowmap(m))
+        for ind in CartesianIndices(inds)
+            if inds[ind] ∈ valid_inds && shadows[ind_map(ind.I, view_size, dir)...]
+                v[:, ind_map(ind.I, view_size, dir)...] .= a[:, inds[ind]]
+            end
+        end
     else
         for ind in CartesianIndices(inds) # for every index in view...
             if inds[ind] ∈ valid_inds # if it's within the environment...
