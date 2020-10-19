@@ -113,6 +113,15 @@ ind_map((i,j), (m, n), ::Right) = (j, n-i+1)
 ind_map((i,j), (m, n), ::Up) = (m-i+1, n-j+1)
 ind_map((i,j), (m, n), ::Down) = (i,j)
 
+"""
+Updates the agent view
+
+Args:
+    v::AbstractArray{Bool,3}: the current agent view as a 3D array with indices [type, x, y]
+    a::AbstractArray{Bool,3}: the current environment as a 3D array with indices [type, x, y]
+    p::CartesianIndex: location of the agent
+    dir::LRUD: direction the agent is looking
+"""
 function get_agent_view!(v::AbstractArray{Bool,3}, a::AbstractArray{Bool,3}, p::CartesianIndex, dir::LRUD)
     view_size = (size(v, 2), size(v, 3))
     grid_size = (size(a,2),size(a,3))
