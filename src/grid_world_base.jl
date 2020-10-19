@@ -61,6 +61,54 @@ function Random.rand(f::Function, w::GridWorldBase; max_try=typemax(Int), rng=Ra
 end
 
 #####
+# Occlusion
+#####
+
+radius(x, y) = √(x^2 + y^2)
+radius(p::Tuple) = radius(p[1], p[2])
+theta(x, y) = x == 0 ? sign(y)*π/2 : atan(y, x)
+theta(p::Tuple) = theta(p[1], p[2])
+
+struct PolarCoord
+    θ::AbstractFloat
+    r::AbstractFloat
+end
+PolarCoord(θ::Real, r::Real) = PolarCoord((θ + (r<0 && π)) % 2π, abs(r))
+PolarCoord(p::Tuple) = PolarCoord(theta(p), radius(p))
+PolarCoord(p::CartesianIndex) = PolarCoord(Tuple(p))
+
+struct Shadow
+    minθ::AbstractFloat
+    maxθ::AbstractFloat
+    r::AbstractFloat
+end
+function Shadow(p::CartesianIndex)
+    r = radius(Tuple(p))
+    corners = [(p[1]+x, p[2]+y) for x in -.5:.5, y in -.5:.5]
+    corners = theta.(corners)
+    Shadow(minimum(corners), maximum(corners), r)
+end
+
+"""
+returns a 2D array of boolean values, where `true` represents an index which is
+occluded by the shadow `s` evaluating `v`
+"""
+function (s::Shadow)(v::CartesianIndices)
+    polar = PolarCoord.(v)``
+    f(x) = x.r > s.r && s.minθ <= x.θ <= s.maxθ
+    f.(polar)
+end
+
+function shadowmap(m::Matrix{Bool})
+    indices = CartesianIndices(((-1*size(m)[1]÷2):(size(m)[1]÷2), 0:(size(m)[2]-1)))
+    shadows = Shadow.(indices[m])
+    output = fill(false, size(a))
+    for s in shadows
+        output |= s(indices)
+    end
+    output
+end
+#####
 # get_agent_view
 #####
 
@@ -74,14 +122,46 @@ ind_map((i,j), (m, n), ::Right) = (j, n-i+1)
 ind_map((i,j), (m, n), ::Up) = (m-i+1, n-j+1)
 ind_map((i,j), (m, n), ::Down) = (i,j)
 
-function get_agent_view!(v::AbstractArray{Bool,3}, a::AbstractArray{Bool,3}, p::CartesianIndex, dir::LRUD)
+"""
+Updates the agent view
+
+Args:
+    v::AbstractArray{Bool,3}: the current agent view as a 3D array with indices [type, x, y]
+    a::AbstractArray{Bool,3}: the current environment as a 3D array with indices [type, x, y]
+    p::CartesianIndex: location of the agent
+    dir::LRUD: direction the agent is looking
+"""
+function get_agent_view!(v::AbstractArray{Bool,3}, w::AbstractGridWorld; perspective::Bool=true)
+    a = convert(GridWorldBase, w)
+    p = get_agent_pos(w)
+    dir = get_agent_dir(w)
+
     view_size = (size(v, 2), size(v, 3))
     grid_size = (size(a,2),size(a,3))
-    inds = get_agent_view_inds(p.I, view_size, dir)
-    valid_inds = CartesianIndices(grid_size)
-    for ind in CartesianIndices(inds)
-        if inds[ind] ∈ valid_inds
-            v[:, ind_map(ind.I, view_size, dir)...] .= a[:, inds[ind]]
+    inds = get_agent_view_inds(p.I, view_size, dir) # indices of the visible points
+    valid_inds = CartesianIndices(grid_size) # CartesianIndices representing the whole environment
+
+    if perspective
+        m = convert(Matrix{Bool}, copy(v))
+        shadows = []
+        for ind in CartesianIndices(inds) # for every index in view...
+            if inds[ind] ∈ valid_inds # if it's within the environment...
+                o = findfirst(w[:, inds[ind]]) # first object at the index
+                m[ind_map(ind.I, view_size, dir)...] .= isnothing(o) ? false : isopaque(w.objects[o]) <: Opaque
+            end
+        end
+        shadows = .!(shadowmap(m))
+        for ind in CartesianIndices(inds)
+            if inds[ind] ∈ valid_inds && shadows[ind_map(ind.I, view_size, dir)...]
+                v[:, ind_map(ind.I, view_size, dir)...] .= a[:, inds[ind]]
+            end
+        end
+    else
+        for ind in CartesianIndices(inds) # for every index in view...
+            if inds[ind] ∈ valid_inds # if it's within the environment...
+                # set its corresponding value in the view to the value in the environment
+                v[:, ind_map(ind.I, view_size, dir)...] .= a[:, inds[ind]]
+            end
         end
     end
     v

@@ -30,8 +30,10 @@ const GOAL = Goal()
 Base.convert(::Type{Char}, ::Goal) = '♥'
 get_color(::Goal) = :red
 
-struct Door{C} <: AbstractObject end
-Door(c) = Door{c}()
+struct Door{C} <: AbstractObject
+    open::Bool
+end
+Door(c) = Door{c}(false)
 Base.convert(::Type{Char}, ::Door) = '⩎'
 get_color(::Door{C}) where C = C
 
@@ -83,6 +85,16 @@ const NONTRANSPORTABLE = Nontransportable()
 istransportable(::Type{<:Key}) = TRANSPORTABLE
 istransportable(::Type{Gem}) = TRANSPORTABLE
 istransportable(x::AbstractObject) = istransportable(typeof(x))
+
+struct Opaque end
+struct Transparent end
+const OPAQUE = Opaque()
+const TRANSPARENT = Transparent()
+isopaque(::Type{<:AbstractObject}) = OPAQUE
+isopaque(::Type{<:Key}) = TRANSPARENT
+isopaque(::Type{Gem}) = TRANSPARENT
+isopaque(x::AbstractObject) = isopaque(typeof(x))
+isopaque(x<:Door) = x.open ? TRANSPARENT : OPAQUE
 
 (x::Pickup)(a::Agent, o) = x(istransportable(o), a, o)
 
