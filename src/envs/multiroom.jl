@@ -1,4 +1,4 @@
-export MultiRoom
+export MultiRoom, MultiRoomN2S4, MultiRoomN4S5, MultiRoomN6
 
 using Random
 
@@ -15,11 +15,11 @@ mutable struct Room
     exitDoor::CartesianIndex{2}
 end
 
-function placeRooms( n, numLeft, roomList, minSize, maxSize, entryDoorWall, entryDoorPos, rng=Random.GLOBAL_RNG)
-    sizeX = rand(rng, minSize, maxSize)
-    sizeY = rand(rng, minSize, maxSize)
+function placeRooms!( n, numLeft, roomList, minSize, maxSize, entryDoorWall, entryDoorPos, rng=Random.GLOBAL_RNG)
+    sizeX = rand(rng, minSize:maxSize)
+    sizeY = rand(rng, minSize:maxSize)
     
-    if !length(roomList)
+    if length(roomList) == 0
         top = entryDoorPos
     elseif entryDoorWall == 0 #RIGHT
         top = CartesianIndex(entryDoorPos[1]-sizeX+1, rand(rng, entryDoorPos[2]-sizeY+2:entryDoorPos[2]))
@@ -43,14 +43,14 @@ function placeRooms( n, numLeft, roomList, minSize, maxSize, entryDoorWall, entr
             return false
         end
     end
-    push!(roomList, Room(top, CartesianIndex(sizeX,sizeY), entryDoorPos, nothing))
+    push!(roomList, Room(top, CartesianIndex(sizeX,sizeY), entryDoorPos, CartesianIndex(-1,-1)))
 
     if numLeft == 1
         return True
     end
 
     for i=1:8
-        wallSet = deleteat([0,1,2,3], entryDoorWall+1)
+        wallSet = deleteat!([0,1,2,3], entryDoorWall+1)
         exitDoorWall = rand(rng, wallSet)
         nextEntryWall = (exitDoorWall + 2) % 4
         if exitDoorWall == 0
@@ -63,31 +63,32 @@ function placeRooms( n, numLeft, roomList, minSize, maxSize, entryDoorWall, entr
             exitDoorPos = CartesianIndex(top[1]+rand(rng, 1:sizeX-1),top[2])
         else
             return false
-        success = placeRooms(n, numLeft-1, roomList, minSize,  maxSize, nextEntryWall, exitDoorPos)
+        end
+        success = placeRooms!(n, numLeft-1, roomList, minSize,  maxSize, nextEntryWall, exitDoorPos)
         if success break end
     end
     return true
 end
 
-function MultiRoom(;n=25, minRooms, maxRooms, maxSize=10, rng=Random.GLOBAL_RNG)
+function MultiRoom(;n=25, minRooms=2, maxRooms=4, maxSize=10, rng=Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, GOAL, (Door(c) for c in COLORS)...)
     world = GridWorldBase(objects, n, n)
     world[EMPTY, :, :] .= true
     numRooms = rand(rng, minRooms:maxRooms)
     roomList = []
-    while length(roomList) < numRooms:
+    while length(roomList) < numRooms
         curRoomList = []
         entryDoorPos = CartesianIndex(rand(rng, 1:n-1),rand(rng, 1:n-1))
-        placeRooms(n, numLeft, curRoomList, 4, maxSize, 3, entryDoorPos)
+        placeRooms!(n, numRooms, curRoomList, 4, maxSize, 3, entryDoorPos)
         if length(curRoomList) > length(roomList)
             roomList = curRoomList
         end
     end
 
     door_colors = COLORS[randperm(rng, length(COLORS))][1:length(roomList)-1]
-    for i, room in enumerate(roomList)
-        world[WALL, [room.top[2],room.top[2]+room.size[2]-1], room.top[1]:room.top[1]+room.size[1]-1]] .=true
-        world[EMPTY, [room.top[2],room.top[2]+room.size[2]-1], room.top[1]:room.top[1]+room.size[1]-1]] .=false
+    for (i, room) in enumerate(roomList)
+        world[WALL, [room.top[2],room.top[2]+room.size[2]-1], room.top[1]:room.top[1]+room.size[1]-1] .=true
+        world[EMPTY, [room.top[2],room.top[2]+room.size[2]-1], room.top[1]:room.top[1]+room.size[1]-1] .=false
         if i>1
             world[Door(door_colors[i-1]), room.entryDoor] = true
             world[WALL, room.entryDoor] = false
@@ -105,5 +106,14 @@ function MultiRoom(;n=25, minRooms, maxRooms, maxSize=10, rng=Random.GLOBAL_RNG)
 end
 
 function (w::MultiRoom)(::MoveForward)
+    dir = get_dir(w.agent)
+    dest = dir(w.agent_pos)
+    if !w.world[WALL, dest]
+        w.agent_pos = dest
+    end
     w
 end
+
+MultiRoomN2S4() = MultiRoom(minRooms=2,maxRooms=2,maxSize=4)
+MultiRoomN4S5() = MultiRoom(minRooms=4,maxRooms=4,maxSize=5)
+MultiRoomN6() = MultiRoom(minRooms=6,maxRooms=6)
