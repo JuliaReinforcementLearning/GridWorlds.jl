@@ -63,8 +63,6 @@ function (w::CollectGems)(action::Union{TurnRight, TurnLeft})
     w
 end
 
-function RLBase.get_terminal(w::CollectGems)
-    return w.num_gem_current <= 0
-end
+RLBase.get_terminal(w::CollectGems) = w.num_gem_current <= 0
 
 RLBase.get_reward(w::CollectGems) = w.r
