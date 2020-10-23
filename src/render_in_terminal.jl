@@ -1,6 +1,6 @@
 using Crayons
 
-function Base.show(io::IO, gw::AbstractGridWorld)
+function Base.show(io::IO, ::MIME"text/markdown", gw::AbstractGridWorld)
     p, d = get_agent_pos(gw), get_agent_dir(gw)
     w = convert(GridWorldBase, gw)
 
