@@ -1,6 +1,7 @@
 module GridWorlds
 
 using Requires
+using ReinforcementLearningBase
 
 const GW = GridWorlds
 export GW
