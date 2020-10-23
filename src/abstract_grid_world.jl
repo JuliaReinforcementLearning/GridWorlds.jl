@@ -1,6 +1,6 @@
 export get_agent_view, AbstractGridWorld
 export get_actions
-abstract type AbstractGridWorld end
+abstract type AbstractGridWorld <: AbstractEnv end
 
 function get_agent_view end
 function get_agent end
