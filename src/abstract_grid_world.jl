@@ -30,6 +30,10 @@ end
 
 RLBase.get_actions(w::AbstractGridWorld) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT)
 
+RLBase.get_state(w::AbstractGridWorld, ::RLBase.PartialObservation{Array}, args...) = get_agent_view(w)
+
+RLBase.DefaultStateStyle(w::AbstractGridWorld) = RLBase.PartialObservation{Array}()
+
 get_agent_view_inds(w::AbstractGridWorld, s=(7,7)) = get_agent_view_inds(get_agent_pos(w).I, s, get_agent_dir(w))
 
 get_agent_view!(v::BitArray{3}, w::AbstractGridWorld) = get_agent_view!(v, convert(GridWorldBase, w), get_agent_pos(w), get_agent_dir(w))
