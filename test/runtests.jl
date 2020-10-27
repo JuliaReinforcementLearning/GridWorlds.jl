@@ -3,7 +3,7 @@ using Test
 using Random
 using ReinforcementLearningBase
 
-ENVS = [EmptyGridWorld, FourRooms, GoToDoor]
+ENVS = [EmptyGridWorld, FourRooms, GoToDoor, DoorKey, CollectGems, DynamicObstacles]
 ACTIONS = [TURN_LEFT, TURN_RIGHT, MOVE_FORWARD]
 
 @testset "GridWorlds.jl" begin
