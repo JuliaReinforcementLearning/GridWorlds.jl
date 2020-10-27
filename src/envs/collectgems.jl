@@ -66,3 +66,5 @@ end
 RLBase.get_terminal(w::CollectGems) = w.num_gem_current <= 0
 
 RLBase.get_reward(w::CollectGems) = w.r
+
+RLBase.get_state(w::CollectGems, args...) = get_agent_view(w)
