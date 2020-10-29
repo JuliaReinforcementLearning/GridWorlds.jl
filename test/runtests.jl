@@ -1,8 +1,9 @@
 using GridWorlds
 using Test
 using Random
+using ReinforcementLearningBase
 
-ENVS = [EmptyGridWorld, FourRooms, GoToDoor]
+ENVS = [EmptyGridWorld, FourRooms, GoToDoor, DoorKey, CollectGems, DynamicObstacles]
 ACTIONS = [TURN_LEFT, TURN_RIGHT, MOVE_FORWARD]
 
 @testset "GridWorlds.jl" begin
@@ -27,5 +28,24 @@ ACTIONS = [TURN_LEFT, TURN_RIGHT, MOVE_FORWARD]
                 @test size(view,3) == 7
             end
         end
+    end
+
+    @testset "RLBase API" begin
+        w = CollectGems()
+
+        @test get_reward(w) == 0.0
+        @test get_terminal(w) == false
+        @test get_state(w) == get_agent_view(w)
+
+        π = RandomPolicy(w)
+        total_reward = 0.0
+
+        while !get_terminal(w)
+            action = π(w)
+            w(action)
+            total_reward += get_reward(w)
+        end
+
+        @test total_reward == w.num_gem_init * w.gem_reward
     end
 end
