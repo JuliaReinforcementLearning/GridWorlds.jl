@@ -8,7 +8,7 @@ mutable struct FourRooms <: AbstractGridWorld
     reward::Float64
 end
 
-function FourRooms(;n=19, agent_start_pos=CartesianIndex(2,2))
+function FourRooms(;n=9, agent_start_pos=CartesianIndex(2,2))
     objects = (EMPTY, WALL, GOAL)
     world = GridWorldBase(objects, n,n)
     world[EMPTY, 2:n-1, 2:n-1] .= true
