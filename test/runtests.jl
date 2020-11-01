@@ -4,6 +4,7 @@ using Random
 using ReinforcementLearningBase
 
 ENVS = [EmptyGridWorld, FourRooms, GoToDoor, DoorKey, CollectGems, DynamicObstacles]
+ENVS_RLBASE = [EmptyGridWorld, CollectGems]
 ACTIONS = [TURN_LEFT, TURN_RIGHT, MOVE_FORWARD]
 
 @testset "GridWorlds.jl" begin
@@ -30,22 +31,28 @@ ACTIONS = [TURN_LEFT, TURN_RIGHT, MOVE_FORWARD]
         end
     end
 
-    @testset "RLBase API" begin
-        w = CollectGems()
+    for env in ENVS_RLBASE
+        @testset "$(env) RLBase API" begin
+            w = env()
 
-        @test get_reward(w) == 0.0
-        @test get_terminal(w) == false
-        @test get_state(w) == get_agent_view(w)
+            @test get_reward(w) == 0.0
+            @test get_terminal(w) == false
+            @test get_state(w) == get_agent_view(w)
 
-        π = RandomPolicy(w)
-        total_reward = 0.0
+            π = RandomPolicy(w)
+            total_reward = 0.0
 
-        while !get_terminal(w)
-            action = π(w)
-            w(action)
-            total_reward += get_reward(w)
+            while !get_terminal(w)
+                action = π(w)
+                w(action)
+                total_reward += get_reward(w)
+            end
+
+            if env == CollectGems
+                @test total_reward == w.num_gem_init * w.gem_reward
+            elseif env == EmptyGridWorld
+                @test total_reward == w.goal_reward
+            end
         end
-
-        @test total_reward == w.num_gem_init * w.gem_reward
     end
 end
