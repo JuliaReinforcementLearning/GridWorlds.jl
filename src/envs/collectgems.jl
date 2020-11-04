@@ -36,9 +36,9 @@ function CollectGems(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=
     end
 
     gem_reward = 1.0
-    r = 0.0
+    reward = 0.0
 
-    CollectGems(w, agent_start_pos, Agent(dir=agent_start_dir), num_gem_init, num_gem_current, gem_reward, r, rng)
+    CollectGems(w, agent_start_pos, Agent(dir=agent_start_dir), num_gem_init, num_gem_current, gem_reward, reward, rng)
 end
 
 function (w::CollectGems)(::MoveForward)
