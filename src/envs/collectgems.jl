@@ -1,6 +1,6 @@
 export CollectGems
 
-mutable struct CollectGems <: AbstractGridWorld
+mutable struct CollectGems{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty,Wall,Gem}}
     agent_pos::CartesianIndex{2}
     agent::Agent
@@ -8,36 +8,28 @@ mutable struct CollectGems <: AbstractGridWorld
     num_gem_current::Int
     gem_reward::Float64
     reward::Float64
+    rng::R
 end
 
 function CollectGems(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RIGHT, rng=Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, GEM)
     w = GridWorldBase(objects, n, n)
 
-    w[EMPTY, 2:n-1, 2:n-1] .= true
     w[WALL, [1,n], 1:n] .= true
     w[WALL, 1:n, [1,n]] .= true
 
-    w[GEM, 1:n, 1:n] .= false
     num_gem_init = n - 1
     num_gem_current = num_gem_init
 
-    gem_placed = 0
-    while gem_placed < num_gem_init
-        gem_pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 2:n-1))
-        if (gem_pos == agent_start_pos) || (w[GEM, gem_pos] == true)
-            continue
-        else
-            w[GEM, gem_pos] = true
-            w[EMPTY, gem_pos] = false
-            gem_placed = gem_placed + 1
-        end
-    end
-
     gem_reward = 1.0
-    r = 0.0
+    reward = 0.0
 
-    CollectGems(w, agent_start_pos, Agent(dir=agent_start_dir), num_gem_init, num_gem_current, gem_reward, r)
+    env = CollectGems(w, agent_start_pos, Agent(dir=agent_start_dir), num_gem_init, num_gem_current, gem_reward, reward, rng)
+
+    reset!(env)
+
+    return env
+
 end
 
 function (w::CollectGems)(::MoveForward)
@@ -66,3 +58,29 @@ end
 RLBase.get_terminal(w::CollectGems) = w.num_gem_current <= 0
 
 RLBase.get_reward(w::CollectGems) = w.reward
+
+function RLBase.reset!(w::CollectGems)
+
+    n = size(w.world)[end]
+    w.world[EMPTY, 2:n-1, 2:n-1] .= true
+    w.world[GEM, 1:n, 1:n] .= false
+    w.num_gem_current = w.num_gem_init
+
+    w.reward = 0.0
+    w.agent_pos = CartesianIndex(2, 2)
+    w.agent.dir = RIGHT
+
+    gem_placed = 0
+    while gem_placed < w.num_gem_init
+        gem_pos = CartesianIndex(rand(w.rng, 2:n-1), rand(w.rng, 2:n-1))
+        if (gem_pos == w.agent_pos) || (w.world[GEM, gem_pos] == true)
+            continue
+        else
+            w.world[GEM, gem_pos] = true
+            w.world[EMPTY, gem_pos] = false
+            gem_placed = gem_placed + 1
+        end
+    end
+
+    return w
+end
