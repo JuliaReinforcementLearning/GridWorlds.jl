@@ -1,6 +1,6 @@
 export CollectGems
 
-mutable struct CollectGems <: AbstractGridWorld
+mutable struct CollectGems{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty,Wall,Gem}}
     agent_pos::CartesianIndex{2}
     agent::Agent
@@ -8,7 +8,7 @@ mutable struct CollectGems <: AbstractGridWorld
     num_gem_current::Int
     gem_reward::Float64
     reward::Float64
-    rng
+    rng::R
 end
 
 function CollectGems(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RIGHT, rng=Random.GLOBAL_RNG)
