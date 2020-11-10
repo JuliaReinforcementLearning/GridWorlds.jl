@@ -11,14 +11,18 @@ end
 function EmptyGridWorld(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RIGHT)
     objects = (EMPTY, WALL, GOAL)
     w = GridWorldBase(objects, n, n)
-    w[EMPTY, 2:n-1, 2:n-1] .= true
+
     w[WALL, [1,n], 1:n] .= true
     w[WALL, 1:n, [1,n]] .= true
-    w[GOAL, n-1, n-1] = true
-    w[EMPTY, n-1, n-1] = false
     goal_reward = 1.0
     reward = 0.0
-    EmptyGridWorld(w, agent_start_pos, Agent(dir=agent_start_dir), goal_reward, reward)
+
+    env = EmptyGridWorld(w, agent_start_pos, Agent(dir=agent_start_dir), goal_reward, reward)
+
+    reset!(env, agent_pos = agent_start_pos, agent_dir = agent_start_dir)
+
+    return env
+
 end
 
 function (w::EmptyGridWorld)(::MoveForward)
@@ -49,5 +53,10 @@ function RLBase.reset!(w::EmptyGridWorld; agent_pos = CartesianIndex(2, 2), agen
     w.reward = 0.0
     w.agent_pos = agent_pos
     w.agent.dir = agent_dir
+
+    w[EMPTY, 2:n-1, 2:n-1] .= true
+    w[GOAL, n-1, n-1] = true
+    w[EMPTY, n-1, n-1] = false
+
     return w
 end
