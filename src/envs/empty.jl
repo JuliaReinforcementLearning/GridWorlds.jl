@@ -45,9 +45,9 @@ RLBase.get_terminal(w::EmptyGridWorld) = w.world[GOAL, w.agent_pos]
 
 RLBase.get_reward(w::EmptyGridWorld) = w.reward
 
-function RLBase.reset!(w::EmptyGridWorld)
+function RLBase.reset!(w::EmptyGridWorld; agent_pos = CartesianIndex(2, 2), agent_dir = RIGHT)
     w.reward = 0.0
-    w.agent_pos = CartesianIndex(2, 2)
-    w.agent.dir = RIGHT
+    w.agent_pos = agent_pos
+    w.agent.dir = agent_dir
     return w
 end
