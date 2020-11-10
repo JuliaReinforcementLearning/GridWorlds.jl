@@ -19,7 +19,7 @@ function EmptyGridWorld(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_d
 
     env = EmptyGridWorld(w, agent_start_pos, Agent(dir=agent_start_dir), goal_reward, reward)
 
-    reset!(env, agent_pos = agent_start_pos, agent_dir = agent_start_dir, goal_pos = goal_pos)
+    reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir, goal_pos = goal_pos)
 
     return env
 
@@ -49,12 +49,12 @@ RLBase.get_terminal(w::EmptyGridWorld) = w.world[GOAL, w.agent_pos]
 
 RLBase.get_reward(w::EmptyGridWorld) = w.reward
 
-function RLBase.reset!(w::EmptyGridWorld; agent_pos = CartesianIndex(2, 2), agent_dir = RIGHT, goal_pos = CartesianIndex(size(w.world)[end] - 1, size(w.world)[end] - 1))
+function RLBase.reset!(w::EmptyGridWorld; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(w.world)[end] - 1, size(w.world)[end] - 1))
     n = size(w.world)[end]
 
     w.reward = 0.0
-    w.agent_pos = agent_pos
-    w.agent.dir = agent_dir
+    w.agent_pos = agent_start_pos
+    w.agent.dir = agent_start_dir
 
     w.world[EMPTY, 2:n-1, 2:n-1] .= true
     w.world[GOAL, goal_pos] = true
