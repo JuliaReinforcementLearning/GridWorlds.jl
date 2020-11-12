@@ -31,37 +31,28 @@ using Makie
 play(w;file_name="example.gif",frame_rate=5)
 ```
 
-## TODO
+## List of Environments
 
-### Environment list
-
-- [x] EmptyGridWorld
+#### EmptyGridWorld
 
 <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/EmptyGridWorld.gif" width="300px">
 
-- [x] FourRooms
+#### FourRooms
 
 <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/FourRooms.gif" width="300px">
 
-- [x] GoToDoor
+#### GoToDoor
 
 <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/GoToDoor.gif" width="300px">
 
-- [x] DoorKey
+#### DoorKey
 
 <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/DoorKey.gif" width="300px">
 
-- [x] CollectGems
+#### CollectGems
 
 <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/CollectGems.gif" width="300px">
 
-- [x] DynamicObstacles
+#### DynamicObstacles
 
 <img src="docs/src/assets/img/DynamicObstacles.gif" width="300px">
-
-### Needs improvement
-
-- [ ] Add test cases
-- [ ] Benchmark (ensure our implementations do not have significant performance issues)
-- [ ] A wrapper for ReinforcementLearningBase.jl
-- [x] Gif/Video writer
