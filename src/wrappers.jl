@@ -1,5 +1,7 @@
 export StochasticEnv
 
+using Random
+
 #####
 # StochasticEnv
 #####
@@ -18,6 +20,6 @@ function (env::StochasticEnv)(args...; kwargs...)
     env.env(args...; kwargs...)
 end
 
-for f in vcat(ENV_API, MULTI_AGENT_ENV_API)
-    @eval $f(x::StochasticEnv, args...; kwargs...) = $f(x.env, args...; kwargs...)
+for f in vcat(RLBase.ENV_API, RLBase.MULTI_AGENT_ENV_API)
+    @eval RLBase.$f(x::StochasticEnv, args...; kwargs...) = RLBase.$f(x.env, args...; kwargs...)
 end
