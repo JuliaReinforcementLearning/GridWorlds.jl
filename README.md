@@ -33,26 +33,26 @@ play(w;file_name="example.gif",frame_rate=5)
 
 ## List of Environments
 
-#### EmptyGridWorld
+1. ### EmptyGridWorld
 
-<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/EmptyGridWorld.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/EmptyGridWorld.gif" width="300px">
 
-#### FourRooms
+1. ### FourRooms
 
-<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/FourRooms.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/FourRooms.gif" width="300px">
 
-#### GoToDoor
+1. ### GoToDoor
 
-<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/GoToDoor.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/GoToDoor.gif" width="300px">
 
-#### DoorKey
+1. ### DoorKey
 
-<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/DoorKey.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/DoorKey.gif" width="300px">
 
-#### CollectGems
+1. ### CollectGems
 
-<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/CollectGems.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/CollectGems.gif" width="300px">
 
-#### DynamicObstacles
+1. ### DynamicObstacles
 
-<img src="docs/src/assets/img/DynamicObstacles.gif" width="300px">
+    <img src="docs/src/assets/img/DynamicObstacles.gif" width="300px">
