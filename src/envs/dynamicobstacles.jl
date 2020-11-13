@@ -11,7 +11,7 @@ mutable struct DynamicObstacles <: AbstractGridWorld
     rng::AbstractRNG
 end
 
-function DynamicObstacles(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RIGHT, num_obstacle=nothing, rng=Random.GLOBAL_RNG)
+function DynamicObstacles(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RIGHT, num_obstacle=n-3, rng=Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, OBSTACLE, GOAL)
     w = GridWorldBase(objects, n, n)
 
