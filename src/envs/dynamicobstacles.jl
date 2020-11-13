@@ -11,35 +11,20 @@ mutable struct DynamicObstacles <: AbstractGridWorld
     rng::AbstractRNG
 end
 
-function DynamicObstacles(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RIGHT, num_obstacle=n-3, rng=Random.GLOBAL_RNG)
+function DynamicObstacles(;n = 8, agent_start_pos = CartesianIndex(2,2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(n-1, n-1), num_obstacle = n-3, rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, OBSTACLE, GOAL)
     w = GridWorldBase(objects, n, n)
 
-    w[EMPTY, 2:n-1, 2:n-1] .= true
     w[WALL, [1,n], 1:n] .= true
     w[WALL, 1:n, [1,n]] .= true
-    w[GOAL, n-1, n-1] = true
-    w[EMPTY, n-1, n-1] = false
 
     obs_pos_array = Array{CartesianIndex{2},1}(undef,num_obstacle)
-    
-    obstacles_placed = 0
-    while obstacles_placed < num_obstacle
-        obs_pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 2:n-1))
-        if (obs_pos == agent_start_pos) || (w[OBSTACLE, obs_pos] == true) || (obs_pos == CartesianIndex(n-1,n-1))
-            continue
-        else
-            
-            w[OBSTACLE, obs_pos] = true
-            w[EMPTY, obs_pos] = false
-            obstacles_placed = obstacles_placed + 1
-            obs_pos_array[obstacles_placed] = obs_pos
-            
-        end
-    end
 
+    env = DynamicObstacles(w, agent_start_pos, Agent(dir=agent_start_dir), num_obstacle, obs_pos_array, n, rng)
 
-    DynamicObstacles(w, agent_start_pos, Agent(dir=agent_start_dir), num_obstacle, obs_pos_array, n, rng)
+    reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir, goal_pos = goal_pos)
+
+    return env
 end
 
 function (w::DynamicObstacles)(::MoveForward)
@@ -89,9 +74,25 @@ function (w::DynamicObstacles)(::MoveForward)
     w
 end
 
+function RLBase.reset!(w::DynamicObstacles; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(w.world)[end] - 1, size(w.world)[end] - 1))
+    n = size(w.world)[end]
+    w.world[EMPTY, 2:n-1, 2:n-1] .= true
+    w.world[GOAL, n-1, n-1] = true
+    w.world[EMPTY, n-1, n-1] = false
 
+    obs_pos_array = Array{CartesianIndex{2},1}(undef,w.num_obstacle)
 
-
-
-
-
+    obstacles_placed = 0
+    while obstacles_placed < w.num_obstacle
+        obs_pos = CartesianIndex(rand(w.rng, 2:n-1), rand(w.rng, 2:n-1))
+        if (obs_pos == agent_start_pos) || (w.world[OBSTACLE, obs_pos] == true) || (obs_pos == CartesianIndex(n-1,n-1))
+            continue
+        else
+            w.world[OBSTACLE, obs_pos] = true
+            w.world[EMPTY, obs_pos] = false
+            obstacles_placed = obstacles_placed + 1
+            obs_pos_array[obstacles_placed] = obs_pos
+        end
+    end
+    return w
+end
