@@ -1,13 +1,13 @@
 export DynamicObstacles
 using Random
 
-mutable struct DynamicObstacles <: AbstractGridWorld
+mutable struct DynamicObstacles{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty,Wall,Obstacle,Goal}}
     agent_pos::CartesianIndex{2}
     agent::Agent
     num_obstacle::Int
     obs_pos_array::Array{CartesianIndex{2},1}
-    rng::AbstractRNG
+    rng::R
 end
 
 function DynamicObstacles(;n = 8, agent_start_pos = CartesianIndex(2,2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(n-1, n-1), num_obstacle = n-3, rng = Random.GLOBAL_RNG)
