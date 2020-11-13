@@ -21,12 +21,6 @@ function DynamicObstacles(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start
     w[GOAL, n-1, n-1] = true
     w[EMPTY, n-1, n-1] = false
 
-    #w[OBSTACLE,1:n,1:n] .= false
-    #num obstacles is n-3 only for n=5 or n=6, it need not be a function of n otherwise
-    if num_obstacle === nothing
-        num_obstacle = n-3
-    end
-
     obs_pos_array = Array{CartesianIndex{2},1}(undef,num_obstacle)
     
     obstacles_placed = 0
