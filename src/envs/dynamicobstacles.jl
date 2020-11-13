@@ -7,7 +7,6 @@ mutable struct DynamicObstacles <: AbstractGridWorld
     agent::Agent
     num_obstacle::Int
     obs_pos_array::Array{CartesianIndex{2},1}
-    n::Int
     rng::AbstractRNG
 end
 
@@ -20,7 +19,7 @@ function DynamicObstacles(;n = 8, agent_start_pos = CartesianIndex(2,2), agent_s
 
     obs_pos_array = Array{CartesianIndex{2},1}(undef,num_obstacle)
 
-    env = DynamicObstacles(w, agent_start_pos, Agent(dir=agent_start_dir), num_obstacle, obs_pos_array, n, rng)
+    env = DynamicObstacles(w, agent_start_pos, Agent(dir=agent_start_dir), num_obstacle, obs_pos_array, rng)
 
     reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir, goal_pos = goal_pos)
 
