@@ -26,11 +26,11 @@ function GoToDoor(;n=8, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_R
     target_reward = 1.0
     penalty = -1.0
 
-    door_pos = [(rand(rng, 2:n-1),1), (rand(rng, 2:n-1),n), (1,rand(rng, 2:n-1)), (n,rand(rng, 2:n-1))]
-    door_colors = COLORS[randperm(rng, length(COLORS))][1:length(door_pos)]
-    for (c, p) in zip(door_colors, door_pos)
-        world[Door(c), p...] = true
-        world[WALL, p...] = false
+    door_pos = [CartesianIndex(rand(rng, 2:n-1),1), CartesianIndex(rand(rng, 2:n-1),n), CartesianIndex(1,rand(rng, 2:n-1)), CartesianIndex(n,rand(rng, 2:n-1))]
+    rp = randperm(rng, length(door_pos))
+    for (door, pos) in zip(doors, door_pos[rp])
+        world[door, pos] = true
+        world[WALL, pos] = false
     end
 
     GoToDoor(world, agent_start_pos, Agent(dir=RIGHT), target, target_reward, penalty)
