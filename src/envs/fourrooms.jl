@@ -12,13 +12,11 @@ function FourRooms(;n=9, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RI
     objects = (EMPTY, WALL, GOAL)
     world = GridWorldBase(objects, n, n)
 
-    world[EMPTY, 2:n-1, 2:n-1] .= true
     world[WALL, [1,n], 1:n] .= true
     world[WALL, 1:n, [1,n]] .= true
     world[WALL, ceil(Int,n/2), vcat(2:ceil(Int,n/4)-1,ceil(Int,n/4)+1:ceil(Int,n/2)-1,ceil(Int,n/2):ceil(Int,3*n/4)-1,ceil(Int,3*n/4)+1:n)] .= true
-    world[EMPTY, ceil(Int,n/2), vcat(2:ceil(Int,n/4)-1,ceil(Int,n/4)+1:ceil(Int,n/2)-1,ceil(Int,n/2):ceil(Int,3*n/4)-1,ceil(Int,3*n/4)+1:n)] .= false
     world[WALL, vcat(2:ceil(Int,n/4)-1,ceil(Int,n/4)+1:ceil(Int,n/2)-1,ceil(Int,n/2):ceil(Int,3*n/4)-1,ceil(Int,3*n/4)+1:n), ceil(Int,n/2)] .= true
-    world[EMPTY, vcat(2:ceil(Int,n/4)-1,ceil(Int,n/4)+1:ceil(Int,n/2)-1,ceil(Int,n/2):ceil(Int,3*n/4)-1,ceil(Int,3*n/4)+1:n), ceil(Int,n/2)] .= false
+    world[EMPTY, :, :] .= .!world[WALL, :, :]
     world[GOAL, goal_pos] = true
     world[EMPTY, goal_pos] = false
 
