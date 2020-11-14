@@ -14,6 +14,7 @@ function EmptyGridWorld(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_d
 
     w[WALL, [1,n], 1:n] .= true
     w[WALL, 1:n, [1,n]] .= true
+
     goal_reward = 1.0
     reward = 0.0
 
