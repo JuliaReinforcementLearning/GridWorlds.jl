@@ -2,13 +2,14 @@ export GoToDoor
 
 using Random
 
-mutable struct GoToDoor{W<:GridWorldBase} <: AbstractGridWorld
+mutable struct GoToDoor{W<:GridWorldBase, R} <: AbstractGridWorld
     world::W
     agent_pos::CartesianIndex{2}
     agent::Agent
     target::Door
     target_reward::Float64
     penalty::Float64
+    rng::R
 end
 
 function GoToDoor(;n=8, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_RNG)
@@ -33,7 +34,7 @@ function GoToDoor(;n=8, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_R
         world[WALL, pos] = false
     end
 
-    GoToDoor(world, agent_start_pos, Agent(dir=RIGHT), target, target_reward, penalty)
+    GoToDoor(world, agent_start_pos, Agent(dir=RIGHT), target, target_reward, penalty, rng)
 end
 
 function (w::GoToDoor)(::MoveForward)
