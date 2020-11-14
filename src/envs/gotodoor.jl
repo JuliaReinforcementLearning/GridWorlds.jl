@@ -38,10 +38,12 @@ function (w::GoToDoor)(::MoveForward)
     dest = dir(w.agent_pos)
     if dest ∈ CartesianIndices((size(w.world, 2), size(w.world, 3))) && !w.world[WALL,dest]
         w.agent_pos = dest
-        if w.world[w.target, w.agent_pos]
-            w.reward = w.target_reward
-        elseif any([w.world[x, w.agent_pos] for x in w.world.objects[end-3:end] if x != w.target])
-            w.reward = w.penalty
+        if get_terminal(w)
+            if w.world[w.target, w.agent_pos]
+                w.reward = w.target_reward
+            else
+                w.reward = w.penalty
+            end
         end
     end
     w
@@ -54,7 +56,11 @@ function (w::GoToDoor)(action::Union{TurnRight, TurnLeft})
     w
 end
 
+RLBase.get_state(w::GoToDoor) = (get_agent_view(w), w.target)
+
 RLBase.get_reward(w::GoToDoor) = w.reward
+
+RLBase.get_terminal(w::GoToDoor) = any([w.world[x, w.agent_pos] for x in w.world.objects[end-3:end]])
 
 function RLBase.reset!(w::GoToDoor)
     n = size(w.world)[end]
