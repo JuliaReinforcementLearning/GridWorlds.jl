@@ -9,27 +9,27 @@ mutable struct DoorKey{W<:GridWorldBase} <: AbstractGridWorld
 end
 
 function DoorKey(;n=8, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_RNG)
-    objects = (EMPTY, WALL, GOAL, Door(:yellow), Key(:yellow))
+    door = Door(:yellow)
+    key = Key(:yellow)
+    objects = (EMPTY, WALL, GOAL, door, key)
     world = GridWorldBase(objects, n, n)
-    world[EMPTY, 2:n-1, 2:n-1] .= true
+
     world[WALL, [1,n], 1:n] .= true
     world[WALL, 1:n, [1,n]] .= true
-    world[EMPTY, n-1, n-1] = false
     world[GOAL, n-1, n-1] = true
 
-    split_idx = rand(3:n-2)
-    world[WALL, 1:n, split_idx] .= true
-    world[EMPTY, 1:n, split_idx] .= false
-    door_idx = rand(2:n-1)
-    world[Door(:yellow), door_idx, split_idx] = true
-    world[WALL, door_idx, split_idx] = false
+    door_pos = CartesianIndex(rand(rng, 2:n-1), (n + 1) ÷ 2)
+    world[WALL, :, door_pos[2]] .= true
+    world[door, door_pos] = true
+    world[WALL, door_pos] = false
 
-    key_pos = CartesianIndex(rand(2:n-2), rand(2:split_idx-1))
-    if key_pos == CartesianIndex(2,2)
-        key_pos = CartesianIndex(3,2)
+    key_pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 2:door_pos[2]-1))
+    while key_pos == agent_start_pos
+        key_pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 2:door_pos[2]-1))
     end
-    world[EMPTY, key_pos] = false
-    world[Key(:yellow), key_pos] = true
+    world[key, key_pos] = true
+
+    world[EMPTY, :, :] .= .!(.|([world[x, :, :] for x in [WALL, GOAL, door, key]]...))
 
     DoorKey(world, agent_start_pos, Agent(;dir=RIGHT))
 end
