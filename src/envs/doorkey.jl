@@ -29,7 +29,7 @@ function DoorKey(;n=8, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_RN
     end
     world[key, key_pos] = true
 
-    world[EMPTY, :, :] .= .!(.|([world[x, :, :] for x in [WALL, GOAL, door, key]]...))
+    world[EMPTY, :, :] .= .!(.|((world[x, :, :] for x in [WALL, GOAL, door, key])...))
 
     DoorKey(world, agent_start_pos, Agent(;dir=RIGHT))
 end
