@@ -8,7 +8,7 @@ mutable struct DoorKey{W<:GridWorldBase} <: AbstractGridWorld
     agent::Agent
 end
 
-function DoorKey(;n=8, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_RNG)
+function DoorKey(;n=7, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_RNG)
     door = Door(:yellow)
     key = Key(:yellow)
     objects = (EMPTY, WALL, GOAL, door, key)
