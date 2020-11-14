@@ -2,10 +2,11 @@ export DoorKey
 
 using Random
 
-mutable struct DoorKey{W<:GridWorldBase} <: AbstractGridWorld
+mutable struct DoorKey{W<:GridWorldBase, R} <: AbstractGridWorld
     world::W
     agent_pos::CartesianIndex{2}
     agent::Agent
+    rng::R
 end
 
 function DoorKey(;n=7, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_RNG)
@@ -31,7 +32,7 @@ function DoorKey(;n=7, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_RN
 
     world[EMPTY, :, :] .= .!(.|((world[x, :, :] for x in [WALL, GOAL, door, key])...))
 
-    DoorKey(world, agent_start_pos, Agent(;dir=RIGHT))
+    DoorKey(world, agent_start_pos, Agent(;dir=RIGHT), rng)
 end
 
 function (w::DoorKey)(::MoveForward)
