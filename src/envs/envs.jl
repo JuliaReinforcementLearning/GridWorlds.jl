@@ -1,4 +1,4 @@
-include("empty.jl")
+include("emptygridworld.jl")
 include("fourrooms.jl")
 include("gotodoor.jl")
 include("doorkey.jl")
