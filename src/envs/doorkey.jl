@@ -11,7 +11,7 @@ mutable struct DoorKey{W<:GridWorldBase, R} <: AbstractGridWorld
     rng::R
 end
 
-function DoorKey(;n=7, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_RNG)
+function DoorKey(;n = 7, agent_start_pos = CartesianIndex(2,2), agent_start_dir = RIGHT, rng = Random.GLOBAL_RNG)
     door = Door(:yellow)
     key = Key(:yellow)
     objects = (EMPTY, WALL, GOAL, door, key)
@@ -21,23 +21,14 @@ function DoorKey(;n=7, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_RN
     world[WALL, 1:n, [1,n]] .= true
     world[GOAL, n-1, n-1] = true
 
-    door_pos = CartesianIndex(rand(rng, 2:n-1), (n + 1) ÷ 2)
-    world[WALL, :, door_pos[2]] .= true
-    world[door, door_pos] = true
-    world[WALL, door_pos] = false
-
-    key_pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 2:door_pos[2]-1))
-    while key_pos == agent_start_pos
-        key_pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 2:door_pos[2]-1))
-    end
-    world[key, key_pos] = true
-
-    world[EMPTY, :, :] .= .!(.|((world[x, :, :] for x in [WALL, GOAL, door, key])...))
-
     goal_reward = 1.0
     reward = 0.0
 
-    DoorKey(world, agent_start_pos, Agent(;dir=RIGHT), goal_reward, reward, rng)
+    env = DoorKey(world, agent_start_pos, Agent(;dir = agent_start_dir), goal_reward, reward, rng)
+
+    reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir)
+
+    return env
 end
 
 function (w::DoorKey)(::MoveForward)
@@ -73,3 +64,26 @@ function (w::DoorKey)(action::Union{TurnRight, TurnLeft})
 end
 
 RLBase.get_reward(w::DoorKey) = w.reward
+
+function RLBase.reset!(w::DoorKey; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT)
+    n = size(w.world)[end]
+    door = w.world.objects[end - 1]
+    key = w.world.objects[end]
+    w.reward = 0.0
+    w.agent_pos = agent_start_pos
+    agent = get_agent(w)
+    set_dir!(agent, agent_start_dir)
+
+    door_pos = CartesianIndex(rand(w.rng, 2:n-1), (n + 1) ÷ 2)
+    w.world[WALL, :, door_pos[2]] .= true
+    w.world[door, door_pos] = true
+    w.world[WALL, door_pos] = false
+
+    key_pos = CartesianIndex(rand(w.rng, 2:n-1), rand(w.rng, 2:door_pos[2]-1))
+    while key_pos == agent_start_pos
+        key_pos = CartesianIndex(rand(w.rng, 2:n-1), rand(w.rng, 2:door_pos[2]-1))
+    end
+    w.world[key, key_pos] = true
+
+    w.world[EMPTY, :, :] .= .!(.|((w.world[x, :, :] for x in [WALL, GOAL, door, key])...))
+end
