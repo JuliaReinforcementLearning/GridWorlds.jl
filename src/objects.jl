@@ -88,6 +88,8 @@ istransportable(x::AbstractObject) = istransportable(typeof(x))
 
 (x::Pickup)(a::Agent, o) = x(istransportable(o), a, o)
 
+(::Pickup)(::Nontransportable, a::Agent, o::AbstractObject) = false
+
 function (::Pickup)(::Transportable, a::Agent, o::AbstractObject) 
     if isnothing(a.inventory)
         a.inventory = o
