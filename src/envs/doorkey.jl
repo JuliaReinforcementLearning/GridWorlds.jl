@@ -19,7 +19,7 @@ function DoorKey(;n = 7, agent_start_pos = CartesianIndex(2,2), agent_start_dir 
 
     world[WALL, [1,n], 1:n] .= true
     world[WALL, 1:n, [1,n]] .= true
-    world[GOAL, n-1, n-1] = true
+    world[GOAL, goal_pos] = true
 
     goal_reward = 1.0
     reward = 0.0
