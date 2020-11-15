@@ -48,7 +48,7 @@ function (w::DoorKey)(::MoveForward)
         nothing
     elseif w.world[door, dest] && w.agent.inventory === key
         w.agent_pos = dest
-    elseif dest ∈ CartesianIndices((size(w.world, 2), size(w.world, 3))) && !w.world[WALL,dest]
+    elseif !w.world[WALL,dest]
         w.agent_pos = dest
         if w.world[GOAL, w.agent_pos]
             w.reward = w.goal_reward
