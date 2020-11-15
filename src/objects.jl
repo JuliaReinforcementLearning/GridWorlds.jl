@@ -80,6 +80,8 @@ struct Transportable end
 struct Nontransportable end
 const TRANSPORTABLE = Transportable()
 const NONTRANSPORTABLE = Nontransportable()
+
+istransportable(::Type{<:AbstractObject}) = NONTRANSPORTABLE
 istransportable(::Type{<:Key}) = TRANSPORTABLE
 istransportable(::Type{Gem}) = TRANSPORTABLE
 istransportable(x::AbstractObject) = istransportable(typeof(x))
