@@ -4,7 +4,7 @@ using Random
 using ReinforcementLearningBase
 
 ENVS = [EmptyGridWorld, FourRooms, GoToDoor, DoorKey, CollectGems, DynamicObstacles]
-ENVS_RLBASE = [EmptyGridWorld, GoToDoor, CollectGems]
+ENVS_RLBASE = [EmptyGridWorld, FourRooms, GoToDoor, CollectGems]
 ACTIONS = [TURN_LEFT, TURN_RIGHT, MOVE_FORWARD]
 
 @testset "GridWorlds.jl" begin
@@ -54,7 +54,7 @@ ACTIONS = [TURN_LEFT, TURN_RIGHT, MOVE_FORWARD]
 
             if env == CollectGems
                 @test total_reward == w.num_gem_init * w.gem_reward
-            elseif env == EmptyGridWorld
+            elseif env == EmptyGridWorld || env == FourRooms
                 @test total_reward == w.goal_reward
             elseif env == GoToDoor
                 @test (total_reward == w.target_reward || total_reward == w.penalty)

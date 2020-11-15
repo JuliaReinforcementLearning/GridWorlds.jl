@@ -8,21 +8,26 @@ mutable struct FourRooms <: AbstractGridWorld
     reward::Float64
 end
 
-function FourRooms(;n=9, agent_start_pos=CartesianIndex(2,2))
+function FourRooms(;n=9, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RIGHT, goal_pos=CartesianIndex(n-1, n-1))
     objects = (EMPTY, WALL, GOAL)
-    world = GridWorldBase(objects, n,n)
-    world[EMPTY, 2:n-1, 2:n-1] .= true
+    world = GridWorldBase(objects, n, n)
+
     world[WALL, [1,n], 1:n] .= true
     world[WALL, 1:n, [1,n]] .= true
     world[WALL, ceil(Int,n/2), vcat(2:ceil(Int,n/4)-1,ceil(Int,n/4)+1:ceil(Int,n/2)-1,ceil(Int,n/2):ceil(Int,3*n/4)-1,ceil(Int,3*n/4)+1:n)] .= true
-    world[EMPTY, ceil(Int,n/2), vcat(2:ceil(Int,n/4)-1,ceil(Int,n/4)+1:ceil(Int,n/2)-1,ceil(Int,n/2):ceil(Int,3*n/4)-1,ceil(Int,3*n/4)+1:n)] .= false
     world[WALL, vcat(2:ceil(Int,n/4)-1,ceil(Int,n/4)+1:ceil(Int,n/2)-1,ceil(Int,n/2):ceil(Int,3*n/4)-1,ceil(Int,3*n/4)+1:n), ceil(Int,n/2)] .= true
-    world[EMPTY, vcat(2:ceil(Int,n/4)-1,ceil(Int,n/4)+1:ceil(Int,n/2)-1,ceil(Int,n/2):ceil(Int,3*n/4)-1,ceil(Int,3*n/4)+1:n), ceil(Int,n/2)] .= false
-    world[GOAL, n-1, n-1] = true
-    world[EMPTY, n-1, n-1] = false
+    world[EMPTY, :, :] .= .!world[WALL, :, :]
+    world[GOAL, goal_pos] = true
+    world[EMPTY, goal_pos] = false
+
     goal_reward = 1.0
     reward = 0.0
-    FourRooms(world,agent_start_pos,Agent(dir=RIGHT), goal_reward, reward)
+
+    env = FourRooms(world,agent_start_pos,Agent(dir=RIGHT), goal_reward, reward)
+
+    reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir, goal_pos = goal_pos)
+
+    return env
 end
 
 function (w::FourRooms)(::MoveForward)
@@ -49,9 +54,16 @@ RLBase.get_terminal(w::FourRooms) = w.world[GOAL, w.agent_pos]
 
 RLBase.get_reward(w::FourRooms) = w.reward
 
-function RLBase.reset!(w::FourRooms)
+function RLBase.reset!(w::FourRooms; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(w.world[end]) - 1, size(w.world)[end] - 1))
+    n = size(w.world)[end]
     w.reward = 0.0
-    w.agent_pos = CartesianIndex(2, 2)
-    w.agent.dir = RIGHT
+    w.agent_pos = agent_start_pos
+    agent = get_agent(w)
+    set_dir!(agent, agent_start_dir)
+
+    w.world[GOAL, :, :] .= false
+    w.world[GOAL, goal_pos] = true
+    w.world[EMPTY, :, :] .= .!w.world[WALL, :, :]
+    w.world[EMPTY, goal_pos] = false
     return w
 end

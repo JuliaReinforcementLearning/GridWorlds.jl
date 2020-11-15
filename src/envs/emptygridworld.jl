@@ -8,17 +8,22 @@ mutable struct EmptyGridWorld <: AbstractGridWorld
     reward::Float64
 end
 
-function EmptyGridWorld(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RIGHT)
+function EmptyGridWorld(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RIGHT, goal_pos = CartesianIndex(n-1, n-1))
     objects = (EMPTY, WALL, GOAL)
     w = GridWorldBase(objects, n, n)
-    w[EMPTY, 2:n-1, 2:n-1] .= true
+
     w[WALL, [1,n], 1:n] .= true
     w[WALL, 1:n, [1,n]] .= true
-    w[GOAL, n-1, n-1] = true
-    w[EMPTY, n-1, n-1] = false
+
     goal_reward = 1.0
     reward = 0.0
-    EmptyGridWorld(w, agent_start_pos, Agent(dir=agent_start_dir), goal_reward, reward)
+
+    env = EmptyGridWorld(w, agent_start_pos, Agent(dir=agent_start_dir), goal_reward, reward)
+
+    reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir, goal_pos = goal_pos)
+
+    return env
+
 end
 
 function (w::EmptyGridWorld)(::MoveForward)
@@ -45,9 +50,16 @@ RLBase.get_terminal(w::EmptyGridWorld) = w.world[GOAL, w.agent_pos]
 
 RLBase.get_reward(w::EmptyGridWorld) = w.reward
 
-function RLBase.reset!(w::EmptyGridWorld)
+function RLBase.reset!(w::EmptyGridWorld; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(w.world)[end] - 1, size(w.world)[end] - 1))
+
     w.reward = 0.0
-    w.agent_pos = CartesianIndex(2, 2)
-    w.agent.dir = RIGHT
+    w.agent_pos = agent_start_pos
+    agent = get_agent(w)
+    set_dir!(agent, agent_start_dir)
+
+    w.world[EMPTY, :, :] .= .!w.world[WALL, :, :]
+    w.world[GOAL, goal_pos] = true
+    w.world[EMPTY, goal_pos] = false
+
     return w
 end
