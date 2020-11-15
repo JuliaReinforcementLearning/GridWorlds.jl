@@ -65,6 +65,8 @@ end
 
 RLBase.get_reward(w::DoorKey) = w.reward
 
+RLBase.get_terminal(w::DoorKey) = w.world[GOAL, w.agent_pos]
+
 function RLBase.reset!(w::DoorKey; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT)
     n = size(w.world)[end]
     door = w.world.objects[end - 1]
