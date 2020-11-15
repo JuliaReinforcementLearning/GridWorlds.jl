@@ -33,18 +33,20 @@ end
 
 function (w::DoorKey)(::MoveForward)
     w.reward = 0.0
+    door = w.world.objects[end - 1]
+    key = w.world.objects[end]
     dir = get_dir(w.agent)
     dest = dir(w.agent_pos)
 
-    if w.world[Key(:yellow), dest]
-        if PICK_UP(w.agent, Key(:yellow))
-            w.world[Key(:yellow), dest] = false
+    if w.world[key, dest]
+        if PICK_UP(w.agent, key)
+            w.world[key, dest] = false
             w.world[EMPTY, dest] = true
         end
         w.agent_pos = dest
-    elseif w.world[Door(:yellow), dest] && w.agent.inventory !== Key(:yellow)
+    elseif w.world[door, dest] && w.agent.inventory !== key
         nothing
-    elseif w.world[Door(:yellow), dest] && w.agent.inventory === Key(:yellow)
+    elseif w.world[door, dest] && w.agent.inventory === key
         w.agent_pos = dest
     elseif dest ∈ CartesianIndices((size(w.world, 2), size(w.world, 3))) && !w.world[WALL,dest]
         w.agent_pos = dest
