@@ -77,9 +77,9 @@ get_dir(a::Agent) = a.dir
 set_dir!(a::Agent, d) = a.dir = d
 
 struct Transportable end
-struct Nontransportable end
+struct NonTransportable end
 const TRANSPORTABLE = Transportable()
-const NONTRANSPORTABLE = Nontransportable()
+const NONTRANSPORTABLE = NonTransportable()
 
 istransportable(::Type{<:AbstractObject}) = NONTRANSPORTABLE
 istransportable(::Type{<:Key}) = TRANSPORTABLE
@@ -88,7 +88,7 @@ istransportable(x::AbstractObject) = istransportable(typeof(x))
 
 (x::Pickup)(a::Agent, o) = x(istransportable(o), a, o)
 
-(::Pickup)(::Nontransportable, a::Agent, o::AbstractObject) = false
+(::Pickup)(::NonTransportable, a::Agent, o::AbstractObject) = false
 
 function (::Pickup)(::Transportable, a::Agent, o::AbstractObject) 
     if isnothing(a.inventory)
