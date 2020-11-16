@@ -1,5 +1,5 @@
 export COLORS, MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, UP, DOWN, LEFT, RIGHT, LRUD, EMPTY, WALL, GOAL, GEM, OBSTACLE
-export MoveForward, AbstractObject, Empty, Wall, Goal, Door, key, Gem, Obstacle, Agent
+export MoveForward, AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Obstacle, Agent
 export get_color, get_dir, set_dir!
 
 using Crayons
@@ -77,14 +77,18 @@ get_dir(a::Agent) = a.dir
 set_dir!(a::Agent, d) = a.dir = d
 
 struct Transportable end
-struct Nontransportable end
+struct NonTransportable end
 const TRANSPORTABLE = Transportable()
-const NONTRANSPORTABLE = Nontransportable()
+const NONTRANSPORTABLE = NonTransportable()
+
+istransportable(::Type{<:AbstractObject}) = NONTRANSPORTABLE
 istransportable(::Type{<:Key}) = TRANSPORTABLE
 istransportable(::Type{Gem}) = TRANSPORTABLE
 istransportable(x::AbstractObject) = istransportable(typeof(x))
 
 (x::Pickup)(a::Agent, o) = x(istransportable(o), a, o)
+
+(::Pickup)(::NonTransportable, a::Agent, o::AbstractObject) = false
 
 function (::Pickup)(::Transportable, a::Agent, o::AbstractObject) 
     if isnothing(a.inventory)
