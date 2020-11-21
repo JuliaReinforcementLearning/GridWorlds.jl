@@ -23,7 +23,6 @@ function EmptyGridWorld(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_d
     reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir, goal_pos = goal_pos)
 
     return env
-
 end
 
 function (w::EmptyGridWorld)(::MoveForward)
@@ -39,16 +38,7 @@ function (w::EmptyGridWorld)(::MoveForward)
     w
 end
 
-function (w::EmptyGridWorld)(action::Union{TurnRight, TurnLeft})
-    w.reward = 0.0
-    agent = get_agent(w)
-    set_dir!(agent, action(get_dir(agent)))
-    w
-end
-
 RLBase.get_terminal(w::EmptyGridWorld) = w.world[GOAL, w.agent_pos]
-
-RLBase.get_reward(w::EmptyGridWorld) = w.reward
 
 function RLBase.reset!(w::EmptyGridWorld; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(w.world)[end] - 1, size(w.world)[end] - 1))
 

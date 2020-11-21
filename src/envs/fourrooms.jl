@@ -43,16 +43,7 @@ function (w::FourRooms)(::MoveForward)
     w
 end
 
-function (w::FourRooms)(action::Union{TurnRight, TurnLeft})
-    w.reward = 0.0
-    agent = get_agent(w)
-    set_dir!(agent, action(get_dir(agent)))
-    w
-end
-
 RLBase.get_terminal(w::FourRooms) = w.world[GOAL, w.agent_pos]
-
-RLBase.get_reward(w::FourRooms) = w.reward
 
 function RLBase.reset!(w::FourRooms; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(w.world[end]) - 1, size(w.world)[end] - 1))
     n = size(w.world)[end]
