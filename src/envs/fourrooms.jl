@@ -30,31 +30,31 @@ function FourRooms(;n=9, agent_start_pos=CartesianIndex(2,2), agent_start_dir=RI
     return env
 end
 
-function (w::FourRooms)(::MoveForward)
-    dir = get_dir(w.agent)
-    dest = dir(w.agent_pos)
-    w.reward = 0.0
-    if !w.world[WALL, dest]
-        w.agent_pos = dest
-        if w.world[GOAL, w.agent_pos]
-            w.reward = w.goal_reward
+function (env::FourRooms)(::MoveForward)
+    dir = get_dir(env.agent)
+    dest = dir(env.agent_pos)
+    env.reward = 0.0
+    if !env.world[WALL, dest]
+        env.agent_pos = dest
+        if env.world[GOAL, env.agent_pos]
+            env.reward = env.goal_reward
         end
     end
-    w
+    env
 end
 
-RLBase.get_terminal(w::FourRooms) = w.world[GOAL, w.agent_pos]
+RLBase.get_terminal(env::FourRooms) = env.world[GOAL, env.agent_pos]
 
-function RLBase.reset!(w::FourRooms; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(w.world[end]) - 1, size(w.world)[end] - 1))
-    n = size(w.world)[end]
-    w.reward = 0.0
-    w.agent_pos = agent_start_pos
-    agent = get_agent(w)
+function RLBase.reset!(env::FourRooms; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(env.world[end]) - 1, size(env.world)[end] - 1))
+    n = size(env.world)[end]
+    env.reward = 0.0
+    env.agent_pos = agent_start_pos
+    agent = get_agent(env)
     set_dir!(agent, agent_start_dir)
 
-    w.world[GOAL, :, :] .= false
-    w.world[GOAL, goal_pos] = true
-    w.world[EMPTY, :, :] .= .!w.world[WALL, :, :]
-    w.world[EMPTY, goal_pos] = false
-    return w
+    env.world[GOAL, :, :] .= false
+    env.world[GOAL, goal_pos] = true
+    env.world[EMPTY, :, :] .= .!env.world[WALL, :, :]
+    env.world[EMPTY, goal_pos] = false
+    return env
 end
