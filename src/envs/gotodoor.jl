@@ -49,16 +49,7 @@ function (w::GoToDoor)(::MoveForward)
     w
 end
 
-function (w::GoToDoor)(action::Union{TurnRight, TurnLeft})
-    w.reward = 0.0
-    agent = get_agent(w)
-    set_dir!(agent, action(get_dir(agent)))
-    w
-end
-
 RLBase.get_state(w::GoToDoor) = (get_agent_view(w), w.target)
-
-RLBase.get_reward(w::GoToDoor) = w.reward
 
 RLBase.get_terminal(w::GoToDoor) = any([w.world[x, w.agent_pos] for x in w.world.objects[end-3:end]])
 

@@ -81,8 +81,6 @@ end
 
 RLBase.get_terminal(w::DynamicObstacles) = iscollision(w) || w.world[GOAL, w.agent_pos]
 
-RLBase.get_reward(w::DynamicObstacles) = w.reward
-
 function RLBase.reset!(w::DynamicObstacles; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(w.world)[end] - 1, size(w.world)[end] - 1))
 
     n = size(w.world)[end]

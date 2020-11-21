@@ -48,16 +48,7 @@ function (w::CollectGems)(::MoveForward)
     w
 end
 
-function (w::CollectGems)(action::Union{TurnRight, TurnLeft})
-    w.reward = 0.0
-    agent = get_agent(w)
-    set_dir!(agent, action(get_dir(agent)))
-    w
-end
-
 RLBase.get_terminal(w::CollectGems) = w.num_gem_current <= 0
-
-RLBase.get_reward(w::CollectGems) = w.reward
 
 function RLBase.reset!(w::CollectGems; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT)
 

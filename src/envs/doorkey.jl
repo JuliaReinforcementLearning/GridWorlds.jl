@@ -58,15 +58,6 @@ function (w::DoorKey)(::MoveForward)
     w
 end
 
-function (w::DoorKey)(action::Union{TurnRight, TurnLeft})
-    w.reward = 0.0
-    agent = get_agent(w)
-    set_dir!(agent, action(get_dir(agent)))
-    w
-end
-
-RLBase.get_reward(w::DoorKey) = w.reward
-
 RLBase.get_terminal(w::DoorKey) = w.world[GOAL, w.agent_pos]
 
 function RLBase.reset!(w::DoorKey; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(w.world)[end] - 1, size(w.world)[end] - 1))
