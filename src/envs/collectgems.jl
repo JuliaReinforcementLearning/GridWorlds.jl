@@ -26,7 +26,7 @@ function CollectGems(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=
 
     env = CollectGems(w, agent_start_pos, Agent(dir=agent_start_dir), num_gem_init, num_gem_current, gem_reward, reward, rng)
 
-    reset!(env)
+    reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir)
 
     return env
 
@@ -59,7 +59,7 @@ RLBase.get_terminal(w::CollectGems) = w.num_gem_current <= 0
 
 RLBase.get_reward(w::CollectGems) = w.reward
 
-function RLBase.reset!(w::CollectGems)
+function RLBase.reset!(w::CollectGems; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT)
 
     n = size(w.world)[end]
     w.world[EMPTY, 2:n-1, 2:n-1] .= true
@@ -67,8 +67,9 @@ function RLBase.reset!(w::CollectGems)
     w.num_gem_current = w.num_gem_init
 
     w.reward = 0.0
-    w.agent_pos = CartesianIndex(2, 2)
-    w.agent.dir = RIGHT
+    w.agent_pos = agent_start_pos
+    agent = get_agent(w)
+    set_dir!(agent, agent_start_dir)
 
     gem_placed = 0
     while gem_placed < w.num_gem_init
