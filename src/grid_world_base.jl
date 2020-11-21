@@ -42,11 +42,11 @@ Base.getindex(w::GridWorldBase, o::AbstractObject, x::Colon, y::Colon) = getinde
 # utils
 #####
 
-switch!(world::GridWorldBase, x, src::CartesianIndex{2}, dest::CartesianIndex{2}) = world[x, src], world[x, dest] = world[x, dest], world[x, src]
+switch!(w::GridWorldBase, x, src::CartesianIndex{2}, dest::CartesianIndex{2}) = w[x, src], w[x, dest] = w[x, dest], w[x, src]
 
-function switch!(world::GridWorldBase, src::CartesianIndex{2}, dest::CartesianIndex{2})
-    for x in axes(world, 1)
-        switch!(world, x, src, dest)
+function switch!(w::GridWorldBase, src::CartesianIndex{2}, dest::CartesianIndex{2})
+    for x in axes(w, 1)
+        switch!(w, x, src, dest)
     end
 end
 
