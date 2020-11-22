@@ -1,5 +1,5 @@
 export Up, Down, Left, Right
-export UP, DOWN, LEFT, RIGHT, LRUD
+export UP, DOWN, LEFT, RIGHT, LRUD, DIRECTIONS
 
 #####
 # Directions
@@ -22,3 +22,4 @@ const RIGHT = Right()
 (x::Right)(p::CartesianIndex{2}) = p + CartesianIndex(0, 1)
 
 const LRUD = Union{Left, Right, Up, Down}
+const DIRECTIONS = [UP, DOWN, LEFT, RIGHT]
