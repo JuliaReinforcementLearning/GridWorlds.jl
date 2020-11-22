@@ -2,10 +2,14 @@ export MultiRoom, MultiRoomN2S4, MultiRoomN4S5, MultiRoomN6
 
 using Random
 
-mutable struct MultiRoom{W<:GridWorldBase} <: AbstractGridWorld
+mutable struct MultiRoom{W<:GridWorldBase, R} <: AbstractGridWorld
     world::W
     agent_pos::CartesianIndex{2}
     agent::Agent
+    goal_reward::Float64
+    reward::Float64
+    roomList::AbstractArray
+    rng::R
 end
 
 mutable struct Room
@@ -89,6 +93,7 @@ function MultiRoom(;n=25, minRooms=2, maxRooms=4, maxSize=10, rng=Random.GLOBAL_
 
     door_colors = COLORS[randperm(rng, length(COLORS))][1:length(roomList)-1]
     for (i, room) in enumerate(roomList)
+        sizeX, sizeY = Tuple(room.size)
         world[WALL, room.top[1]:room.top[1]+sizeX-1, [room.top[2],room.top[2]+sizeY-1]] .= true
         world[EMPTY, room.top[1]:room.top[1]+sizeX-1, [room.top[2],room.top[2]+sizeY-1]] .= false
         
@@ -102,21 +107,31 @@ function MultiRoom(;n=25, minRooms=2, maxRooms=4, maxSize=10, rng=Random.GLOBAL_
             roomList[i-1].exitDoor = room.entryDoor
         end
     end
-    froom, lroom = roomList[1], roomList[length(roomlist)]
+    froom, lroom = roomList[1], roomList[length(roomList)]
     agent_start_pos = froom.top + CartesianIndex(rand(rng, 2:froom.size[1]-2), rand(rng, 2:froom.size[2]-2))
+    agent_start_dir = rand(rng, DIRECTIONS)
     goal = lroom.top + CartesianIndex(rand(rng, 2:lroom.size[1]-2), rand(rng, 2:lroom.size[2]-2))
 
     world[EMPTY, goal] = false
     world[GOAL, goal] = true
 
-    MultiRoom(world, agent_start_pos, Agent(dir=RIGHT))
+    goal_reward = 1.0
+    reward = 0.0
+
+    env = MultiRoom(world, agent_start_pos, Agent(dir=RIGHT), goal_reward, reward, roomList, rng)
+    reset!(env)
+    return env
 end
 
 function (w::MultiRoom)(::MoveForward)
     dir = get_dir(w.agent)
     dest = dir(w.agent_pos)
+    w.reward = 0.0
     if !w.world[WALL, dest]
         w.agent_pos = dest
+        if w.world[GOAL, w.agent_pos]
+            w.reward = w.goal_reward
+        end
     end
     w
 end
@@ -124,3 +139,25 @@ end
 MultiRoomN2S4() = MultiRoom(minRooms=2,maxRooms=2,maxSize=4)
 MultiRoomN4S5() = MultiRoom(minRooms=4,maxRooms=4,maxSize=5)
 MultiRoomN6() = MultiRoom(minRooms=6,maxRooms=6)
+
+RLBase.get_terminal(w::MultiRoom) = w.world[GOAL, w.agent_pos]
+
+function RLBase.reset!(w::MultiRoom)
+    froom, lroom = w.roomList[1], w.roomList[length(w.roomList)]
+    rng = w.rng
+    agent_start_pos = froom.top + CartesianIndex(rand(rng, 2:froom.size[1]-2), rand(rng, 2:froom.size[2]-2))
+    agent_start_dir = rand(rng, DIRECTIONS)
+    goal_pos = lroom.top + CartesianIndex(rand(rng, 2:lroom.size[1]-2), rand(rng, 2:lroom.size[2]-2))
+
+    n = size(w.world)[end]
+    w.reward = 0.0
+    w.agent_pos = agent_start_pos
+    agent = get_agent(w)
+    set_dir!(agent, agent_start_dir)
+
+    w.world[GOAL, :, :] .= false
+    w.world[GOAL, goal_pos] = true
+    w.world[EMPTY, :, :] .= .!w.world[WALL, :, :]
+    w.world[EMPTY, goal_pos] = false
+    return w
+end
