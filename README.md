@@ -70,3 +70,7 @@ play(w;file_name="example.gif",frame_rate=5)
 1. ### DynamicObstacles
 
     <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/DynamicObstacles.gif" width="300px">
+
+1. ### MultiRoom
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/MultiRoom.gif" width="300px">
