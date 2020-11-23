@@ -16,7 +16,7 @@ function Base.show(io::IO, ::MIME"text/markdown", env::AbstractGridWorld)
                 agent = get_agent(env)
                 print(io, Crayon(background=bg, foreground=get_color(agent),reset=true), convert(Char, agent))
             else
-                o = get_object(env)[findfirst(w.world[:, i, j])]
+                o = get_object(env)[findfirst(w.grid[:, i, j])]
                 print(io, Crayon(background=bg, foreground=get_color(o),reset=true),  convert(Char, o))
             end
         end
