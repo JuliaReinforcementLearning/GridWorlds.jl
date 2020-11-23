@@ -8,58 +8,58 @@ ENVS_RLBASE = [EmptyGridWorld, FourRooms, GoToDoor, DoorKey, CollectGems, Dynami
 ACTIONS = [TURN_LEFT, TURN_RIGHT, MOVE_FORWARD]
 
 @testset "GridWorlds.jl" begin
-    for env in ENVS
-        @testset "$(env)" begin
-            w = env()
-            @test typeof(w.agent_pos) == CartesianIndex{2}
-            @test typeof(w.agent.dir) <: LRUD
-            @test size(w.world.grid, 1) == length(w.world.objects)
-            @test 1 ≤ w.agent_pos[1] ≤ size(w.world.grid, 2)
-            @test 1 ≤ w.agent_pos[2] ≤ size(w.world.grid, 3)
+    for Env in ENVS
+        @testset "$(Env)" begin
+            env = Env()
+            @test typeof(env.agent_pos) == CartesianIndex{2}
+            @test typeof(env.agent.dir) <: LRUD
+            @test size(env.world.grid, 1) == length(env.world.objects)
+            @test 1 ≤ env.agent_pos[1] ≤ size(env.world.grid, 2)
+            @test 1 ≤ env.agent_pos[2] ≤ size(env.world.grid, 3)
 
             for _=1:1000
-                w = w(rand(ACTIONS))
-                @test 1 ≤ w.agent_pos[1] ≤ size(w.world.grid, 2)
-                @test 1 ≤ w.agent_pos[2] ≤ size(w.world.grid, 3)
-                @test w.world[WALL, w.agent_pos] == false
-                view = get_agent_view(w)
+                env = env(rand(ACTIONS))
+                @test 1 ≤ env.agent_pos[1] ≤ size(env.world.grid, 2)
+                @test 1 ≤ env.agent_pos[2] ≤ size(env.world.grid, 3)
+                @test env.world[WALL, env.agent_pos] == false
+                view = get_agent_view(env)
                 @test typeof(view) <: BitArray{3}
-                @test size(view,1) == length(w.world.objects)
+                @test size(view,1) == length(env.world.objects)
                 @test size(view,2) == 7
                 @test size(view,3) == 7
             end
         end
     end
 
-    for env in ENVS_RLBASE
-        @testset "$(env) RLBase API" begin
-            w = env()
+    for Env in ENVS_RLBASE
+        @testset "$(Env) RLBase API" begin
+            env = Env()
 
-            @test get_reward(w) == 0.0
-            @test get_terminal(w) == false
-            if env == GoToDoor
-                @test get_state(w) == (get_agent_view(w), w.target)
+            @test get_reward(env) == 0.0
+            @test get_terminal(env) == false
+            if Env == GoToDoor
+                @test get_state(env) == (get_agent_view(env), env.target)
             else
-                @test get_state(w) == get_agent_view(w)
+                @test get_state(env) == get_agent_view(env)
             end
 
-            π = RandomPolicy(w)
+            π = RandomPolicy(env)
             total_reward = 0.0
 
-            while !get_terminal(w)
-                action = π(w)
-                w(action)
-                total_reward += get_reward(w)
+            while !get_terminal(env)
+                action = π(env)
+                env(action)
+                total_reward += get_reward(env)
             end
 
-            if env == CollectGems
-                @test total_reward == w.num_gem_init * w.gem_reward
-            elseif env == EmptyGridWorld || env == FourRooms || env == DoorKey
-                @test total_reward == w.goal_reward
-            elseif env == GoToDoor
-                @test (total_reward == w.target_reward || total_reward == w.penalty)
-            elseif env == DynamicObstacles
-                @test (total_reward == w.obstacle_reward || total_reward == w.goal_reward)
+            if Env == CollectGems
+                @test total_reward == env.num_gem_init * env.gem_reward
+            elseif Env == EmptyGridWorld || Env == FourRooms || Env == DoorKey
+                @test total_reward == env.goal_reward
+            elseif Env == GoToDoor
+                @test (total_reward == env.target_reward || total_reward == env.penalty)
+            elseif Env == DynamicObstacles
+                @test (total_reward == env.obstacle_reward || total_reward == env.goal_reward)
             end
         end
     end
