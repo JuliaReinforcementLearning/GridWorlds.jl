@@ -34,74 +34,75 @@ function DynamicObstacles(;n = 8, agent_start_pos = CartesianIndex(2,2), agent_s
     return env
 end
 
-iscollision(w::DynamicObstacles) = w.world[OBSTACLE, w.agent_pos]
+iscollision(env::DynamicObstacles) = env.world[OBSTACLE, env.agent_pos]
 
-function (w::DynamicObstacles)(::MoveForward)
-    w.reward = 0.0
-    update_obstacles!(w)
-    dir = get_dir(w.agent) 
-    dest = dir(w.agent_pos)
-    if !w.world[WALL, dest]
-        w.agent_pos = dest
+function (env::DynamicObstacles)(::MoveForward)
+    env.reward = 0.0
+    update_obstacles!(env)
+    dir = get_dir(env.agent) 
+    dest = dir(env.agent_pos)
+    if !env.world[WALL, dest]
+        env.agent_pos = dest
     end
-    if iscollision(w)
-        w.reward = w.obstacle_reward
+    if iscollision(env)
+        env.reward = env.obstacle_reward
     end
-    w
+    return env
 end
 
-function (w::DynamicObstacles)(action::Union{TurnRight, TurnLeft})
-    w.reward = 0.0
-    update_obstacles!(w)
-    agent = get_agent(w)
+function (env::DynamicObstacles)(action::Union{TurnRight, TurnLeft})
+    env.reward = 0.0
+    update_obstacles!(env)
+    agent = get_agent(env)
     set_dir!(agent, action(get_dir(agent)))
-    if iscollision(w)
-        w.reward = w.obstacle_reward
+    if iscollision(env)
+        env.reward = env.obstacle_reward
     end
-    w
+    return env
 end
 
-function valid_obstacle_dest(w::DynamicObstacles, pos::CartesianIndex{2})
+function valid_obstacle_dest(env::DynamicObstacles, pos::CartesianIndex{2})
     candidate_pos = [CartesianIndex(pos[1] + i, pos[2] + j) for i in [-1, 0, 1] for j in [-1, 0, 1]]
-    filter(p -> w.world[EMPTY, p] || pos == p, candidate_pos)
+    filter(p -> env.world[EMPTY, p] || pos == p, candidate_pos)
 end
 
-function update_obstacles!(w::DynamicObstacles)
-    for (i, pos) in enumerate(w.obstacle_pos)
-        w.world[EMPTY, pos] = true
-        w.world[OBSTACLE, pos] = false
+function update_obstacles!(env::DynamicObstacles)
+    for (i, pos) in enumerate(env.obstacle_pos)
+        env.world[EMPTY, pos] = true
+        env.world[OBSTACLE, pos] = false
 
-        new_pos = rand(w.rng, valid_obstacle_dest(w, pos))
-        w.obstacle_pos[i] = new_pos
+        new_pos = rand(env.rng, valid_obstacle_dest(env, pos))
+        env.obstacle_pos[i] = new_pos
 
-        w.world[EMPTY, new_pos] = false
-        w.world[OBSTACLE, new_pos] = true
+        env.world[EMPTY, new_pos] = false
+        env.world[OBSTACLE, new_pos] = true
     end
+    return env
 end
 
-RLBase.get_terminal(w::DynamicObstacles) = iscollision(w) || w.world[GOAL, w.agent_pos]
+RLBase.get_terminal(env::DynamicObstacles) = iscollision(env) || env.world[GOAL, env.agent_pos]
 
-function RLBase.reset!(w::DynamicObstacles; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(w.world)[end] - 1, size(w.world)[end] - 1))
+function RLBase.reset!(env::DynamicObstacles; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(env.world)[end] - 1, size(env.world)[end] - 1))
 
-    n = size(w.world)[end]
-    w.world[EMPTY, 2:n-1, 2:n-1] .= true
-    w.world[GOAL, goal_pos] = true
-    w.world[EMPTY, goal_pos] = false
-    w.agent_pos = agent_start_pos
-    agent = get_agent(w)
+    n = size(env.world)[end]
+    env.world[EMPTY, 2:n-1, 2:n-1] .= true
+    env.world[GOAL, goal_pos] = true
+    env.world[EMPTY, goal_pos] = false
+    env.agent_pos = agent_start_pos
+    agent = get_agent(env)
     set_dir!(agent, agent_start_dir)
 
     obstacles_placed = 0
-    while obstacles_placed < w.num_obstacles
-        pos = CartesianIndex(rand(w.rng, 2:n-1), rand(w.rng, 2:n-1))
-        if (pos == w.agent_pos) || (w.world[OBSTACLE, pos] == true) || (pos == goal_pos)
+    while obstacles_placed < env.num_obstacles
+        pos = CartesianIndex(rand(env.rng, 2:n-1), rand(env.rng, 2:n-1))
+        if (pos == env.agent_pos) || (env.world[OBSTACLE, pos] == true) || (pos == goal_pos)
             continue
         else
-            w.world[OBSTACLE, pos] = true
-            w.world[EMPTY, pos] = false
+            env.world[OBSTACLE, pos] = true
+            env.world[EMPTY, pos] = false
             obstacles_placed = obstacles_placed + 1
-            w.obstacle_pos[obstacles_placed] = pos
+            env.obstacle_pos[obstacles_placed] = pos
         end
     end
-    return w
+    return env
 end

@@ -32,52 +32,52 @@ function GoToDoor(;n=8, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_R
     return env
 end
 
-function (w::GoToDoor)(::MoveForward)
-    w.reward = 0.0
-    dir = get_dir(w.agent)
-    dest = dir(w.agent_pos)
-    if dest ∈ CartesianIndices((size(w.world, 2), size(w.world, 3))) && !w.world[WALL,dest]
-        w.agent_pos = dest
-        if get_terminal(w)
-            if w.world[w.target, w.agent_pos]
-                w.reward = w.target_reward
+function (env::GoToDoor)(::MoveForward)
+    env.reward = 0.0
+    dir = get_dir(env.agent)
+    dest = dir(env.agent_pos)
+    if dest ∈ CartesianIndices((size(env.world, 2), size(env.world, 3))) && !env.world[WALL,dest]
+        env.agent_pos = dest
+        if get_terminal(env)
+            if env.world[env.target, env.agent_pos]
+                env.reward = env.target_reward
             else
-                w.reward = w.penalty
+                env.reward = env.penalty
             end
         end
     end
-    w
+    env
 end
 
-RLBase.get_state(w::GoToDoor) = (get_agent_view(w), w.target)
+RLBase.get_state(env::GoToDoor) = (get_agent_view(env), env.target)
 
-RLBase.get_terminal(w::GoToDoor) = any([w.world[x, w.agent_pos] for x in w.world.objects[end-3:end]])
+RLBase.get_terminal(env::GoToDoor) = any([env.world[x, env.agent_pos] for x in env.world.objects[end-3:end]])
 
-function RLBase.reset!(w::GoToDoor)
-    n = size(w.world)[end]
+function RLBase.reset!(env::GoToDoor)
+    n = size(env.world)[end]
 
-    w.world[WALL, [1,n], 1:n] .= true
-    w.world[WALL, 1:n, [1,n]] .= true
+    env.world[WALL, [1,n], 1:n] .= true
+    env.world[WALL, 1:n, [1,n]] .= true
 
-    doors = w.world.objects[end-3:end]
+    doors = env.world.objects[end-3:end]
     for door in doors
-        w.world[door, :, :] .= false
+        env.world[door, :, :] .= false
     end
 
-    w.target = rand(w.rng, doors)
-    w.reward = 0.0
+    env.target = rand(env.rng, doors)
+    env.reward = 0.0
 
-    door_pos = [CartesianIndex(rand(w.rng, 2:n-1),1),
-                CartesianIndex(rand(w.rng, 2:n-1),n),
-                CartesianIndex(1,rand(w.rng, 2:n-1)),
-                CartesianIndex(n,rand(w.rng, 2:n-1))]
+    door_pos = [CartesianIndex(rand(env.rng, 2:n-1),1),
+                CartesianIndex(rand(env.rng, 2:n-1),n),
+                CartesianIndex(1,rand(env.rng, 2:n-1)),
+                CartesianIndex(n,rand(env.rng, 2:n-1))]
 
-    rp = randperm(w.rng, length(door_pos))
+    rp = randperm(env.rng, length(door_pos))
 
     for (door, pos) in zip(doors, door_pos[rp])
-        w.world[door, pos] = true
-        w.world[WALL, pos] = false
+        env.world[door, pos] = true
+        env.world[WALL, pos] = false
     end
 
-    w
+    env
 end

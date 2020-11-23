@@ -7,14 +7,14 @@ transform(x::Int) = p -> CartesianIndex(p[2], x-p[1]+1)
 
 using .Makie
 
-function init_screen(w::Observable{<:AbstractGridWorld}; resolution=(1000,1000))
+function init_screen(env::Observable{<:AbstractGridWorld}; resolution=(1000,1000))
     scene = Scene(resolution = resolution, raw = true, camera = campixel!)
 
     area = scene.px_area
-    grid_size = size(w[].world)[2:3]
+    grid_size = size(env[].world)[2:3]
     grid_inds = CartesianIndices(grid_size)
-    tile_size = @lift((widths($area)[1] / size($w.world, 2), widths($area)[2] / size($w.world, 3)))
-    T = transform(size(w[].world, 2))
+    tile_size = @lift((widths($area)[1] / size($env.world, 2), widths($area)[2] / size($env.world, 3)))
+    T = transform(size(env[].world, 2))
     boxes(pos, s) = [FRect2D((T(p).I .- (1,1)) .* s, s) for p in pos]
     centers(pos, s) = [(T(p).I .- (0.5,0.5)) .* s for p in pos]
 
@@ -22,9 +22,9 @@ function init_screen(w::Observable{<:AbstractGridWorld}; resolution=(1000,1000))
     poly!(scene, area)
 
     # 2. paint each kind of object
-    for o in get_object(w[])
+    for o in get_object(env[])
         if o !== EMPTY
-            scatter!(scene, @lift(centers(findall($w.world[o,:,:]), $tile_size)), color=get_color(o), marker=convert(Char, o), markersize=@lift(minimum($tile_size)))
+            scatter!(scene, @lift(centers(findall($env.world[o,:,:]), $tile_size)), color=get_color(o), marker=convert(Char, o), markersize=@lift(minimum($tile_size)))
         end
     end
 
@@ -32,19 +32,19 @@ function init_screen(w::Observable{<:AbstractGridWorld}; resolution=(1000,1000))
     poly!(scene, @lift(boxes(vec(grid_inds), $tile_size)), color=:transparent, strokecolor = :lightgray, strokewidth = 4)
 
     # 3. paint agent's view
-    view_boxes = @lift boxes([p for p in get_agent_view_inds($w) if p ∈ grid_inds], $tile_size)
+    view_boxes = @lift boxes([p for p in get_agent_view_inds($env) if p ∈ grid_inds], $tile_size)
     poly!(scene, view_boxes, color="rgba(255,255,255,0.2)")
 
     # 4. paint agent
-    agent = @lift(get_agent($w))
-    agent_position = @lift((T(get_agent_pos($w)).I .- (0.5, 0.5)).* $tile_size)
+    agent = @lift(get_agent($env))
+    agent_position = @lift((T(get_agent_pos($env)).I .- (0.5, 0.5)).* $tile_size)
     scatter!(scene, agent_position, color=@lift(get_color($agent)), marker=@lift(convert(Char, $agent)), markersize=@lift(minimum($tile_size)))
 
     display(scene)
     scene
 end
 
-function play(environment::AbstractGridWorld;file_name=nothing,frame_rate=24)
+function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
     print("""
     Key bindings:
     ←: TurnLeft
@@ -52,9 +52,8 @@ function play(environment::AbstractGridWorld;file_name=nothing,frame_rate=24)
     ↑: MoveForward
     q: Quit
     """)
-    w = environment
-    w_node = Node(w)
-    scene = init_screen(w_node)
+    env_node = Node(env)
+    scene = init_screen(env_node)
     is_quit = Ref(false)
 
     if !isnothing(file_name)
@@ -64,14 +63,14 @@ function play(environment::AbstractGridWorld;file_name=nothing,frame_rate=24)
 
     on(scene.events.keyboardbuttons) do b
         if ispressed(b, Keyboard.left)
-            w(TURN_LEFT)
-            w_node[] = w
+            env(TURN_LEFT)
+            env_node[] = env
         elseif ispressed(b, Keyboard.right)
-            w(TURN_RIGHT)
-            w_node[] = w
+            env(TURN_RIGHT)
+            env_node[] = env
         elseif ispressed(b, Keyboard.up)
-            w(MOVE_FORWARD)
-            w_node[] = w
+            env(MOVE_FORWARD)
+            env_node[] = env
         elseif ispressed(b, Keyboard.q)
             is_quit[] = true
         end

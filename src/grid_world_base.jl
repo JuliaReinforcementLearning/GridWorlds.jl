@@ -11,19 +11,19 @@ The first dimension uses multi-hot encoding to encode objects in a tile.
 The second and third dimension means the height and width of the grid.
 """
 struct GridWorldBase{O} <: AbstractArray{Bool, 3}
-    world::BitArray{3}
+    grid::BitArray{3}
     objects::O
 end
 
 get_object(w::GridWorldBase) = w.objects
 
 function GridWorldBase(objects::Tuple{Vararg{AbstractObject}}, x::Int, y::Int)
-    world = BitArray{3}(undef, length(objects), x, y)
-    fill!(world, false)
-    GridWorldBase(world, objects)
+    grid = BitArray{3}(undef, length(objects), x, y)
+    fill!(grid, false)
+    GridWorldBase(grid, objects)
 end
 
-@forward GridWorldBase.world Base.size, Base.getindex, Base.setindex!
+@forward GridWorldBase.grid Base.size, Base.getindex, Base.setindex!
 
 @generated function Base.to_index(::GridWorldBase{O}, x::X) where {X<:AbstractObject, O}
     i = findfirst(X .=== O.parameters)
@@ -31,22 +31,22 @@ end
     :($i)
 end
 
-Base.setindex!(w::GridWorldBase, v::Bool, o::AbstractObject, x::Int, y::Int) = setindex!(w.world, v, Base.to_index(w, o), x, y)
+Base.setindex!(w::GridWorldBase, v::Bool, o::AbstractObject, x::Int, y::Int) = setindex!(w.grid, v, Base.to_index(w, o), x, y)
 Base.setindex!(w::GridWorldBase, v::Bool, o::AbstractObject, i::CartesianIndex{2}) = setindex!(w, v, o, i[1], i[2])
 
-Base.getindex(w::GridWorldBase, o::AbstractObject, x::Int, y::Int) = getindex(w.world, Base.to_index(w, o), x, y)
+Base.getindex(w::GridWorldBase, o::AbstractObject, x::Int, y::Int) = getindex(w.grid, Base.to_index(w, o), x, y)
 Base.getindex(w::GridWorldBase, o::AbstractObject, i::CartesianIndex{2}) = getindex(w, o, i[1], i[2])
-Base.getindex(w::GridWorldBase, o::AbstractObject, x::Colon, y::Colon) = getindex(w.world, Base.to_index(w, o), x, y)
+Base.getindex(w::GridWorldBase, o::AbstractObject, x::Colon, y::Colon) = getindex(w.grid, Base.to_index(w, o), x, y)
 
 #####
 # utils
 #####
 
-switch!(world::GridWorldBase, x, src::CartesianIndex{2}, dest::CartesianIndex{2}) = world[x, src], world[x, dest] = world[x, dest], world[x, src]
+switch!(w::GridWorldBase, x, src::CartesianIndex{2}, dest::CartesianIndex{2}) = w[x, src], w[x, dest] = w[x, dest], w[x, src]
 
-function switch!(world::GridWorldBase, src::CartesianIndex{2}, dest::CartesianIndex{2})
-    for x in axes(world, 1)
-        switch!(world, x, src, dest)
+function switch!(w::GridWorldBase, src::CartesianIndex{2}, dest::CartesianIndex{2})
+    for x in axes(w, 1)
+        switch!(w, x, src, dest)
     end
 end
 

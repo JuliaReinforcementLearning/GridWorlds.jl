@@ -25,31 +25,31 @@ function EmptyGridWorld(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_d
     return env
 end
 
-function (w::EmptyGridWorld)(::MoveForward)
-    dir = get_dir(w.agent)
-    dest = dir(w.agent_pos)
-    w.reward = 0.0
-    if !w.world[WALL, dest]
-        w.agent_pos = dest
-        if w.world[GOAL, w.agent_pos]
-            w.reward = w.goal_reward
+function (env::EmptyGridWorld)(::MoveForward)
+    dir = get_dir(env.agent)
+    dest = dir(env.agent_pos)
+    env.reward = 0.0
+    if !env.world[WALL, dest]
+        env.agent_pos = dest
+        if env.world[GOAL, env.agent_pos]
+            env.reward = env.goal_reward
         end
     end
-    w
+    env
 end
 
-RLBase.get_terminal(w::EmptyGridWorld) = w.world[GOAL, w.agent_pos]
+RLBase.get_terminal(env::EmptyGridWorld) = env.world[GOAL, env.agent_pos]
 
-function RLBase.reset!(w::EmptyGridWorld; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(w.world)[end] - 1, size(w.world)[end] - 1))
+function RLBase.reset!(env::EmptyGridWorld; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(env.world)[end] - 1, size(env.world)[end] - 1))
 
-    w.reward = 0.0
-    w.agent_pos = agent_start_pos
-    agent = get_agent(w)
+    env.reward = 0.0
+    env.agent_pos = agent_start_pos
+    agent = get_agent(env)
     set_dir!(agent, agent_start_dir)
 
-    w.world[EMPTY, :, :] .= .!w.world[WALL, :, :]
-    w.world[GOAL, goal_pos] = true
-    w.world[EMPTY, goal_pos] = false
+    env.world[EMPTY, :, :] .= .!env.world[WALL, :, :]
+    env.world[GOAL, goal_pos] = true
+    env.world[EMPTY, goal_pos] = false
 
-    return w
+    return env
 end

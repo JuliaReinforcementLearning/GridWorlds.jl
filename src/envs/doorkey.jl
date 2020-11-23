@@ -31,56 +31,56 @@ function DoorKey(;n = 7, agent_start_pos = CartesianIndex(2,2), agent_start_dir 
     return env
 end
 
-function (w::DoorKey)(::MoveForward)
-    w.reward = 0.0
-    door = w.world.objects[end - 1]
-    key = w.world.objects[end]
-    dir = get_dir(w.agent)
-    dest = dir(w.agent_pos)
+function (env::DoorKey)(::MoveForward)
+    env.reward = 0.0
+    door = env.world.objects[end - 1]
+    key = env.world.objects[end]
+    dir = get_dir(env.agent)
+    dest = dir(env.agent_pos)
 
-    if w.world[key, dest]
-        if PICK_UP(w.agent, key)
-            w.world[key, dest] = false
-            w.world[EMPTY, dest] = true
+    if env.world[key, dest]
+        if PICK_UP(env.agent, key)
+            env.world[key, dest] = false
+            env.world[EMPTY, dest] = true
         end
-        w.agent_pos = dest
-    elseif w.world[door, dest] && w.agent.inventory !== key
+        env.agent_pos = dest
+    elseif env.world[door, dest] && env.agent.inventory !== key
         nothing
-    elseif w.world[door, dest] && w.agent.inventory === key
-        w.agent_pos = dest
-    elseif !w.world[WALL,dest]
-        w.agent_pos = dest
-        if w.world[GOAL, w.agent_pos]
-            w.reward = w.goal_reward
+    elseif env.world[door, dest] && env.agent.inventory === key
+        env.agent_pos = dest
+    elseif !env.world[WALL,dest]
+        env.agent_pos = dest
+        if env.world[GOAL, env.agent_pos]
+            env.reward = env.goal_reward
         end
     end
 
-    w
+    env
 end
 
-RLBase.get_terminal(w::DoorKey) = w.world[GOAL, w.agent_pos]
+RLBase.get_terminal(env::DoorKey) = env.world[GOAL, env.agent_pos]
 
-function RLBase.reset!(w::DoorKey; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(w.world)[end] - 1, size(w.world)[end] - 1))
-    n = size(w.world)[end]
-    door = w.world.objects[end - 1]
-    key = w.world.objects[end]
-    w.reward = 0.0
-    w.agent_pos = agent_start_pos
-    agent = get_agent(w)
+function RLBase.reset!(env::DoorKey; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(env.world)[end] - 1, size(env.world)[end] - 1))
+    n = size(env.world)[end]
+    door = env.world.objects[end - 1]
+    key = env.world.objects[end]
+    env.reward = 0.0
+    env.agent_pos = agent_start_pos
+    agent = get_agent(env)
     set_dir!(agent, agent_start_dir)
 
-    door_pos = CartesianIndex(rand(w.rng, 2:n-1), rand(w.rng, 3:n-2))
+    door_pos = CartesianIndex(rand(env.rng, 2:n-1), rand(env.rng, 3:n-2))
     @assert agent_start_pos[2] < door_pos[2] "Agent should start on the left side of the door"
     @assert goal_pos[2] > door_pos[2] "Goal should be placed on the right side of the door"
-    w.world[WALL, :, door_pos[2]] .= true
-    w.world[door, door_pos] = true
-    w.world[WALL, door_pos] = false
+    env.world[WALL, :, door_pos[2]] .= true
+    env.world[door, door_pos] = true
+    env.world[WALL, door_pos] = false
 
-    key_pos = CartesianIndex(rand(w.rng, 2:n-1), rand(w.rng, 2:door_pos[2]-1))
+    key_pos = CartesianIndex(rand(env.rng, 2:n-1), rand(env.rng, 2:door_pos[2]-1))
     while key_pos == agent_start_pos
-        key_pos = CartesianIndex(rand(w.rng, 2:n-1), rand(w.rng, 2:door_pos[2]-1))
+        key_pos = CartesianIndex(rand(env.rng, 2:n-1), rand(env.rng, 2:door_pos[2]-1))
     end
-    w.world[key, key_pos] = true
+    env.world[key, key_pos] = true
 
-    w.world[EMPTY, :, :] .= .!(.|((w.world[x, :, :] for x in [WALL, GOAL, door, key])...))
+    env.world[EMPTY, :, :] .= .!(.|((env.world[x, :, :] for x in [WALL, GOAL, door, key])...))
 end

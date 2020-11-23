@@ -32,47 +32,47 @@ function CollectGems(;n=8, agent_start_pos=CartesianIndex(2,2), agent_start_dir=
 
 end
 
-function (w::CollectGems)(::MoveForward)
-    dir = get_dir(w.agent)
-    dest = dir(w.agent_pos)
-    w.reward = 0.0
-    if !w.world[WALL, dest]
-        w.agent_pos = dest
-        if w.world[GEM, dest]
-            w.world[GEM, dest] = false
-            w.world[EMPTY, dest] = true
-            w.num_gem_current = w.num_gem_current - 1
-            w.reward = w.gem_reward
+function (env::CollectGems)(::MoveForward)
+    dir = get_dir(env.agent)
+    dest = dir(env.agent_pos)
+    env.reward = 0.0
+    if !env.world[WALL, dest]
+        env.agent_pos = dest
+        if env.world[GEM, dest]
+            env.world[GEM, dest] = false
+            env.world[EMPTY, dest] = true
+            env.num_gem_current = env.num_gem_current - 1
+            env.reward = env.gem_reward
         end
     end
-    w
+    env
 end
 
-RLBase.get_terminal(w::CollectGems) = w.num_gem_current <= 0
+RLBase.get_terminal(env::CollectGems) = env.num_gem_current <= 0
 
-function RLBase.reset!(w::CollectGems; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT)
+function RLBase.reset!(env::CollectGems; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT)
 
-    n = size(w.world)[end]
-    w.world[EMPTY, 2:n-1, 2:n-1] .= true
-    w.world[GEM, 1:n, 1:n] .= false
-    w.num_gem_current = w.num_gem_init
+    n = size(env.world)[end]
+    env.world[EMPTY, 2:n-1, 2:n-1] .= true
+    env.world[GEM, 1:n, 1:n] .= false
+    env.num_gem_current = env.num_gem_init
 
-    w.reward = 0.0
-    w.agent_pos = agent_start_pos
-    agent = get_agent(w)
+    env.reward = 0.0
+    env.agent_pos = agent_start_pos
+    agent = get_agent(env)
     set_dir!(agent, agent_start_dir)
 
     gem_placed = 0
-    while gem_placed < w.num_gem_init
-        gem_pos = CartesianIndex(rand(w.rng, 2:n-1), rand(w.rng, 2:n-1))
-        if (gem_pos == w.agent_pos) || (w.world[GEM, gem_pos] == true)
+    while gem_placed < env.num_gem_init
+        gem_pos = CartesianIndex(rand(env.rng, 2:n-1), rand(env.rng, 2:n-1))
+        if (gem_pos == env.agent_pos) || (env.world[GEM, gem_pos] == true)
             continue
         else
-            w.world[GEM, gem_pos] = true
-            w.world[EMPTY, gem_pos] = false
+            env.world[GEM, gem_pos] = true
+            env.world[EMPTY, gem_pos] = false
             gem_placed = gem_placed + 1
         end
     end
 
-    return w
+    return env
 end

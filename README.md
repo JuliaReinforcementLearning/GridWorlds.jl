@@ -31,18 +31,18 @@ A `GridWorldBase` is used to represent the whole grid world. Inside of it, a 3-D
 ```julia
 using GridWorlds
 
-w = EmptyGridWorld()
+env = EmptyGridWorld()
 
-w(MOVE_FORWARD)
-w(TURN_LEFT)
-w(TURN_RIGHT)
+env(MOVE_FORWARD)
+env(TURN_LEFT)
+env(TURN_RIGHT)
 
 # play interactively with Makie.
 # you need to manually install Makie with the following command first
 # ] add Makie
 # first time plot may be slow
 using Makie
-play(w;file_name="example.gif",frame_rate=5)
+play(env;file_name="example.gif",frame_rate=5)
 ```
 
 ## List of Environments
