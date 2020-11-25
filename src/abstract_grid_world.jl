@@ -26,10 +26,15 @@ get_agent_view_inds(env::AbstractGridWorld, s=(7,7)) = get_agent_view_inds(get_a
 
 get_agent_view!(v::BitArray{3}, env::AbstractGridWorld) = get_agent_view!(v, convert(GridWorldBase, env), get_agent_pos(env), get_agent_dir(env))
 
-function get_full_view(env::AbstractGridWorld)
-    dims = size(env.world.grid)[2:end]
+function get_agent_layer(grid::BitArray{3}, agent_pos::CartesianIndex{2})
+    dims = size(grid)[2:end]
     v = falses(1, dims...)
-    v[1, get_agent_pos(env)] = true
+    v[1, agent_pos] = true
+    return v
+end
+
+function get_full_view(env::AbstractGridWorld)
+    v = get_agent_layer(env.world.grid, get_agent_pos(env))
     return cat(v, env.world.grid, dims = 1)
 end
 
