@@ -26,6 +26,13 @@ get_agent_view_inds(env::AbstractGridWorld, s=(7,7)) = get_agent_view_inds(get_a
 
 get_agent_view!(v::BitArray{3}, env::AbstractGridWorld) = get_agent_view!(v, convert(GridWorldBase, env), get_agent_pos(env), get_agent_dir(env))
 
+function get_full_view(env::AbstractGridWorld)
+    dims = size(env.world.grid)[2:end]
+    v = falses(1, dims...)
+    v[1, get_agent_pos(env)] = true
+    return cat(v, env.world.grid, dims = 1)
+end
+
 #####
 # RLBase defaults
 #####
@@ -33,6 +40,8 @@ get_agent_view!(v::BitArray{3}, env::AbstractGridWorld) = get_agent_view!(v, con
 RLBase.DefaultStateStyle(env::AbstractGridWorld) = RLBase.PartialObservation{Array}()
 
 RLBase.get_state(env::AbstractGridWorld, ::RLBase.PartialObservation{Array}, args...) = get_agent_view(env)
+
+RLBase.get_state(env::AbstractGridWorld, ::RLBase.Observation{Array}, args...) = get_full_view(env)
 
 RLBase.get_actions(env::AbstractGridWorld) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT)
 
