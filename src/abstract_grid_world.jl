@@ -41,7 +41,7 @@ RLBase.DefaultStateStyle(env::AbstractGridWorld) = RLBase.PartialObservation{Arr
 
 RLBase.get_state(env::AbstractGridWorld, ::RLBase.PartialObservation{Array}, args...) = get_agent_view(env)
 
-RLBase.get_state(env::AbstractGridWorld, ::RLBase.Observation{Array}, args...) = get_full_view(env)
+RLBase.get_state(env::AbstractGridWorld, ::RLBase.Observation{Array}, args...) = (get_full_view(env), get_agent_dir(env))
 
 RLBase.get_actions(env::AbstractGridWorld) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT)
 
