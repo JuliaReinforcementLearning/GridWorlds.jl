@@ -25,7 +25,7 @@ mutable struct SequentialRooms{R} <: AbstractGridWorld
     rng::R
 end
 
-function SequentialRooms(;num_rooms = 3, room_length_range = 4:8, agent_start_dir = RIGHT, rng = Random.GLOBAL_RNG)
+function SequentialRooms(;num_rooms = 3, room_length_range = 4:5, agent_start_dir = RIGHT, rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, GOAL)
     n = 2 * num_rooms * room_length_range.stop
     world = GridWorldBase(objects, n, n)
@@ -87,7 +87,52 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
         tries += 1
     end
 
+    # shift the region and the rooms
+    centered_world = get_centered_world(world)
+
+
     return env
+end
+
+function shifted_room(room::Room, new_global_origin::CartesianIndex{2})
+
+    height = size(room.region, 1)
+    width = size(room.region, 2)
+
+    new_region = CartesianIndices((new_global_origin.I[1] : new_origin.I[1] + small_n - 1, new_origin.I[2] : new_origin.I[2] + small_n - 1))
+end
+
+function get_centered_world(world::GridWorldBase)
+    small_n = size(world)[end] ÷ 2
+    new_origin = get_new_origin(world)
+    new_region = CartesianIndices((new_origin.I[1] : new_origin.I[1] + small_n - 1, new_origin.I[2] : new_origin.I[2] + small_n - 1))
+    centered_world = GridWorldBase(get_object(world), small_n, small_n)
+    centered_world[:, :, :] .= world[:, new_region]
+    return centered_world
+end
+
+function get_bounding_region(world::GridWorldBase)
+    all_wall_pos = findall(world[WALL, :, :])
+    top_extreme = minimum(pos -> pos.I[1], all_wall_pos)
+    bottom_extreme = maximum(pos -> pos.I[1], all_wall_pos)
+    left_extreme = minimum(pos -> pos.I[2], all_wall_pos)
+    right_extreme = maximum(pos -> pos.I[2], all_wall_pos)
+    CartesianIndices((top_extreme:bottom_extreme, left_extreme:right_extreme))
+end
+
+function get_shift(world::GridWorldBase)
+    bounding_region = get_bounding_region(world)
+    small_n = size(world)[end] ÷ 2
+    top_padding = (small_n - size(bounding_region, 1)) ÷ 2
+    left_padding = (small_n - size(bounding_region, 2)) ÷ 2
+    CartesianIndex(top_padding, left_padding)
+end
+
+function get_new_origin(world::GridWorldBase)
+    shift = get_shift(world)
+    bounding_region = get_bounding_region(world)
+    new_origin = bounding_region[1, 1] - shift
+    return new_origin
 end
 
 function generate_first_room(env::AbstractGridWorld)
