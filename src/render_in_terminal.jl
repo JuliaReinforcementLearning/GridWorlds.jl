@@ -1,45 +1,44 @@
 using Crayons
 
+get_background(env::AbstractGridWorld, pos::CartesianIndex{2}, ::Val{:agent_view}) = :dark_gray
+get_background(env::AbstractGridWorld, pos::CartesianIndex{2}, ::Val{:full_view}) = pos in get_agent_view_inds(env) ? :dark_gray : :black
+
+function print_grid(io::IO, env::AbstractGridWorld, view_type)
+    grid = get_grid(env, Val{view_type}())
+    agent = get_agent(env, Val{view_type}())
+    agent_pos = get_agent_pos(env, Val{view_type}())
+    agent_layer = get_agent_layer(grid, agent_pos)
+    grid = cat(agent_layer, grid, dims = 1)
+
+    objects = (agent, get_object(env)...)
+
+    for i in 1:size(grid, 2)
+        for j in 1:size(grid, 3)
+            pos = CartesianIndex(i, j)
+            idx = findfirst(grid[:, pos])
+            if isnothing(idx)
+                o = nothing
+                foreground = :white
+                c = '_'
+            else
+                o = objects[idx]
+                foreground = get_color(o)
+                c = convert(Char, o)
+            end
+            print(io, Crayon(background = get_background(env, pos, Val{view_type}()), foreground = foreground, bold = true, reset = true), c)
+        end
+        println(io, Crayon(reset = true))
+    end
+end
+
 function Base.show(io::IO, ::MIME"text/markdown", env::AbstractGridWorld)
-    p, d = get_agent_pos(env), get_agent_dir(env)
-    w = convert(GridWorldBase, env)
 
-    println(io, "World:")
-    for i in 1:size(w, 2)
-        for j in 1:size(w, 3)
-            if CartesianIndex(i, j) ∈ get_agent_view_inds(env)
-                bg = :dark_gray
-            else
-                bg = :black
-            end
-            if i == p[1] && j == p[2]
-                agent = get_agent(env)
-                print(io, Crayon(background=bg, foreground=get_color(agent),reset=true), convert(Char, agent))
-            else
-                o = get_object(env)[findfirst(w.grid[:, i, j])]
-                print(io, Crayon(background=bg, foreground=get_color(o),reset=true),  convert(Char, o))
-            end
-        end
-        println(io, Crayon(reset=true))
-    end
+    println(io, "Full View:")
+    print_grid(io, env, :full_view)
+
     println(io)
 
-    println(io, "Agent's view:")
-    v = get_agent_view(env)
-    for i in 1:size(v, 2)
-        for j in 1:size(v, 3)
-            if i == 1 && j == size(v, 3) ÷ 2 + 1
-                print(io, Agent(dir=DOWN))
-            else
-                x = findfirst(v[:, i, j])
-                if isnothing(x)
-                    print(io, '_')
-                else
-                    print(io, get_object(env)[x])
-                end
-            end
-        end
-        println(io)
-    end
-    println(io)
+    println(io, "Agent's View:")
+    print_grid(io, env, :agent_view)
+
 end
