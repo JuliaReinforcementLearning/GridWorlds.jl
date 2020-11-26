@@ -32,13 +32,9 @@ function print_grid(io::IO, env::AbstractGridWorld, view_type)
 end
 
 function Base.show(io::IO, ::MIME"text/markdown", env::AbstractGridWorld)
-
     println(io, "Full View:")
     print_grid(io, env, :full_view)
-
     println(io)
-
     println(io, "Agent's View:")
     print_grid(io, env, :agent_view)
-
 end
