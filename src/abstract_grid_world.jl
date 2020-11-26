@@ -1,5 +1,6 @@
 export get_agent_view, AbstractGridWorld
 export get_actions
+
 abstract type AbstractGridWorld <: AbstractEnv end
 
 function get_agent_view end
@@ -11,9 +12,27 @@ get_object(env::AbstractGridWorld, x::Type{<:AbstractObject}) = filter(o -> o is
 get_object(env::AbstractGridWorld, x::Type{Agent}) = env.agent
 get_pos(env::AbstractGridWorld, ::Type{Agent}) = env.agent_pos
 
-get_agent(env::AbstractGridWorld) = get_object(env, Agent)
-get_agent_pos(env::AbstractGridWorld) = get_pos(env, Agent)
-get_agent_dir(env::AbstractGridWorld) = env |> get_agent |> get_dir
+#####
+# useful getter methods
+#####
+
+get_world(env::AbstractGridWorld) = env.world
+
+get_grid(env::AbstractGridWorld, ::Val{:full_view}) = get_world(env).grid
+get_grid(env::AbstractGridWorld, ::Val{:agent_view}) = get_agent_view(env)
+get_grid(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_grid(env, Val{view_type}())
+
+get_agent(env::AbstractGridWorld, ::Val{:full_view}) = env.agent
+get_agent(env::AbstractGridWorld, ::Val{:agent_view}) = Agent(dir = DOWN)
+get_agent(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_agent(env, Val{view_type}())
+
+get_agent_pos(env::AbstractGridWorld, ::Val{:full_view}) = env.agent_pos
+get_agent_pos(env::AbstractGridWorld, ::Val{:agent_view}) = CartesianIndex(1, size(get_grid(env, Val{:agent_view}()), 3) ÷ 2 + 1)
+get_agent_pos(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_agent_pos(env, Val{view_type}())
+
+get_agent_dir(env::AbstractGridWorld, ::Val{:full_view}) = env |> get_agent |> get_dir
+get_agent_dir(env::AbstractGridWorld, ::Val{:agent_view}) = DOWN
+get_agent_dir(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_agent_dir(env, Val{view_type}())
 
 function get_agent_view(env::AbstractGridWorld, agent_view_size=(7,7))
     w = convert(GridWorldBase, env)
