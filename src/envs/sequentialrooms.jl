@@ -13,10 +13,10 @@ Room(origin, height, width) = Room(CartesianIndices((origin.I[1] : origin.I[1] +
 get_origin(region::CartesianIndices{2}) = region[1, 1]
 get_origin(room::Room) = get_origin(room.region)
 
-interior(room::Room) = room.region[2:end-1, 2:end-1]
+get_interior(room::Room) = room.region[2:end-1, 2:end-1]
 
 function is_intersecting(room1::Room, room2::Room)
-    intersection = intersect(interior(room1), room2.region)
+    intersection = intersect(get_interior(room1), room2.region)
     length(intersection) > 0 ? true : false
 end
 
@@ -114,13 +114,13 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
     set_world!(env, centered_world)
 
     # add the agent randomly in the first room
-    set_agent_pos!(env, rand(env.rng, interior(env.rooms[1])))
+    set_agent_pos!(env, rand(env.rng, get_interior(env.rooms[1])))
 
     # add the GOAL randomly in the last room
     world = get_world(env)
-    goal_pos = rand(env.rng, interior(env.rooms[end]))
+    goal_pos = rand(env.rng, get_interior(env.rooms[end]))
     while goal_pos == env.agent_pos
-        goal_pos = rand(env.rng, interior(env.rooms[end]))
+        goal_pos = rand(env.rng, get_interior(env.rooms[end]))
     end
     world[GOAL, goal_pos] = true
     world[EMPTY, goal_pos] = false
@@ -144,8 +144,8 @@ end
 function add_room!(env::AbstractGridWorld, room::Room)
     world = get_world(env)
     world[WALL, room.region] .= true
-    world[WALL, interior(room)] .= false
-    world[EMPTY, interior(room)] .= true
+    world[WALL, get_interior(room)] .= false
+    world[EMPTY, get_interior(room)] .= true
     push!(env.rooms, room)
 end
 
