@@ -3,8 +3,8 @@ using Test
 using Random
 using ReinforcementLearningBase
 
-ENVS = [EmptyGridWorld, FourRooms, GoToDoor, DoorKey, CollectGems, DynamicObstacles]
-ENVS_RLBASE = [EmptyGridWorld, FourRooms, GoToDoor, DoorKey, CollectGems, DynamicObstacles]
+ENVS = [EmptyGridWorld, FourRooms, GoToDoor, DoorKey, CollectGems, DynamicObstacles, SequentialRooms]
+ENVS_RLBASE = [EmptyGridWorld, FourRooms, GoToDoor, DoorKey, CollectGems, DynamicObstacles, SequentialRooms]
 ACTIONS = [TURN_LEFT, TURN_RIGHT, MOVE_FORWARD]
 
 @testset "GridWorlds.jl" begin
@@ -54,7 +54,7 @@ ACTIONS = [TURN_LEFT, TURN_RIGHT, MOVE_FORWARD]
 
             if Env == CollectGems
                 @test total_reward == env.num_gem_init * env.gem_reward
-            elseif Env == EmptyGridWorld || Env == FourRooms || Env == DoorKey
+            elseif Env == EmptyGridWorld || Env == FourRooms || Env == DoorKey || Env == SequentialRooms
                 @test total_reward == env.goal_reward
             elseif Env == GoToDoor
                 @test (total_reward == env.target_reward || total_reward == env.penalty)
