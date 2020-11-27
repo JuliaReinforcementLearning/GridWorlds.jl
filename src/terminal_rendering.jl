@@ -10,7 +10,7 @@ function print_grid(io::IO, env::AbstractGridWorld, view_type)
     agent_layer = get_agent_layer(grid, agent_pos)
     grid = cat(agent_layer, grid, dims = 1)
 
-    objects = (agent, get_object(env)...)
+    objects = (agent, get_objects(env)...)
 
     for i in 1:size(grid, 2)
         for j in 1:size(grid, 3)
@@ -23,7 +23,7 @@ function print_grid(io::IO, env::AbstractGridWorld, view_type)
             else
                 o = objects[idx]
                 foreground = get_color(o)
-                c = convert(Char, o)
+                c = get_char(o)
             end
             print(io, Crayon(background = get_background(env, pos, Val{view_type}()), foreground = foreground, bold = true, reset = true), c)
         end

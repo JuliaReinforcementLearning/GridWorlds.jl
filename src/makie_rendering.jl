@@ -22,9 +22,9 @@ function init_screen(env::Observable{<:AbstractGridWorld}; resolution=(1000,1000
     poly!(scene, area)
 
     # 2. paint each kind of object
-    for o in get_object(env[])
+    for o in get_objects(env[])
         if o !== EMPTY
-            scatter!(scene, @lift(centers(findall($env.world[o,:,:]), $tile_size)), color=get_color(o), marker=convert(Char, o), markersize=@lift(minimum($tile_size)))
+            scatter!(scene, @lift(centers(findall($env.world[o,:,:]), $tile_size)), color=get_color(o), marker=get_char(o), markersize=@lift(minimum($tile_size)))
         end
     end
 
@@ -38,7 +38,7 @@ function init_screen(env::Observable{<:AbstractGridWorld}; resolution=(1000,1000
     # 4. paint agent
     agent = @lift(get_agent($env))
     agent_position = @lift((T(get_agent_pos($env)).I .- (0.5, 0.5)).* $tile_size)
-    scatter!(scene, agent_position, color=@lift(get_color($agent)), marker=@lift(convert(Char, $agent)), markersize=@lift(minimum($tile_size)))
+    scatter!(scene, agent_position, color=@lift(get_color($agent)), marker=@lift(get_char($agent)), markersize=@lift(minimum($tile_size)))
 
     display(scene)
     scene

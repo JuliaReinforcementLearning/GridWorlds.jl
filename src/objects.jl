@@ -1,5 +1,5 @@
-export COLORS, MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, UP, DOWN, LEFT, RIGHT, LRUD, EMPTY, WALL, GOAL, GEM, OBSTACLE
-export MoveForward, AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Obstacle, Agent
+export COLORS, EMPTY, WALL, GOAL, GEM, OBSTACLE
+export AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Obstacle, Agent
 export get_color, get_dir, set_dir!
 
 using Crayons
@@ -13,41 +13,41 @@ const COLORS = (:red, :green, :blue, :magenta, :yellow, :white)
 
 abstract type AbstractObject end
 
-Base.show(io::IO, x::AbstractObject) = print(io, Crayon(foreground=get_color(x), reset=true), convert(Char, x))
+Base.show(io::IO, object::AbstractObject) = print(io, Crayon(foreground = get_color(object), reset = true), get_char(object))
 
 struct Empty <: AbstractObject end
 const EMPTY = Empty()
-Base.convert(::Type{Char}, ::Empty) = '⋅'
+get_char(::Empty) = '⋅'
 get_color(::Empty) = :white
 
 struct Wall <: AbstractObject end
 const WALL = Wall()
-Base.convert(::Type{Char}, ::Wall) = '█'
+get_char(::Wall) = '█'
 get_color(::Wall) = :white
 
 struct Goal <: AbstractObject end
 const GOAL = Goal()
-Base.convert(::Type{Char}, ::Goal) = '♥'
+get_char(::Goal) = '♥'
 get_color(::Goal) = :red
 
 struct Door{C} <: AbstractObject end
 Door(c) = Door{c}()
-Base.convert(::Type{Char}, ::Door) = '⩎'
+get_char(::Door) = '⩎'
 get_color(::Door{C}) where C = C
 
 struct Key{C} <: AbstractObject end
 Key(c) = Key{c}()
-Base.convert(::Type{Char}, ::Key) = '⚷'
+get_char(::Key) = '⚷'
 get_color(::Key{C}) where C = C
 
 struct Gem <: AbstractObject end
 const GEM = Gem()
-Base.convert(::Type{Char}, ::Gem) = '♦'
+get_char(::Gem) = '♦'
 get_color(::Gem) = :magenta
 
 struct Obstacle <: AbstractObject end
 const OBSTACLE = Obstacle()
-Base.convert(::Type{Char}, ::Obstacle) = '⊗'
+get_char(::Obstacle) = '⊗'
 get_color(::Obstacle) = :blue    
 
 #####
@@ -56,29 +56,30 @@ get_color(::Obstacle) = :blue
 
 Base.@kwdef mutable struct Agent <: AbstractObject
     color::Symbol=:red
-    dir::LRUD
+    dir::Direction
     inventory::Union{Nothing, AbstractObject, Vector}=nothing
 end
 
-function Base.convert(::Type{Char}, a::Agent)
-    if     a.dir === UP
+function get_char(agent::Agent)
+    if     agent.dir === UP
         '↑'
-    elseif a.dir === DOWN
+    elseif agent.dir === DOWN
         '↓'
-    elseif a.dir === LEFT
+    elseif agent.dir === LEFT
         '←'
-    elseif a.dir === RIGHT
+    elseif agent.dir === RIGHT
         '→'
     end
 end
 
-get_color(a::Agent) = a.color
-get_dir(a::Agent) = a.dir
-set_dir!(a::Agent, d) = a.dir = d
+get_color(agent::Agent) = agent.color
+get_dir(agent::Agent) = agent.dir
+set_dir!(agent::Agent, dir) = agent.dir = dir
 
 struct Transportable end
-struct NonTransportable end
 const TRANSPORTABLE = Transportable()
+
+struct NonTransportable end
 const NONTRANSPORTABLE = NonTransportable()
 
 istransportable(::Type{<:AbstractObject}) = NONTRANSPORTABLE
