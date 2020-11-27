@@ -13,7 +13,7 @@ mutable struct GoToDoor{W<:GridWorldBase, R} <: AbstractGridWorld
     rng::R
 end
 
-function GoToDoor(;n=8, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_RNG)
+function GoToDoor(; n = 8, agent_start_pos = CartesianIndex(2,2), rng = Random.GLOBAL_RNG)
     doors = [Door(c) for c in COLORS[1:4]]
     objects = (EMPTY, WALL, doors...)
 
@@ -25,7 +25,7 @@ function GoToDoor(;n=8, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_R
     penalty = -1.0
     reward = 0.0
 
-    env = GoToDoor(world, agent_start_pos, Agent(dir=RIGHT), doors[begin], target_reward, penalty, reward, rng)
+    env = GoToDoor(world, agent_start_pos, Agent(dir = RIGHT), doors[1], target_reward, penalty, reward, rng)
 
     reset!(env)
 
@@ -33,35 +33,42 @@ function GoToDoor(;n=8, agent_start_pos=CartesianIndex(2,2), rng=Random.GLOBAL_R
 end
 
 function (env::GoToDoor)(::MoveForward)
+    world = get_world(env)
+    agent = get_agent(env)
+
     env.reward = 0.0
-    dir = get_dir(env.agent)
-    dest = dir(env.agent_pos)
-    if dest ∈ CartesianIndices((size(env.world, 2), size(env.world, 3))) && !env.world[WALL,dest]
+
+    dir = get_dir(agent)
+    dest = dir(get_agent_pos(env))
+
+    if dest ∈ CartesianIndices((size(world, 2), size(world, 3))) && !world[WALL,dest]
         env.agent_pos = dest
         if get_terminal(env)
-            if env.world[env.target, env.agent_pos]
+            if world[env.target, get_agent_pos(env)]
                 env.reward = env.target_reward
             else
                 env.reward = env.penalty
             end
         end
     end
-    env
+    return env
 end
 
 RLBase.get_state(env::GoToDoor) = (get_agent_view(env), env.target)
 
-RLBase.get_terminal(env::GoToDoor) = any([env.world[x, env.agent_pos] for x in env.world.objects[end-3:end]])
+RLBase.get_terminal(env::GoToDoor) = any([get_world(env)[x, env.agent_pos] for x in get_object(env)[end-3:end]])
 
 function RLBase.reset!(env::GoToDoor)
-    n = size(env.world)[end]
+    world = get_world(env)
 
-    env.world[WALL, [1,n], 1:n] .= true
-    env.world[WALL, 1:n, [1,n]] .= true
+    n = size(world)[end]
 
-    doors = env.world.objects[end-3:end]
+    world[WALL, [1,n], 1:n] .= true
+    world[WALL, 1:n, [1,n]] .= true
+
+    doors = get_object(env)[end-3:end]
     for door in doors
-        env.world[door, :, :] .= false
+        world[door, :, :] .= false
     end
 
     env.target = rand(env.rng, doors)
@@ -75,9 +82,9 @@ function RLBase.reset!(env::GoToDoor)
     rp = randperm(env.rng, length(door_pos))
 
     for (door, pos) in zip(doors, door_pos[rp])
-        env.world[door, pos] = true
-        env.world[WALL, pos] = false
+        world[door, pos] = true
+        world[WALL, pos] = false
     end
 
-    env
+    return env
 end
