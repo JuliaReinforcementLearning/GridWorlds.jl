@@ -34,18 +34,18 @@ end
 function (env::CollectGems)(::MoveForward)
     world = get_world(env)
 
-    env.reward = 0.0
+    set_reward!(env, 0.0)
 
     dir = get_agent_dir(env)
     dest = dir(get_agent_pos(env))
 
     if !world[WALL, dest]
-        env.agent_pos = dest
+        set_agent_pos!(env, dest)
         if world[GEM, dest]
             world[GEM, dest] = false
             world[EMPTY, dest] = true
             env.num_gem_current = env.num_gem_current - 1
-            env.reward = env.gem_reward
+            set_reward!(env, env.gem_reward)
         end
     end
 
@@ -56,18 +56,18 @@ RLBase.get_terminal(env::CollectGems) = env.num_gem_current <= 0
 
 function RLBase.reset!(env::CollectGems; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT)
     world = get_world(env)
+    n = get_width(env)
 
-    n = size(world)[end]
     world[EMPTY, 2:n-1, 2:n-1] .= true
     world[GEM, 1:n, 1:n] .= false
 
     env.num_gem_current = env.num_gem_init
 
-    env.reward = 0.0
+    set_reward!(env, 0.0)
 
-    env.agent_pos = agent_start_pos
+    set_agent_pos!(env, agent_start_pos)
 
-    set_dir!(get_agent(env), agent_start_dir)
+    set_agent_dir!(env, agent_start_dir)
 
     gem_placed = 0
     while gem_placed < env.num_gem_init

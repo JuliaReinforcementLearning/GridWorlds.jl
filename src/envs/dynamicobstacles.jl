@@ -39,7 +39,7 @@ iscollision(env::DynamicObstacles) = get_world(env)[OBSTACLE, get_agent_pos(env)
 function (env::DynamicObstacles)(::MoveForward)
     world = get_world(env)
 
-    env.reward = 0.0
+    set_reward!(env, 0.0)
 
     update_obstacles!(env)
 
@@ -47,25 +47,25 @@ function (env::DynamicObstacles)(::MoveForward)
     dest = dir(get_agent_pos(env))
 
     if !world[WALL, dest]
-        env.agent_pos = dest
+        set_agent_pos!(env, dest)
     end
 
     if iscollision(env)
-        env.reward = env.obstacle_reward
+        set_reward!(env, env.obstacle_reward)
     end
 
     return env
 end
 
 function (env::DynamicObstacles)(action::Union{TurnRight, TurnLeft})
-    env.reward = 0.0
+    set_reward!(env, 0.0)
 
     update_obstacles!(env)
 
     set_dir!(get_agent(env), action(get_agent_dir(env)))
 
     if iscollision(env)
-        env.reward = env.obstacle_reward
+        set_reward!(env, env.obstacle_reward)
     end
 
     return env
@@ -73,7 +73,7 @@ end
 
 function valid_obstacle_dest(env::DynamicObstacles, pos::CartesianIndex{2})
     candidate_pos = [CartesianIndex(pos[1] + i, pos[2] + j) for i in [-1, 0, 1] for j in [-1, 0, 1]]
-    filter(p -> env.world[EMPTY, p] || pos == p, candidate_pos)
+    filter(p -> get_world(env)[EMPTY, p] || pos == p, candidate_pos)
 end
 
 function update_obstacles!(env::DynamicObstacles)
@@ -95,17 +95,19 @@ end
 
 RLBase.get_terminal(env::DynamicObstacles) = iscollision(env) || get_world(env)[GOAL, get_agent_pos(env)]
 
-function RLBase.reset!(env::DynamicObstacles; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(env.world)[end] - 1, size(env.world)[end] - 1))
+function RLBase.reset!(env::DynamicObstacles; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(get_width(env) - 1, get_width(env) - 1))
     world = get_world(env)
+    n = get_width(env)
 
-    n = size(world)[end]
     world[EMPTY, 2:n-1, 2:n-1] .= true
     world[GOAL, goal_pos] = true
     world[EMPTY, goal_pos] = false
 
-    env.agent_pos = agent_start_pos
+    set_reward!(env, 0.0)
 
-    set_dir!(get_agent(env), agent_start_dir)
+    set_agent_pos!(env, agent_start_pos)
+
+    set_agent_dir!(env, agent_start_dir)
 
     obstacles_placed = 0
     while obstacles_placed < env.num_obstacles

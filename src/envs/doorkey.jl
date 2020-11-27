@@ -11,10 +11,12 @@ mutable struct DoorKey{W<:GridWorldBase, R} <: AbstractGridWorld
     rng::R
 end
 
-function DoorKey(;n = 7, agent_start_pos = CartesianIndex(2,2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(n-1, n-1), rng = Random.GLOBAL_RNG)
+function DoorKey(; n = 7, agent_start_pos = CartesianIndex(2,2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(n-1, n-1), rng = Random.GLOBAL_RNG)
     door = Door(:yellow)
     key = Key(:yellow)
+
     objects = (EMPTY, WALL, GOAL, door, key)
+
     world = GridWorldBase(objects, n, n)
 
     world[WALL, [1,n], 1:n] .= true
@@ -24,7 +26,7 @@ function DoorKey(;n = 7, agent_start_pos = CartesianIndex(2,2), agent_start_dir 
     goal_reward = 1.0
     reward = 0.0
 
-    env = DoorKey(world, agent_start_pos, Agent(;dir = agent_start_dir), goal_reward, reward, rng)
+    env = DoorKey(world, agent_start_pos, Agent(dir = agent_start_dir), goal_reward, reward, rng)
 
     reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir, goal_pos = goal_pos)
 
@@ -36,10 +38,12 @@ function (env::DoorKey)(::MoveForward)
     objects = get_objects(env)
     agent = get_agent(env)
 
-    env.reward = 0.0
+    set_reward!(env, 0.0)
+
     door = objects[end - 1]
     key = objects[end]
-    dir = get_dir(agent)
+
+    dir = get_agent_dir(env)
     dest = dir(get_agent_pos(env))
 
     if world[key, dest]
@@ -47,15 +51,15 @@ function (env::DoorKey)(::MoveForward)
             world[key, dest] = false
             world[EMPTY, dest] = true
         end
-        env.agent_pos = dest
+        set_agent_pos!(env, dest)
     elseif world[door, dest] && agent.inventory !== key
         nothing
     elseif world[door, dest] && agent.inventory === key
-        env.agent_pos = dest
+        set_agent_pos!(env, dest)
     elseif !world[WALL,dest]
-        env.agent_pos = dest
-        if world[GOAL, env.agent_pos]
-            env.reward = env.goal_reward
+        set_agent_pos!(env, dest)
+        if world[GOAL, get_agent_pos(env)]
+            set_reward!(env, env.goal_reward)
         end
     end
 
@@ -64,19 +68,19 @@ end
 
 RLBase.get_terminal(env::DoorKey) = get_world(env)[GOAL, get_agent_pos(env)]
 
-function RLBase.reset!(env::DoorKey; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(env.world)[end] - 1, size(env.world)[end] - 1))
+function RLBase.reset!(env::DoorKey; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(get_width(env) - 1, get_width(env) - 1))
     world = get_world(env)
+    n = get_width(env)
+
     objects = get_objects(env)
-
-    n = size(world)[end]
-
     door = objects[end - 1]
     key = objects[end]
 
-    env.reward = 0.0
+    set_reward!(env, 0.0)
 
-    env.agent_pos = agent_start_pos
-    set_dir!(get_agent(env), agent_start_dir)
+    set_agent_pos!(env, agent_start_pos)
+
+    set_agent_dir!(env, agent_start_dir)
 
     door_pos = CartesianIndex(rand(env.rng, 2:n-1), rand(env.rng, 3:n-2))
     @assert agent_start_pos[2] < door_pos[2] "Agent should start on the left side of the door"

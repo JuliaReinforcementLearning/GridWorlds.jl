@@ -34,23 +34,23 @@ end
 
 function (env::GoToDoor)(::MoveForward)
     world = get_world(env)
-    agent = get_agent(env)
 
-    env.reward = 0.0
+    set_reward!(env, 0.0)
 
-    dir = get_dir(agent)
+    dir = get_agent_dir(env)
     dest = dir(get_agent_pos(env))
 
     if dest ∈ CartesianIndices((size(world, 2), size(world, 3))) && !world[WALL,dest]
-        env.agent_pos = dest
+        set_agent_pos!(env, dest)
         if get_terminal(env)
             if world[env.target, get_agent_pos(env)]
-                env.reward = env.target_reward
+                set_reward!(env, env.target_reward)
             else
-                env.reward = env.penalty
+                set_reward!(env, env.penalty)
             end
         end
     end
+
     return env
 end
 
@@ -61,7 +61,7 @@ RLBase.get_terminal(env::GoToDoor) = any([get_world(env)[x, env.agent_pos] for x
 function RLBase.reset!(env::GoToDoor)
     world = get_world(env)
 
-    n = size(world)[end]
+    n = get_width(env)
 
     world[WALL, [1,n], 1:n] .= true
     world[WALL, 1:n, [1,n]] .= true
@@ -72,7 +72,7 @@ function RLBase.reset!(env::GoToDoor)
     end
 
     env.target = rand(env.rng, doors)
-    env.reward = 0.0
+    set_reward!(env, 0.0)
 
     door_pos = [CartesianIndex(rand(env.rng, 2:n-1),1),
                 CartesianIndex(rand(env.rng, 2:n-1),n),

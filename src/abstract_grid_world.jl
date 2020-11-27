@@ -4,10 +4,11 @@ export get_objects, get_world, get_grid, get_agent, get_agent_pos, get_agent_dir
 abstract type AbstractGridWorld <: AbstractEnv end
 
 #####
-# useful getter methods
+# useful getter and setter methods
 #####
 
 get_world(env::AbstractGridWorld) = env.world
+set_world!(env::AbstractGridWorld, world::GridWorldBase) = env.world = world
 
 get_grid(env::AbstractGridWorld, ::Val{:full_view}) = env |> get_world |> get_grid
 get_grid(env::AbstractGridWorld, ::Val{:agent_view}) = get_agent_view(env)
@@ -21,14 +22,17 @@ get_width(env::AbstractGridWorld) = size(get_world(env), 3)
 get_agent(env::AbstractGridWorld, ::Val{:full_view}) = env.agent
 get_agent(env::AbstractGridWorld, ::Val{:agent_view}) = Agent(dir = DOWN)
 get_agent(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_agent(env, Val{view_type}())
+set_agent!(env::AbstractGridWorld, agent::Agent) = env.agent = agent
 
 get_agent_pos(env::AbstractGridWorld, ::Val{:full_view}) = env.agent_pos
 get_agent_pos(env::AbstractGridWorld, ::Val{:agent_view}) = CartesianIndex(1, size(get_grid(env, Val{:agent_view}()), 3) ÷ 2 + 1)
 get_agent_pos(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_agent_pos(env, Val{view_type}())
+set_agent_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = env.agent_pos = pos
 
 get_agent_dir(env::AbstractGridWorld, ::Val{:full_view}) = env |> get_agent |> get_dir
 get_agent_dir(env::AbstractGridWorld, ::Val{:agent_view}) = DOWN
 get_agent_dir(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_agent_dir(env, Val{view_type}())
+set_agent_dir!(env::AbstractGridWorld, dir::Direction) = set_dir!(get_agent(env), dir)
 
 function get_agent_view(env::AbstractGridWorld, agent_view_size = (7,7))
     world = get_world(env)
@@ -53,6 +57,8 @@ function get_full_view(env::AbstractGridWorld)
     agent_layer = get_agent_layer(grid, get_agent_pos(env))
     return cat(agent_layer, grid, dims = 1)
 end
+
+set_reward!(env::AbstractGridWorld, reward) = env.reward = reward
 
 #####
 # RLBase API defaults

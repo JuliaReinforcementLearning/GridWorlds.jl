@@ -36,7 +36,7 @@ mutable struct SequentialRooms{R} <: AbstractGridWorld
     rng::R
 end
 
-function SequentialRooms(;num_rooms = 3, room_length_range = 4:6, agent_start_dir = RIGHT, rng = Random.GLOBAL_RNG)
+function SequentialRooms(; num_rooms = 3, room_length_range = 4:6, agent_start_dir = RIGHT, rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, GOAL)
     big_n = 2 * num_rooms * room_length_range.stop
     world = GridWorldBase(objects, big_n, big_n)
@@ -58,17 +58,15 @@ end
 function (env::SequentialRooms)(::MoveForward)
     world = get_world(env)
 
-    env.reward = 0.0
+    set_reward!(env, 0.0)
 
-    agent = get_agent(env)
     dir = get_agent_dir(env)
-    pos = get_agent_pos(env)
-    dest = dir(pos)
+    dest = dir(get_agent_pos(env))
 
     if !world[WALL, dest]
-        env.agent_pos = dest
+        set_agent_pos!(env, dest)
         if world[GOAL, get_agent_pos(env)]
-            env.reward = env.goal_reward
+            set_reward!(env, env.goal_reward)
         end
     end
 
@@ -79,13 +77,16 @@ RLBase.get_terminal(env::SequentialRooms) = get_world(env)[GOAL, get_agent_pos(e
 
 function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
     world = get_world(env)
-    agent = get_agent(env)
 
     world[:, :, :] .= false
-    env.agent_pos = CartesianIndex(1, 1)
+
+    set_agent_pos!(env, CartesianIndex(1, 1))
+
     env.rooms = Room[]
-    env.reward = 0.0
-    set_dir!(agent, agent_start_dir)
+
+    set_reward!(env, 0.0)
+
+    set_agent_dir!(env, agent_start_dir)
 
     room = generate_first_room(env)
     add_room!(env, room)
@@ -110,10 +111,10 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
     # create a compact world
     centered_world = get_centered_world(world)
     shift_rooms!(env)
-    env.world = centered_world
+    set_world!(env, centered_world)
 
     # add the agent randomly in the first room
-    env.agent_pos = rand(env.rng, interior(env.rooms[1]))
+    set_agent_pos!(env, rand(env.rng, interior(env.rooms[1])))
 
     # add the GOAL randomly in the last room
     world = get_world(env)
@@ -132,7 +133,7 @@ end
 #####
 
 function generate_first_room(env::AbstractGridWorld)
-    big_n = size(get_world(env))[end]
+    big_n = get_width(env)
     origin = CartesianIndex(big_n ÷ 2 + 1, big_n ÷ 2 + 1)
     height = rand(env.rng, env.room_length_range)
     width = rand(env.rng, env.room_length_range)
@@ -203,7 +204,7 @@ end
 
 function get_padding(world::GridWorldBase)
     bounding_region = get_bounding_region(world)
-    small_n = size(world)[end] ÷ 2
+    small_n = get_width(world) ÷ 2
     top_padding = (small_n - size(bounding_region, 1)) ÷ 2
     left_padding = (small_n - size(bounding_region, 2)) ÷ 2
     CartesianIndex(top_padding, left_padding)
@@ -231,7 +232,7 @@ function shifted_room(room::Room, new_global_origin::CartesianIndex{2})
 end
 
 function get_centered_world(world::GridWorldBase)
-    small_n = size(world)[end] ÷ 2
+    small_n = get_width(world) ÷ 2
     new_global_origin = get_new_global_origin(world)
     new_global_region = CartesianIndices((new_global_origin.I[1] : new_global_origin.I[1] + small_n - 1, new_global_origin.I[2] : new_global_origin.I[2] + small_n - 1))
     centered_world = GridWorldBase(get_objects(world), small_n, small_n)
