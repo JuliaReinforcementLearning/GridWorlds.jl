@@ -1,5 +1,6 @@
 export AbstractGridWorld
-export get_objects, get_world, get_grid, get_agent, get_agent_pos, get_agent_dir, get_agent_view, get_full_view
+export get_world, get_grid, get_objects, get_height, get_width, get_agent, get_agent_pos, get_agent_dir, get_agent_view, get_agent_view!, get_full_view
+export set_world!, set_agent!, set_agent_pos!, set_agent_dir!, set_reward!
 
 abstract type AbstractGridWorld <: AbstractEnv end
 

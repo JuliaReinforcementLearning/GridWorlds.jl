@@ -1,5 +1,5 @@
 export GridWorldBase
-export get_objects
+export get_grid, get_objects, get_height, get_width, switch!, get_agent_view!
 
 using MacroTools:@forward
 using Random
