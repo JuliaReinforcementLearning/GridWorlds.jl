@@ -1,10 +1,7 @@
-export get_agent_view, AbstractGridWorld
-export get_actions
+export AbstractGridWorld
+export get_object, get_world, get_grid, get_agent, get_agent_pos, get_agent_dir, get_agent_view, get_full_view
 
 abstract type AbstractGridWorld <: AbstractEnv end
-
-function get_agent_view end
-function get_agent end
 
 Base.convert(::Type{GridWorldBase}, env::AbstractGridWorld) = env.world
 get_object(env::AbstractGridWorld) = get_object(convert(GridWorldBase, env))
@@ -34,31 +31,32 @@ get_agent_dir(env::AbstractGridWorld, ::Val{:full_view}) = env |> get_agent |> g
 get_agent_dir(env::AbstractGridWorld, ::Val{:agent_view}) = DOWN
 get_agent_dir(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_agent_dir(env, Val{view_type}())
 
-function get_agent_view(env::AbstractGridWorld, agent_view_size=(7,7))
-    w = convert(GridWorldBase, env)
-    v = BitArray{3}(undef, size(w, 1), agent_view_size...)
-    fill!(v, false)
-    get_agent_view!(v, env)
+function get_agent_view(env::AbstractGridWorld, agent_view_size = (7,7))
+    world = convert(GridWorldBase, env)
+    grid = BitArray{3}(undef, size(world, 1), agent_view_size...)
+    fill!(grid, false)
+    get_agent_view!(grid, env)
 end
 
-get_agent_view_inds(env::AbstractGridWorld, s=(7,7)) = get_agent_view_inds(get_agent_pos(env).I, s, get_agent_dir(env))
+get_agent_view_inds(env::AbstractGridWorld, agent_view_size = (7,7)) = get_agent_view_inds(get_agent_pos(env).I, agent_view_size, get_agent_dir(env))
 
-get_agent_view!(v::BitArray{3}, env::AbstractGridWorld) = get_agent_view!(v, convert(GridWorldBase, env), get_agent_pos(env), get_agent_dir(env))
+get_agent_view!(grid::BitArray{3}, env::AbstractGridWorld) = get_agent_view!(grid, convert(GridWorldBase, env), get_agent_pos(env), get_agent_dir(env))
 
 function get_agent_layer(grid::BitArray{3}, agent_pos::CartesianIndex{2})
     dims = size(grid)[2:end]
-    v = falses(1, dims...)
-    v[1, agent_pos] = true
-    return v
+    agent_layer = falses(1, dims...)
+    agent_layer[1, agent_pos] = true
+    return agent_layer
 end
 
 function get_full_view(env::AbstractGridWorld)
-    v = get_agent_layer(env.world.grid, get_agent_pos(env))
-    return cat(v, env.world.grid, dims = 1)
+    grid = get_grid(env)
+    agent_layer = get_agent_layer(grid, get_agent_pos(env))
+    return cat(agent_layer, grid, dims = 1)
 end
 
 #####
-# RLBase defaults
+# RLBase API defaults
 #####
 
 RLBase.DefaultStateStyle(env::AbstractGridWorld) = RLBase.PartialObservation{Array}()
