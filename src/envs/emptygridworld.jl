@@ -54,8 +54,9 @@ function RLBase.reset!(env::EmptyGridWorld; agent_start_pos = CartesianIndex(2, 
 
     set_agent_dir!(env, agent_start_dir)
 
-    world[EMPTY, :, :] .= .!world[WALL, :, :]
+    world[GOAL, :, :] .= false
     world[GOAL, goal_pos] = true
+    world[EMPTY, :, :] .= .!world[WALL, :, :]
     world[EMPTY, goal_pos] = false
 
     return env
