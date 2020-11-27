@@ -23,7 +23,7 @@ function print_grid(io::IO, env::AbstractGridWorld, view_type)
             else
                 o = objects[idx]
                 foreground = get_color(o)
-                c = convert(Char, o)
+                c = get_char(o)
             end
             print(io, Crayon(background = get_background(env, pos, Val{view_type}()), foreground = foreground, bold = true, reset = true), c)
         end
