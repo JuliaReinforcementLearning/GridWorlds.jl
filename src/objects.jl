@@ -77,8 +77,9 @@ get_dir(agent::Agent) = agent.dir
 set_dir!(agent::Agent, dir) = agent.dir = dir
 
 struct Transportable end
-struct NonTransportable end
 const TRANSPORTABLE = Transportable()
+
+struct NonTransportable end
 const NONTRANSPORTABLE = NonTransportable()
 
 istransportable(::Type{<:AbstractObject}) = NONTRANSPORTABLE
