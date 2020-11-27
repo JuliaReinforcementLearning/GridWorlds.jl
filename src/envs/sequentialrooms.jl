@@ -56,30 +56,35 @@ end
 #####
 
 function (env::SequentialRooms)(::MoveForward)
+    world = get_world(env)
+
     env.reward = 0.0
+
     agent = get_agent(env)
     dir = get_agent_dir(env)
     pos = get_agent_pos(env)
     dest = dir(pos)
-    if !env.world[WALL, dest]
+
+    if !world[WALL, dest]
         env.agent_pos = dest
-        if env.world[GOAL, env.agent_pos]
+        if world[GOAL, get_agent_pos(env)]
             env.reward = env.goal_reward
         end
     end
-    env
+
+    return env
 end
 
 RLBase.get_terminal(env::SequentialRooms) = get_world(env)[GOAL, get_agent_pos(env)]
 
 function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
     world = get_world(env)
+    agent = get_agent(env)
+
     world[:, :, :] .= false
     env.agent_pos = CartesianIndex(1, 1)
     env.rooms = Room[]
     env.reward = 0.0
-
-    agent = get_agent(env)
     set_dir!(agent, agent_start_dir)
 
     room = generate_first_room(env)
@@ -111,12 +116,13 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
     env.agent_pos = rand(env.rng, interior(env.rooms[1]))
 
     # add the GOAL randomly in the last room
+    world = get_world(env)
     goal_pos = rand(env.rng, interior(env.rooms[end]))
     while goal_pos == env.agent_pos
         goal_pos = rand(env.rng, interior(env.rooms[end]))
     end
-    env.world[GOAL, goal_pos] = true
-    env.world[EMPTY, goal_pos] = false
+    world[GOAL, goal_pos] = true
+    world[EMPTY, goal_pos] = false
 
     return env
 end
@@ -126,7 +132,7 @@ end
 #####
 
 function generate_first_room(env::AbstractGridWorld)
-    big_n = size(env.world)[end]
+    big_n = size(get_world(env))[end]
     origin = CartesianIndex(big_n ÷ 2 + 1, big_n ÷ 2 + 1)
     height = rand(env.rng, env.room_length_range)
     width = rand(env.rng, env.room_length_range)
