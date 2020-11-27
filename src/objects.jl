@@ -13,7 +13,7 @@ const COLORS = (:red, :green, :blue, :magenta, :yellow, :white)
 
 abstract type AbstractObject end
 
-Base.show(io::IO, x::AbstractObject) = print(io, Crayon(foreground=get_color(x), reset=true), convert(Char, x))
+Base.show(io::IO, object::AbstractObject) = print(io, Crayon(foreground = get_color(object), reset = true), convert(Char, object))
 
 struct Empty <: AbstractObject end
 const EMPTY = Empty()
@@ -72,9 +72,9 @@ function Base.convert(::Type{Char}, a::Agent)
     end
 end
 
-get_color(a::Agent) = a.color
-get_dir(a::Agent) = a.dir
-set_dir!(a::Agent, d) = a.dir = d
+get_color(agent::Agent) = agent.color
+get_dir(agent::Agent) = agent.dir
+set_dir!(agent::Agent, dir) = agent.dir = dir
 
 struct Transportable end
 struct NonTransportable end
