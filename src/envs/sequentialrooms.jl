@@ -102,9 +102,21 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
         tries += 1
     end
 
-    shift_rooms!(env)
+    # create a compact world
     centered_world = get_centered_world(world)
+    shift_rooms!(env)
     env.world = centered_world
+
+    # add the agent randomly in the first room
+    env.agent_pos = rand(env.rng, interior(env.rooms[1]))
+
+    # add the GOAL randomly in the last room
+    goal_pos = rand(env.rng, interior(env.rooms[end]))
+    while goal_pos == env.agent_pos
+        goal_pos = rand(env.rng, interior(env.rooms[end]))
+    end
+    env.world[GOAL, goal_pos] = true
+    env.world[EMPTY, goal_pos] = false
 
     return env
 end
@@ -208,7 +220,7 @@ end
 function shifted_room(room::Room, new_global_origin::CartesianIndex{2})
     height = size(room.region, 1)
     width = size(room.region, 2)
-    new_room_origin = get_origin(room) - new_global_origin
+    new_room_origin = get_origin(room) - new_global_origin + CartesianIndex(1, 1)
     Room(new_room_origin, height, width)
 end
 
