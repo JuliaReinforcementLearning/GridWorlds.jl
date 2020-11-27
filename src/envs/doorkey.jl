@@ -59,7 +59,7 @@ function (env::DoorKey)(::MoveForward)
         end
     end
 
-    env
+    return env
 end
 
 RLBase.get_terminal(env::DoorKey) = get_world(env)[GOAL, get_agent_pos(env)]
