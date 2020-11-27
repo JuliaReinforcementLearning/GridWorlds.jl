@@ -4,7 +4,7 @@ export get_object, get_world, get_grid, get_agent, get_agent_pos, get_agent_dir,
 abstract type AbstractGridWorld <: AbstractEnv end
 
 Base.convert(::Type{GridWorldBase}, env::AbstractGridWorld) = env.world
-get_object(env::AbstractGridWorld) = get_object(convert(GridWorldBase, env))
+get_object(env::AbstractGridWorld) = get_object(get_world(env))
 get_object(env::AbstractGridWorld, x::Type{<:AbstractObject}) = filter(o -> o isa x, get_object(env))
 get_object(env::AbstractGridWorld, x::Type{Agent}) = env.agent
 get_pos(env::AbstractGridWorld, ::Type{Agent}) = env.agent_pos
@@ -32,15 +32,15 @@ get_agent_dir(env::AbstractGridWorld, ::Val{:agent_view}) = DOWN
 get_agent_dir(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_agent_dir(env, Val{view_type}())
 
 function get_agent_view(env::AbstractGridWorld, agent_view_size = (7,7))
-    world = convert(GridWorldBase, env)
-    grid = BitArray{3}(undef, size(world, 1), agent_view_size...)
-    fill!(grid, false)
-    get_agent_view!(grid, env)
+    world = get_world(env)
+    agent_view = BitArray{3}(undef, size(world, 1), agent_view_size...)
+    fill!(agent_view, false)
+    get_agent_view!(agent_view, env)
 end
 
 get_agent_view_inds(env::AbstractGridWorld, agent_view_size = (7,7)) = get_agent_view_inds(get_agent_pos(env).I, agent_view_size, get_agent_dir(env))
 
-get_agent_view!(grid::BitArray{3}, env::AbstractGridWorld) = get_agent_view!(grid, convert(GridWorldBase, env), get_agent_pos(env), get_agent_dir(env))
+get_agent_view!(grid::BitArray{3}, env::AbstractGridWorld) = get_agent_view!(grid, get_world(env), get_agent_pos(env), get_agent_dir(env))
 
 function get_agent_layer(grid::BitArray{3}, agent_pos::CartesianIndex{2})
     dims = size(grid)[2:end]
