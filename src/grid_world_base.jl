@@ -17,26 +17,26 @@ end
 
 get_object(world::GridWorldBase) = world.objects
 
-function GridWorldBase(objects::Tuple{Vararg{AbstractObject}}, x::Int, y::Int)
-    grid = BitArray{3}(undef, length(objects), x, y)
+function GridWorldBase(objects::Tuple{Vararg{AbstractObject}}, height::Int, width::Int)
+    grid = BitArray{3}(undef, length(objects), height, width)
     fill!(grid, false)
     GridWorldBase(grid, objects)
 end
 
 @forward GridWorldBase.grid Base.size, Base.getindex, Base.setindex!
 
-@generated function Base.to_index(::GridWorldBase{O}, x::X) where {X<:AbstractObject, O}
+@generated function Base.to_index(::GridWorldBase{O}, object::X) where {X<:AbstractObject, O}
     i = findfirst(X .=== O.parameters)
-    isnothing(i) && error("unknow object $x")
+    isnothing(i) && error("unknow object $object")
     :($i)
 end
 
-Base.setindex!(world::GridWorldBase, v::Bool, o::AbstractObject, x::Int, y::Int) = setindex!(world.grid, v, Base.to_index(w, o), x, y)
-Base.setindex!(world::GridWorldBase, v::Bool, o::AbstractObject, i::CartesianIndex{2}) = setindex!(w, v, o, i[1], i[2])
+Base.setindex!(world::GridWorldBase, v::Bool, o::AbstractObject, x::Int, y::Int) = setindex!(world.grid, v, Base.to_index(world, o), x, y)
+Base.setindex!(world::GridWorldBase, v::Bool, o::AbstractObject, i::CartesianIndex{2}) = setindex!(world, v, o, i[1], i[2])
 
-Base.getindex(world::GridWorldBase, o::AbstractObject, x::Int, y::Int) = getindex(world.grid, Base.to_index(w, o), x, y)
-Base.getindex(world::GridWorldBase, o::AbstractObject, i::CartesianIndex{2}) = getindex(w, o, i[1], i[2])
-Base.getindex(world::GridWorldBase, o::AbstractObject, x::Colon, y::Colon) = getindex(world.grid, Base.to_index(w, o), x, y)
+Base.getindex(world::GridWorldBase, o::AbstractObject, x::Int, y::Int) = getindex(world.grid, Base.to_index(world, o), x, y)
+Base.getindex(world::GridWorldBase, o::AbstractObject, i::CartesianIndex{2}) = getindex(world, o, i[1], i[2])
+Base.getindex(world::GridWorldBase, o::AbstractObject, x::Colon, y::Colon) = getindex(world.grid, Base.to_index(world, o), x, y)
 
 #####
 # utils
@@ -50,7 +50,7 @@ function switch!(world::GridWorldBase, src::CartesianIndex{2}, dest::CartesianIn
     end
 end
 
-function Random.rand(f::Function, world::GridWorldBase; max_try=typemax(Int), rng=Random.GLOBAL_RNG)
+function Random.rand(f::Function, world::GridWorldBase; max_try = typemax(Int), rng=Random.GLOBAL_RNG)
     inds = CartesianIndices((size(world, 2), size(world, 3)))
     for _ in 1:max_try
         pos = rand(rng, inds)
