@@ -15,7 +15,7 @@ struct GridWorldBase{O} <: AbstractArray{Bool, 3}
     objects::O
 end
 
-get_object(w::GridWorldBase) = w.objects
+get_object(world::GridWorldBase) = world.objects
 
 function GridWorldBase(objects::Tuple{Vararg{AbstractObject}}, x::Int, y::Int)
     grid = BitArray{3}(undef, length(objects), x, y)
@@ -31,30 +31,30 @@ end
     :($i)
 end
 
-Base.setindex!(w::GridWorldBase, v::Bool, o::AbstractObject, x::Int, y::Int) = setindex!(w.grid, v, Base.to_index(w, o), x, y)
-Base.setindex!(w::GridWorldBase, v::Bool, o::AbstractObject, i::CartesianIndex{2}) = setindex!(w, v, o, i[1], i[2])
+Base.setindex!(world::GridWorldBase, v::Bool, o::AbstractObject, x::Int, y::Int) = setindex!(world.grid, v, Base.to_index(w, o), x, y)
+Base.setindex!(world::GridWorldBase, v::Bool, o::AbstractObject, i::CartesianIndex{2}) = setindex!(w, v, o, i[1], i[2])
 
-Base.getindex(w::GridWorldBase, o::AbstractObject, x::Int, y::Int) = getindex(w.grid, Base.to_index(w, o), x, y)
-Base.getindex(w::GridWorldBase, o::AbstractObject, i::CartesianIndex{2}) = getindex(w, o, i[1], i[2])
-Base.getindex(w::GridWorldBase, o::AbstractObject, x::Colon, y::Colon) = getindex(w.grid, Base.to_index(w, o), x, y)
+Base.getindex(world::GridWorldBase, o::AbstractObject, x::Int, y::Int) = getindex(world.grid, Base.to_index(w, o), x, y)
+Base.getindex(world::GridWorldBase, o::AbstractObject, i::CartesianIndex{2}) = getindex(w, o, i[1], i[2])
+Base.getindex(world::GridWorldBase, o::AbstractObject, x::Colon, y::Colon) = getindex(world.grid, Base.to_index(w, o), x, y)
 
 #####
 # utils
 #####
 
-switch!(w::GridWorldBase, x, src::CartesianIndex{2}, dest::CartesianIndex{2}) = w[x, src], w[x, dest] = w[x, dest], w[x, src]
+switch!(world::GridWorldBase, x, src::CartesianIndex{2}, dest::CartesianIndex{2}) = world[x, src], world[x, dest] = world[x, dest], world[x, src]
 
-function switch!(w::GridWorldBase, src::CartesianIndex{2}, dest::CartesianIndex{2})
-    for x in axes(w, 1)
-        switch!(w, x, src, dest)
+function switch!(world::GridWorldBase, src::CartesianIndex{2}, dest::CartesianIndex{2})
+    for x in axes(world, 1)
+        switch!(world, x, src, dest)
     end
 end
 
-function Random.rand(f::Function, w::GridWorldBase; max_try=typemax(Int), rng=Random.GLOBAL_RNG)
-    inds = CartesianIndices((size(w, 2), size(w, 3)))
+function Random.rand(f::Function, world::GridWorldBase; max_try=typemax(Int), rng=Random.GLOBAL_RNG)
+    inds = CartesianIndices((size(world, 2), size(world, 3)))
     for _ in 1:max_try
         pos = rand(rng, inds)
-        f(view(w, :, pos)) && return pos
+        f(view(world, :, pos)) && return pos
     end
     @warn "a rare case happened when sampling from GridWorldBase"
     return nothing
