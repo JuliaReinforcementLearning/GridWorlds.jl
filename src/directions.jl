@@ -1,5 +1,5 @@
 export Up, Down, Left, Right, Direction
-export UP, DOWN, LEFT, RIGHT, DIRECTIONS, LRUD
+export UP, DOWN, LEFT, RIGHT, DIRECTIONS
 
 struct Up end
 const UP = Up()
@@ -16,9 +16,6 @@ const LEFT = Left()
 struct Right end
 const RIGHT = Right()
 (x::Right)(p::CartesianIndex{2}) = p + CartesianIndex(0, 1)
-
-# TODO: deprecate LRUD
-const LRUD = Union{Left, Right, Up, Down}
 
 const Direction = Union{Up, Down, Left, Right}
 const DIRECTIONS = (UP, DOWN, LEFT, RIGHT)

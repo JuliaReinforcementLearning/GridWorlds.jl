@@ -74,7 +74,7 @@ ind_map((i,j), (m, n), ::Right) = (j, n-i+1)
 ind_map((i,j), (m, n), ::Up) = (m-i+1, n-j+1)
 ind_map((i,j), (m, n), ::Down) = (i,j)
 
-function get_agent_view!(agent_view::AbstractArray{Bool,3}, grid::AbstractArray{Bool,3}, agent_pos::CartesianIndex{2}, dir::LRUD)
+function get_agent_view!(agent_view::AbstractArray{Bool,3}, grid::AbstractArray{Bool,3}, agent_pos::CartesianIndex{2}, dir::Direction)
     view_size = (size(agent_view, 2), size(agent_view, 3))
     grid_size = (size(grid,2),size(grid,3))
     inds = get_agent_view_inds(agent_pos.I, view_size, dir)
