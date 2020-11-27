@@ -12,7 +12,7 @@ ACTIONS = [TURN_LEFT, TURN_RIGHT, MOVE_FORWARD]
         @testset "$(Env)" begin
             env = Env()
             @test typeof(env.agent_pos) == CartesianIndex{2}
-            @test typeof(env.agent.dir) <: LRUD
+            @test typeof(env.agent.dir) <: Direction
             @test size(env.world.grid, 1) == length(env.world.objects)
             @test 1 ≤ env.agent_pos[1] ≤ size(env.world.grid, 2)
             @test 1 ≤ env.agent_pos[2] ≤ size(env.world.grid, 3)
