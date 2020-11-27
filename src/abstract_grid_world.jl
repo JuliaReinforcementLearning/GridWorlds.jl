@@ -15,6 +15,9 @@ get_grid(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_grid(env,
 
 get_objects(env::AbstractGridWorld) = env |> get_world |> get_objects
 
+get_height(env::AbstractGridWorld) = size(get_world(env), 2)
+get_width(env::AbstractGridWorld) = size(get_world(env), 3)
+
 get_agent(env::AbstractGridWorld, ::Val{:full_view}) = env.agent
 get_agent(env::AbstractGridWorld, ::Val{:agent_view}) = Agent(dir = DOWN)
 get_agent(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_agent(env, Val{view_type}())
