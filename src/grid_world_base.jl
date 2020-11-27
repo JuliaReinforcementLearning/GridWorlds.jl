@@ -15,6 +15,7 @@ struct GridWorldBase{O} <: AbstractArray{Bool, 3}
     objects::O
 end
 
+get_grid(world::GridWorldBase) = world.grid
 get_object(world::GridWorldBase) = world.objects
 
 function GridWorldBase(objects::Tuple{Vararg{AbstractObject}}, height::Int, width::Int)
