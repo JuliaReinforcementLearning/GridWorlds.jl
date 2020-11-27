@@ -31,12 +31,12 @@ end
     :($i)
 end
 
-Base.setindex!(world::GridWorldBase, v::Bool, o::AbstractObject, x::Int, y::Int) = setindex!(world.grid, v, Base.to_index(world, o), x, y)
-Base.setindex!(world::GridWorldBase, v::Bool, o::AbstractObject, i::CartesianIndex{2}) = setindex!(world, v, o, i[1], i[2])
+Base.setindex!(world::GridWorldBase, ispresent::Bool, object::AbstractObject, height::Int, width::Int) = setindex!(world.grid, ispresent, Base.to_index(world, object), height, width)
+Base.setindex!(world::GridWorldBase, ispresent::Bool, object::AbstractObject, pos::CartesianIndex{2}) = setindex!(world, ispresent, object, pos[1], pos[2])
 
-Base.getindex(world::GridWorldBase, o::AbstractObject, x::Int, y::Int) = getindex(world.grid, Base.to_index(world, o), x, y)
-Base.getindex(world::GridWorldBase, o::AbstractObject, i::CartesianIndex{2}) = getindex(world, o, i[1], i[2])
-Base.getindex(world::GridWorldBase, o::AbstractObject, x::Colon, y::Colon) = getindex(world.grid, Base.to_index(world, o), x, y)
+Base.getindex(world::GridWorldBase, object::AbstractObject, height::Int, width::Int) = getindex(world.grid, Base.to_index(world, object), height, width)
+Base.getindex(world::GridWorldBase, object::AbstractObject, pos::CartesianIndex{2}) = getindex(world, object, pos[1], pos[2])
+Base.getindex(world::GridWorldBase, object::AbstractObject, heights::Colon, widths::Colon) = getindex(world.grid, Base.to_index(world, object), heights, widths)
 
 #####
 # utils
