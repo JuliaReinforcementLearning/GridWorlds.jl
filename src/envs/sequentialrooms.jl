@@ -1,10 +1,17 @@
 export Room, SequentialRooms
 
+#####
+# Room struct
+#####
+
 struct Room
     region::CartesianIndices{2}
 end
 
 Room(origin, height, width) = Room(CartesianIndices((origin.I[1] : origin.I[1] + height - 1, origin.I[2] : origin.I[2] + width - 1)))
+
+get_origin(region::CartesianIndices{2}) = region[1, 1]
+get_origin(room::Room) = get_origin(room.region)
 
 interior(room::Room) = room.region[2:end-1, 2:end-1]
 
@@ -12,6 +19,10 @@ function is_intersecting(room1::Room, room2::Room)
     intersection = intersect(interior(room1), room2.region)
     length(intersection) > 0 ? true : false
 end
+
+#####
+# Environment struct
+#####
 
 mutable struct SequentialRooms{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty,Wall,Goal}}
@@ -25,10 +36,10 @@ mutable struct SequentialRooms{R} <: AbstractGridWorld
     rng::R
 end
 
-function SequentialRooms(;num_rooms = 3, room_length_range = 4:5, agent_start_dir = RIGHT, rng = Random.GLOBAL_RNG)
+function SequentialRooms(;num_rooms = 3, room_length_range = 4:6, agent_start_dir = RIGHT, rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, GOAL)
-    n = 2 * num_rooms * room_length_range.stop
-    world = GridWorldBase(objects, n, n)
+    big_n = 2 * num_rooms * room_length_range.stop
+    world = GridWorldBase(objects, big_n, big_n)
 
     goal_reward = 1.0
     reward = 0.0
@@ -39,6 +50,10 @@ function SequentialRooms(;num_rooms = 3, room_length_range = 4:5, agent_start_di
 
     return env
 end
+
+#####
+# RLBase API
+#####
 
 function (env::SequentialRooms)(::MoveForward)
     env.reward = 0.0
@@ -55,6 +70,8 @@ function (env::SequentialRooms)(::MoveForward)
     env
 end
 
+RLBase.get_terminal(env::SequentialRooms) = get_world(env)[GOAL, get_agent_pos(env)]
+
 function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
     world = get_world(env)
     world[:, :, :] .= false
@@ -66,8 +83,7 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
     set_dir!(agent, agent_start_dir)
 
     room = generate_first_room(env)
-    push!(env.rooms, room)
-    place_room!(world, room)
+    add_room!(env, room)
 
     tries = 1
 
@@ -76,8 +92,7 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
 
         if length(candidate_rooms) > 0
             room = rand(env.rng, candidate_rooms)
-            push!(env.rooms, room)
-            place_room!(world, room)
+            add_room!(env, room)
 
             door_pos = rand(env.rng, intersect(env.rooms[end - 1].region, room.region)[2:end-1])
             world[WALL, door_pos] = false
@@ -87,90 +102,48 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
         tries += 1
     end
 
-    # shift the region and the rooms
+    shift_rooms!(env)
     centered_world = get_centered_world(world)
-
+    env.world = centered_world
 
     return env
 end
 
-function shifted_room(room::Room, new_global_origin::CartesianIndex{2})
-
-    height = size(room.region, 1)
-    width = size(room.region, 2)
-
-    new_region = CartesianIndices((new_global_origin.I[1] : new_origin.I[1] + small_n - 1, new_origin.I[2] : new_origin.I[2] + small_n - 1))
-end
-
-function get_centered_world(world::GridWorldBase)
-    small_n = size(world)[end] ÷ 2
-    new_origin = get_new_origin(world)
-    new_region = CartesianIndices((new_origin.I[1] : new_origin.I[1] + small_n - 1, new_origin.I[2] : new_origin.I[2] + small_n - 1))
-    centered_world = GridWorldBase(get_object(world), small_n, small_n)
-    centered_world[:, :, :] .= world[:, new_region]
-    return centered_world
-end
-
-function get_bounding_region(world::GridWorldBase)
-    all_wall_pos = findall(world[WALL, :, :])
-    top_extreme = minimum(pos -> pos.I[1], all_wall_pos)
-    bottom_extreme = maximum(pos -> pos.I[1], all_wall_pos)
-    left_extreme = minimum(pos -> pos.I[2], all_wall_pos)
-    right_extreme = maximum(pos -> pos.I[2], all_wall_pos)
-    CartesianIndices((top_extreme:bottom_extreme, left_extreme:right_extreme))
-end
-
-function get_shift(world::GridWorldBase)
-    bounding_region = get_bounding_region(world)
-    small_n = size(world)[end] ÷ 2
-    top_padding = (small_n - size(bounding_region, 1)) ÷ 2
-    left_padding = (small_n - size(bounding_region, 2)) ÷ 2
-    CartesianIndex(top_padding, left_padding)
-end
-
-function get_new_origin(world::GridWorldBase)
-    shift = get_shift(world)
-    bounding_region = get_bounding_region(world)
-    new_origin = bounding_region[1, 1] - shift
-    return new_origin
-end
+#####
+# Room generation and placement
+#####
 
 function generate_first_room(env::AbstractGridWorld)
-    n = size(env.world)[end]
-    origin = CartesianIndex(n ÷ 2 + 1, n ÷ 2 + 1)
+    big_n = size(env.world)[end]
+    origin = CartesianIndex(big_n ÷ 2 + 1, big_n ÷ 2 + 1)
     height = rand(env.rng, env.room_length_range)
     width = rand(env.rng, env.room_length_range)
     room = Room(origin, height, width)
     return room
 end
 
-function place_room!(world::GridWorldBase, room::Room)
+function add_room!(env::AbstractGridWorld, room::Room)
+    world = get_world(env)
     world[WALL, room.region] .= true
     world[WALL, interior(room)] .= false
     world[EMPTY, interior(room)] .= true
+    push!(env.rooms, room)
 end
+
+is_valid_room(env::SequentialRooms, room::Room) = !any(x -> is_intersecting(room, x), env.rooms)
 
 function generate_candidate_rooms(env::SequentialRooms)
     rooms = Room[]
-    for height in env.room_length_range, width in env.room_length_range
-        for dir in DIRECTIONS
-            push!(rooms, generate_candidate_rooms(env, height, width, dir)...)
-        end
+    for height in env.room_length_range, width in env.room_length_range, dir in DIRECTIONS
+        push!(rooms, generate_candidate_rooms(env, height, width, dir)...)
     end
-
     return rooms
 end
 
 function generate_candidate_rooms(env::SequentialRooms, height::Int, width::Int, dir::Direction)
-    rooms = Room[]
     origins = generate_candidate_origins(env.rooms[end], height, width, dir)
-    for origin in origins
-        room = Room(origin, height, width)
-        if is_valid_room(env, room)
-            push!(rooms, room)
-        end
-    end
-    return rooms
+    rooms = map(x -> Room(x, height, width), origins)
+    valid_rooms = filter(x -> is_valid_room(env, x), rooms)
 end
 
 function generate_candidate_origins(room::Room, height::Int, width::Int, dir::Up)
@@ -197,11 +170,53 @@ function generate_candidate_origins(room::Room, height::Int, width::Int, dir::Ri
     return CartesianIndices((ii, j:j))
 end
 
-function is_valid_room(env::SequentialRooms, room::Room)
-    for r in env.rooms
-        if is_intersecting(r, room)
-            return false
-        end
+#####
+# World centering
+#####
+
+function get_bounding_region(world::GridWorldBase)
+    all_wall_pos = findall(world[WALL, :, :])
+    top_extreme = minimum(pos -> pos.I[1], all_wall_pos)
+    bottom_extreme = maximum(pos -> pos.I[1], all_wall_pos)
+    left_extreme = minimum(pos -> pos.I[2], all_wall_pos)
+    right_extreme = maximum(pos -> pos.I[2], all_wall_pos)
+    CartesianIndices((top_extreme:bottom_extreme, left_extreme:right_extreme))
+end
+
+function get_padding(world::GridWorldBase)
+    bounding_region = get_bounding_region(world)
+    small_n = size(world)[end] ÷ 2
+    top_padding = (small_n - size(bounding_region, 1)) ÷ 2
+    left_padding = (small_n - size(bounding_region, 2)) ÷ 2
+    CartesianIndex(top_padding, left_padding)
+end
+
+function get_new_global_origin(world::GridWorldBase)
+    padding = get_padding(world)
+    bounding_region = get_bounding_region(world)
+    return get_origin(bounding_region) - padding
+end
+
+function shift_rooms!(env::AbstractGridWorld)
+    world = get_world(env)
+    new_global_origin = get_new_global_origin(world)
+    for (i, room) in enumerate(env.rooms)
+        env.rooms[i] = shifted_room(room, new_global_origin)
     end
-    return true
+end
+
+function shifted_room(room::Room, new_global_origin::CartesianIndex{2})
+    height = size(room.region, 1)
+    width = size(room.region, 2)
+    new_room_origin = get_origin(room) - new_global_origin
+    Room(new_room_origin, height, width)
+end
+
+function get_centered_world(world::GridWorldBase)
+    small_n = size(world)[end] ÷ 2
+    new_global_origin = get_new_global_origin(world)
+    new_global_region = CartesianIndices((new_global_origin.I[1] : new_global_origin.I[1] + small_n - 1, new_global_origin.I[2] : new_global_origin.I[2] + small_n - 1))
+    centered_world = GridWorldBase(get_object(world), small_n, small_n)
+    centered_world[:, :, :] .= world[:, new_global_region]
+    return centered_world
 end
