@@ -74,15 +74,15 @@ ind_map((i,j), (m, n), ::Right) = (j, n-i+1)
 ind_map((i,j), (m, n), ::Up) = (m-i+1, n-j+1)
 ind_map((i,j), (m, n), ::Down) = (i,j)
 
-function get_agent_view!(v::AbstractArray{Bool,3}, a::AbstractArray{Bool,3}, p::CartesianIndex, dir::LRUD)
-    view_size = (size(v, 2), size(v, 3))
-    grid_size = (size(a,2),size(a,3))
-    inds = get_agent_view_inds(p.I, view_size, dir)
+function get_agent_view!(agent_view::AbstractArray{Bool,3}, grid::AbstractArray{Bool,3}, agent_pos::CartesianIndex{2}, dir::LRUD)
+    view_size = (size(agent_view, 2), size(agent_view, 3))
+    grid_size = (size(grid,2),size(grid,3))
+    inds = get_agent_view_inds(agent_pos.I, view_size, dir)
     valid_inds = CartesianIndices(grid_size)
     for ind in CartesianIndices(inds)
         if inds[ind] ∈ valid_inds
-            v[:, ind_map(ind.I, view_size, dir)...] .= a[:, inds[ind]]
+            agent_view[:, ind_map(ind.I, view_size, dir)...] .= grid[:, inds[ind]]
         end
     end
-    v
+    agent_view
 end
