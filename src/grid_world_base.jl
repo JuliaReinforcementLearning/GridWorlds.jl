@@ -1,4 +1,5 @@
 export GridWorldBase
+export get_objects
 
 using MacroTools:@forward
 using Random
@@ -16,7 +17,7 @@ struct GridWorldBase{O} <: AbstractArray{Bool, 3}
 end
 
 get_grid(world::GridWorldBase) = world.grid
-get_object(world::GridWorldBase) = world.objects
+get_objects(world::GridWorldBase) = world.objects
 
 function GridWorldBase(objects::Tuple{Vararg{AbstractObject}}, height::Int, width::Int)
     grid = BitArray{3}(undef, length(objects), height, width)

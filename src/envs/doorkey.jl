@@ -33,7 +33,7 @@ end
 
 function (env::DoorKey)(::MoveForward)
     world = get_world(env)
-    objects = get_object(env)
+    objects = get_objects(env)
     agent = get_agent(env)
 
     env.reward = 0.0
@@ -66,7 +66,7 @@ RLBase.get_terminal(env::DoorKey) = get_world(env)[GOAL, get_agent_pos(env)]
 
 function RLBase.reset!(env::DoorKey; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(size(env.world)[end] - 1, size(env.world)[end] - 1))
     world = get_world(env)
-    objects = get_object(env)
+    objects = get_objects(env)
 
     n = size(world)[end]
 

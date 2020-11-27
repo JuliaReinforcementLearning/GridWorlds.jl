@@ -1,13 +1,7 @@
 export AbstractGridWorld
-export get_object, get_world, get_grid, get_agent, get_agent_pos, get_agent_dir, get_agent_view, get_full_view
+export get_objects, get_world, get_grid, get_agent, get_agent_pos, get_agent_dir, get_agent_view, get_full_view
 
 abstract type AbstractGridWorld <: AbstractEnv end
-
-Base.convert(::Type{GridWorldBase}, env::AbstractGridWorld) = env.world
-get_object(env::AbstractGridWorld) = get_object(get_world(env))
-get_object(env::AbstractGridWorld, x::Type{<:AbstractObject}) = filter(o -> o isa x, get_object(env))
-get_object(env::AbstractGridWorld, x::Type{Agent}) = env.agent
-get_pos(env::AbstractGridWorld, ::Type{Agent}) = env.agent_pos
 
 #####
 # useful getter methods
@@ -15,9 +9,11 @@ get_pos(env::AbstractGridWorld, ::Type{Agent}) = env.agent_pos
 
 get_world(env::AbstractGridWorld) = env.world
 
-get_grid(env::AbstractGridWorld, ::Val{:full_view}) = get_world(env).grid
+get_grid(env::AbstractGridWorld, ::Val{:full_view}) = env |> get_world |> get_grid
 get_grid(env::AbstractGridWorld, ::Val{:agent_view}) = get_agent_view(env)
 get_grid(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_grid(env, Val{view_type}())
+
+get_objects(env::AbstractGridWorld) = env |> get_world |> get_objects
 
 get_agent(env::AbstractGridWorld, ::Val{:full_view}) = env.agent
 get_agent(env::AbstractGridWorld, ::Val{:agent_view}) = Agent(dir = DOWN)

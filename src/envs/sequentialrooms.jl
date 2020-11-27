@@ -234,7 +234,7 @@ function get_centered_world(world::GridWorldBase)
     small_n = size(world)[end] ÷ 2
     new_global_origin = get_new_global_origin(world)
     new_global_region = CartesianIndices((new_global_origin.I[1] : new_global_origin.I[1] + small_n - 1, new_global_origin.I[2] : new_global_origin.I[2] + small_n - 1))
-    centered_world = GridWorldBase(get_object(world), small_n, small_n)
+    centered_world = GridWorldBase(get_objects(world), small_n, small_n)
     centered_world[:, :, :] .= world[:, new_global_region]
     return centered_world
 end

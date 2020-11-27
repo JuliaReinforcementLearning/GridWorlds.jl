@@ -56,7 +56,7 @@ end
 
 RLBase.get_state(env::GoToDoor) = (get_agent_view(env), env.target)
 
-RLBase.get_terminal(env::GoToDoor) = any([get_world(env)[x, env.agent_pos] for x in get_object(env)[end-3:end]])
+RLBase.get_terminal(env::GoToDoor) = any([get_world(env)[x, env.agent_pos] for x in get_objects(env)[end-3:end]])
 
 function RLBase.reset!(env::GoToDoor)
     world = get_world(env)
@@ -66,7 +66,7 @@ function RLBase.reset!(env::GoToDoor)
     world[WALL, [1,n], 1:n] .= true
     world[WALL, 1:n, [1,n]] .= true
 
-    doors = get_object(env)[end-3:end]
+    doors = get_objects(env)[end-3:end]
     for door in doors
         world[door, :, :] .= false
     end

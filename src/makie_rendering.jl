@@ -22,7 +22,7 @@ function init_screen(env::Observable{<:AbstractGridWorld}; resolution=(1000,1000
     poly!(scene, area)
 
     # 2. paint each kind of object
-    for o in get_object(env[])
+    for o in get_objects(env[])
         if o !== EMPTY
             scatter!(scene, @lift(centers(findall($env.world[o,:,:]), $tile_size)), color=get_color(o), marker=convert(Char, o), markersize=@lift(minimum($tile_size)))
         end
