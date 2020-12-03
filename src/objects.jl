@@ -74,7 +74,7 @@ end
 
 get_color(agent::Agent) = agent.color
 get_dir(agent::Agent) = agent.dir
-set_dir!(agent::Agent, dir) = agent.dir = dir
+set_dir!(agent::Agent, dir::Direction) = agent.dir = dir
 
 struct Transportable end
 const TRANSPORTABLE = Transportable()
