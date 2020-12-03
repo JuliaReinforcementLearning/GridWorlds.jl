@@ -58,12 +58,12 @@ end
 set_reward!(env::AbstractGridWorld, reward) = env.reward = reward
 
 function get_world_with_agent(env::AbstractGridWorld; view_type::Symbol = :full_view)
-    grid = get_grid(env, Val{view_type}())
-    agent_pos = get_agent_pos(env, Val{view_type}())
+    grid = get_grid(env, view_type = view_type)
+    agent_pos = get_agent_pos(env, view_type = view_type)
     agent_layer = get_agent_layer(grid, agent_pos)
     grid_with_agent = cat(agent_layer, grid, dims = 1)
 
-    agent = get_agent(env, Val{view_type}())
+    agent = get_agent(env, view_type = view_type)
     objects_with_agent = (agent, get_objects(env)...)
 
     GridWorldBase(grid_with_agent, objects_with_agent)
