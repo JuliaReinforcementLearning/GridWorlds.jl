@@ -81,3 +81,21 @@ function (env::AbstractGridWorld)(action::Union{TurnRight, TurnLeft})
     set_agent_dir!(env, action(dir))
     return env
 end
+
+function (env::AbstractGridWorld)(::MoveForward)
+    world = get_world(env)
+
+    set_reward!(env, 0.0)
+
+    dir = get_agent_dir(env)
+    dest = dir(get_agent_pos(env))
+
+    if !world[WALL, dest]
+        set_agent_pos!(env, dest)
+        if world[GOAL, get_agent_pos(env)]
+            set_reward!(env, env.goal_reward)
+        end
+    end
+
+    return env
+end
