@@ -25,8 +25,6 @@ function EmptyGridWorld(; n = 8, agent_start_pos = CartesianIndex(2,2), agent_st
     return env
 end
 
-RLBase.get_terminal(env::EmptyGridWorld) = get_world(env)[GOAL, get_agent_pos(env)]
-
 function RLBase.reset!(env::EmptyGridWorld; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(get_width(env) - 1, get_width(env) - 1))
     world = get_world(env)
 

@@ -55,8 +55,6 @@ end
 # RLBase API
 #####
 
-RLBase.get_terminal(env::SequentialRooms) = get_world(env)[GOAL, get_agent_pos(env)]
-
 function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
     world = get_world(env)
 
