@@ -76,8 +76,8 @@ RLBase.get_actions(env::AbstractGridWorld) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGH
 RLBase.get_reward(env::AbstractGridWorld) = env.reward
 
 function (env::AbstractGridWorld)(action::Union{TurnRight, TurnLeft})
-    env.reward = 0.0
-    agent = get_agent(env)
-    set_dir!(agent, action(get_dir(agent)))
-    env
+    set_reward!(env, 0.0)
+    dir = get_agent_dir(env)
+    set_agent_dir!(env, action(dir))
+    return env
 end
