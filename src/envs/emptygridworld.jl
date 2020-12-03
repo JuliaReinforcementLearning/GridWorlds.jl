@@ -2,7 +2,6 @@ export EmptyGridWorld
 
 mutable struct EmptyGridWorld <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty,Wall,Goal}}
-    agent_pos::CartesianIndex{2}
     agent::Agent
     goal_reward::Float64
     reward::Float64
@@ -18,7 +17,7 @@ function EmptyGridWorld(; n = 8, agent_start_pos = CartesianIndex(2,2), agent_st
     goal_reward = 1.0
     reward = 0.0
 
-    env = EmptyGridWorld(world, agent_start_pos, Agent(dir = agent_start_dir), goal_reward, reward)
+    env = EmptyGridWorld(world, Agent(dir = agent_start_dir, pos = agent_start_pos), goal_reward, reward)
 
     reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir, goal_pos = goal_pos)
 

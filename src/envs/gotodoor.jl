@@ -4,7 +4,6 @@ using Random
 
 mutable struct GoToDoor{W<:GridWorldBase, R} <: AbstractGridWorld
     world::W
-    agent_pos::CartesianIndex{2}
     agent::Agent
     target::Door
     target_reward::Float64
@@ -25,7 +24,7 @@ function GoToDoor(; n = 8, agent_start_pos = CartesianIndex(2,2), rng = Random.G
     penalty = -1.0
     reward = 0.0
 
-    env = GoToDoor(world, agent_start_pos, Agent(dir = RIGHT), doors[1], target_reward, penalty, reward, rng)
+    env = GoToDoor(world, Agent(dir = RIGHT, pos = agent_start_pos), doors[1], target_reward, penalty, reward, rng)
 
     reset!(env)
 
@@ -56,7 +55,7 @@ end
 
 RLBase.get_state(env::GoToDoor) = (get_agent_view(env), env.target)
 
-RLBase.get_terminal(env::GoToDoor) = any([get_world(env)[x, env.agent_pos] for x in get_objects(env)[end-3:end]])
+RLBase.get_terminal(env::GoToDoor) = any([get_world(env)[x, get_agent_pos(env)] for x in get_objects(env)[end-3:end]])
 
 function RLBase.reset!(env::GoToDoor)
     world = get_world(env)

@@ -2,7 +2,6 @@ export CollectGems
 
 mutable struct CollectGems{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty,Wall,Gem}}
-    agent_pos::CartesianIndex{2}
     agent::Agent
     num_gem_init::Int
     num_gem_current::Int
@@ -24,7 +23,7 @@ function CollectGems(; n = 8, agent_start_pos = CartesianIndex(2,2), agent_start
     gem_reward = 1.0
     reward = 0.0
 
-    env = CollectGems(world, agent_start_pos, Agent(dir = agent_start_dir), num_gem_init, num_gem_current, gem_reward, reward, rng)
+    env = CollectGems(world, Agent(dir = agent_start_dir, pos = agent_start_pos), num_gem_init, num_gem_current, gem_reward, reward, rng)
 
     reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir)
 

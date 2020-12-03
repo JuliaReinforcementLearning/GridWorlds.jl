@@ -4,7 +4,6 @@ using Random
 
 mutable struct DynamicObstacles{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty,Wall,Obstacle,Goal}}
-    agent_pos::CartesianIndex{2}
     agent::Agent
     num_obstacles::Int
     obstacle_pos::Array{CartesianIndex{2},1}
@@ -27,7 +26,7 @@ function DynamicObstacles(; n = 8, agent_start_pos = CartesianIndex(2,2), agent_
     goal_reward = 1.0
     reward = 0.0
 
-    env = DynamicObstacles(world, agent_start_pos, Agent(dir = agent_start_dir), num_obstacles, obstacle_pos, obstacle_reward, goal_reward, reward, rng)
+    env = DynamicObstacles(world, Agent(dir = agent_start_dir, pos = agent_start_pos), num_obstacles, obstacle_pos, obstacle_reward, goal_reward, reward, rng)
 
     reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir, goal_pos = goal_pos)
 
