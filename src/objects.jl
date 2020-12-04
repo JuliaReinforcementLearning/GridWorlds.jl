@@ -1,6 +1,6 @@
-export COLORS, EMPTY, WALL, GOAL, GEM, OBSTACLE
 export AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Obstacle, Agent
-export get_color, get_dir, set_dir!
+export COLORS, EMPTY, WALL, GOAL, GEM, OBSTACLE
+export get_char, get_color, get_dir, set_dir!
 
 using Crayons
 using Colors
