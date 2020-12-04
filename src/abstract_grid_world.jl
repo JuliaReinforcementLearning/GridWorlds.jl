@@ -34,7 +34,7 @@ set_agent_dir!(env::AbstractGridWorld, dir::Direction) = set_dir!(get_agent(env)
 
 function get_agent_view(env::AbstractGridWorld, agent_view_size = (7,7))
     world = get_world(env)
-    agent_view = BitArray{3}(undef, size(world, 1), agent_view_size...)
+    agent_view = BitArray{3}(undef, get_num_objects(env), agent_view_size...)
     fill!(agent_view, false)
     get_agent_view!(agent_view, env)
 end
