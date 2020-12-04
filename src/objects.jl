@@ -2,7 +2,7 @@ export AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Obstacle, Agent, Trans
 export COLORS, EMPTY, WALL, GOAL, GEM, OBSTACLE, TRANSPORTABLE, NONTRANSPORTABLE
 export get_char, get_color, get_dir, set_dir!, get_pos, set_pos!, istransportable
 
-using Crayons
+import Crayons
 
 const COLORS = (:red, :green, :blue, :magenta, :yellow, :white)
 
@@ -12,7 +12,7 @@ const COLORS = (:red, :green, :blue, :magenta, :yellow, :white)
 
 abstract type AbstractObject end
 
-Base.show(io::IO, object::AbstractObject) = print(io, Crayon(foreground = get_color(object), reset = true), get_char(object))
+Base.show(io::IO, object::AbstractObject) = print(io, Crayons.Crayon(foreground = get_color(object), reset = true), get_char(object))
 
 struct Empty <: AbstractObject end
 const EMPTY = Empty()
