@@ -1,13 +1,14 @@
 export FourRooms
 
-mutable struct FourRooms <: AbstractGridWorld
+mutable struct FourRooms{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty,Wall,Goal}}
     agent::Agent
     goal_reward::Float64
     reward::Float64
+    rng::R
 end
 
-function FourRooms(; n = 9, agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(n - 1, n - 1))
+function FourRooms(; n = 9, agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(n - 1, n - 1), rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, GOAL)
     world = GridWorldBase(objects, n, n)
 
@@ -22,7 +23,7 @@ function FourRooms(; n = 9, agent_start_pos = CartesianIndex(2, 2), agent_start_
     goal_reward = 1.0
     reward = 0.0
 
-    env = FourRooms(world, Agent(dir = RIGHT, pos = agent_start_pos), goal_reward, reward)
+    env = FourRooms(world, Agent(dir = RIGHT, pos = agent_start_pos), goal_reward, reward, rng)
 
     reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir, goal_pos = goal_pos)
 
