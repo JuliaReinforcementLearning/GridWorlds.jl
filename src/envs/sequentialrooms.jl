@@ -26,7 +26,6 @@ end
 
 mutable struct SequentialRooms{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty,Wall,Goal}}
-    agent_pos::CartesianIndex{2}
     agent::Agent
     num_rooms::Int
     room_length_range::UnitRange{Int}
@@ -44,7 +43,7 @@ function SequentialRooms(; num_rooms = 3, room_length_range = 4:6, agent_start_d
     goal_reward = 1.0
     reward = 0.0
 
-    env = SequentialRooms(world, CartesianIndex(1, 1), Agent(dir = agent_start_dir), num_rooms, room_length_range, Room[], goal_reward, reward, rng)
+    env = SequentialRooms(world, Agent(dir = agent_start_dir), num_rooms, room_length_range, Room[], goal_reward, reward, rng)
 
     reset!(env, agent_start_dir = agent_start_dir)
 
@@ -54,26 +53,6 @@ end
 #####
 # RLBase API
 #####
-
-function (env::SequentialRooms)(::MoveForward)
-    world = get_world(env)
-
-    set_reward!(env, 0.0)
-
-    dir = get_agent_dir(env)
-    dest = dir(get_agent_pos(env))
-
-    if !world[WALL, dest]
-        set_agent_pos!(env, dest)
-        if world[GOAL, get_agent_pos(env)]
-            set_reward!(env, env.goal_reward)
-        end
-    end
-
-    return env
-end
-
-RLBase.get_terminal(env::SequentialRooms) = get_world(env)[GOAL, get_agent_pos(env)]
 
 function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
     world = get_world(env)
@@ -119,7 +98,7 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
     # add the GOAL randomly in the last room
     world = get_world(env)
     goal_pos = rand(env.rng, get_interior(env.rooms[end]))
-    while goal_pos == env.agent_pos
+    while goal_pos == get_agent_pos(env)
         goal_pos = rand(env.rng, get_interior(env.rooms[end]))
     end
     world[GOAL, goal_pos] = true

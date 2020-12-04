@@ -1,5 +1,5 @@
 export GridWorldBase
-export get_grid, get_objects, get_height, get_width, switch!, get_agent_view!
+export get_grid, get_objects, get_num_objects, get_height, get_width, switch!, get_agent_view!
 
 using MacroTools:@forward
 using Random
@@ -25,6 +25,7 @@ end
 get_grid(world::GridWorldBase) = world.grid
 get_objects(world::GridWorldBase) = world.objects
 
+get_num_objects(world::GridWorldBase) = world |> get_objects |> length
 get_height(world::GridWorldBase) = size(world, 2)
 get_width(world::GridWorldBase) = size(world, 3)
 

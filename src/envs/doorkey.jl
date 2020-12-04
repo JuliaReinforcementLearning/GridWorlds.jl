@@ -4,7 +4,6 @@ using Random
 
 mutable struct DoorKey{W<:GridWorldBase, R} <: AbstractGridWorld
     world::W
-    agent_pos::CartesianIndex{2}
     agent::Agent
     goal_reward::Float64
     reward::Float64
@@ -26,7 +25,7 @@ function DoorKey(; n = 7, agent_start_pos = CartesianIndex(2,2), agent_start_dir
     goal_reward = 1.0
     reward = 0.0
 
-    env = DoorKey(world, agent_start_pos, Agent(dir = agent_start_dir), goal_reward, reward, rng)
+    env = DoorKey(world, Agent(dir = agent_start_dir, pos = agent_start_pos), goal_reward, reward, rng)
 
     reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir, goal_pos = goal_pos)
 

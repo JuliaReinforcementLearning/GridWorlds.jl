@@ -1,5 +1,5 @@
 export AbstractGridWorld
-export get_world, get_grid, get_objects, get_height, get_width, get_agent, get_agent_pos, get_agent_dir, get_agent_view, get_agent_view!, get_full_view
+export get_world, get_grid, get_objects, get_num_objects, get_height, get_width, get_agent, get_agent_pos, get_agent_dir, get_agent_view, get_agent_view!, get_full_view
 export set_world!, set_agent!, set_agent_pos!, set_agent_dir!, set_reward!
 
 abstract type AbstractGridWorld <: AbstractEnv end
@@ -17,27 +17,24 @@ get_grid(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_grid(env,
 
 get_objects(env::AbstractGridWorld) = env |> get_world |> get_objects
 
+get_num_objects(env::AbstractGridWorld) = env |> get_world |> get_num_objects
 get_height(env::AbstractGridWorld) = size(get_world(env), 2)
 get_width(env::AbstractGridWorld) = size(get_world(env), 3)
 
 get_agent(env::AbstractGridWorld, ::Val{:full_view}) = env.agent
-get_agent(env::AbstractGridWorld, ::Val{:agent_view}) = Agent(dir = DOWN)
+get_agent(env::AbstractGridWorld, ::Val{:agent_view}) = Agent(dir = DOWN, pos = CartesianIndex(1, size(get_grid(env, Val{:agent_view}()), 3) ÷ 2 + 1))
 get_agent(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_agent(env, Val{view_type}())
 set_agent!(env::AbstractGridWorld, agent::Agent) = env.agent = agent
 
-get_agent_pos(env::AbstractGridWorld, ::Val{:full_view}) = env.agent_pos
-get_agent_pos(env::AbstractGridWorld, ::Val{:agent_view}) = CartesianIndex(1, size(get_grid(env, Val{:agent_view}()), 3) ÷ 2 + 1)
-get_agent_pos(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_agent_pos(env, Val{view_type}())
-set_agent_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = env.agent_pos = pos
+get_agent_pos(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_pos(get_agent(env, Val{view_type}()))
+set_agent_pos!(env::AbstractGridWorld, pos::CartesianIndex) = set_pos!(get_agent(env), pos)
 
-get_agent_dir(env::AbstractGridWorld, ::Val{:full_view}) = env |> get_agent |> get_dir
-get_agent_dir(env::AbstractGridWorld, ::Val{:agent_view}) = DOWN
-get_agent_dir(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_agent_dir(env, Val{view_type}())
+get_agent_dir(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_dir(get_agent(env, Val{view_type}()))
 set_agent_dir!(env::AbstractGridWorld, dir::Direction) = set_dir!(get_agent(env), dir)
 
 function get_agent_view(env::AbstractGridWorld, agent_view_size = (7,7))
     world = get_world(env)
-    agent_view = BitArray{3}(undef, size(world, 1), agent_view_size...)
+    agent_view = BitArray{3}(undef, get_num_objects(env), agent_view_size...)
     fill!(agent_view, false)
     get_agent_view!(agent_view, env)
 end
@@ -61,6 +58,18 @@ end
 
 set_reward!(env::AbstractGridWorld, reward) = env.reward = reward
 
+function get_world_with_agent(env::AbstractGridWorld; view_type::Symbol = :full_view)
+    grid = get_grid(env, view_type = view_type)
+    agent_pos = get_agent_pos(env, view_type = view_type)
+    agent_layer = get_agent_layer(grid, agent_pos)
+    grid_with_agent = cat(agent_layer, grid, dims = 1)
+
+    agent = get_agent(env, view_type = view_type)
+    objects_with_agent = (agent, get_objects(env)...)
+
+    GridWorldBase(grid_with_agent, objects_with_agent)
+end
+
 #####
 # RLBase API defaults
 #####
@@ -75,9 +84,29 @@ RLBase.get_actions(env::AbstractGridWorld) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGH
 
 RLBase.get_reward(env::AbstractGridWorld) = env.reward
 
+RLBase.get_terminal(env::AbstractGridWorld) = get_world(env)[GOAL, get_agent_pos(env)]
+
 function (env::AbstractGridWorld)(action::Union{TurnRight, TurnLeft})
-    env.reward = 0.0
-    agent = get_agent(env)
-    set_dir!(agent, action(get_dir(agent)))
-    env
+    set_reward!(env, 0.0)
+    dir = get_agent_dir(env)
+    set_agent_dir!(env, action(dir))
+    return env
+end
+
+function (env::AbstractGridWorld)(::MoveForward)
+    world = get_world(env)
+
+    set_reward!(env, 0.0)
+
+    dir = get_agent_dir(env)
+    dest = dir(get_agent_pos(env))
+
+    if !world[WALL, dest]
+        set_agent_pos!(env, dest)
+        if world[GOAL, get_agent_pos(env)]
+            set_reward!(env, env.goal_reward)
+        end
+    end
+
+    return env
 end

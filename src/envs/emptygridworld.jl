@@ -2,7 +2,6 @@ export EmptyGridWorld
 
 mutable struct EmptyGridWorld <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty,Wall,Goal}}
-    agent_pos::CartesianIndex{2}
     agent::Agent
     goal_reward::Float64
     reward::Float64
@@ -18,32 +17,12 @@ function EmptyGridWorld(; n = 8, agent_start_pos = CartesianIndex(2,2), agent_st
     goal_reward = 1.0
     reward = 0.0
 
-    env = EmptyGridWorld(world, agent_start_pos, Agent(dir = agent_start_dir), goal_reward, reward)
+    env = EmptyGridWorld(world, Agent(dir = agent_start_dir, pos = agent_start_pos), goal_reward, reward)
 
     reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir, goal_pos = goal_pos)
 
     return env
 end
-
-function (env::EmptyGridWorld)(::MoveForward)
-    world = get_world(env)
-
-    set_reward!(env, 0.0)
-
-    dir = get_agent_dir(env)
-    dest = dir(get_agent_pos(env))
-
-    if !world[WALL, dest]
-        set_agent_pos!(env, dest)
-        if world[GOAL, get_agent_pos(env)]
-            set_reward!(env, env.goal_reward)
-        end
-    end
-
-    return env
-end
-
-RLBase.get_terminal(env::EmptyGridWorld) = get_world(env)[GOAL, get_agent_pos(env)]
 
 function RLBase.reset!(env::EmptyGridWorld; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(get_width(env) - 1, get_width(env) - 1))
     world = get_world(env)

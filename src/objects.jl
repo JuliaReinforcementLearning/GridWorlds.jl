@@ -55,9 +55,10 @@ get_color(::Obstacle) = :blue
 #####
 
 Base.@kwdef mutable struct Agent <: AbstractObject
-    color::Symbol=:red
-    dir::Direction
-    inventory::Union{Nothing, AbstractObject, Vector}=nothing
+    color::Symbol = :red
+    dir::Direction = RIGHT
+    pos::CartesianIndex = CartesianIndex(1, 1)
+    inventory::Union{Nothing, AbstractObject, Vector} = nothing
 end
 
 function get_char(agent::Agent)
@@ -74,7 +75,9 @@ end
 
 get_color(agent::Agent) = agent.color
 get_dir(agent::Agent) = agent.dir
-set_dir!(agent::Agent, dir) = agent.dir = dir
+set_dir!(agent::Agent, dir::Direction) = agent.dir = dir
+get_pos(agent::Agent) = agent.pos
+set_pos!(agent::Agent, pos::CartesianIndex) = agent.pos = pos
 
 struct Transportable end
 const TRANSPORTABLE = Transportable()

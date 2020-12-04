@@ -11,20 +11,20 @@ ACTIONS = [TURN_LEFT, TURN_RIGHT, MOVE_FORWARD]
     for Env in ENVS
         @testset "$(Env)" begin
             env = Env()
-            @test typeof(env.agent_pos) == CartesianIndex{2}
-            @test typeof(env.agent.dir) <: Direction
-            @test size(env.world.grid, 1) == length(env.world.objects)
-            @test 1 ≤ env.agent_pos[1] ≤ size(env.world.grid, 2)
-            @test 1 ≤ env.agent_pos[2] ≤ size(env.world.grid, 3)
+            @test typeof(get_agent_pos(env)) == CartesianIndex{2}
+            @test typeof(get_agent_dir(env)) <: Direction
+            @test size(get_grid(env), 1) == length(get_objects(env))
+            @test 1 ≤ get_agent_pos(env)[1] ≤ get_height(env)
+            @test 1 ≤ get_agent_pos(env)[2] ≤ get_width(env)
 
             for _=1:1000
                 env = env(rand(ACTIONS))
-                @test 1 ≤ env.agent_pos[1] ≤ size(env.world.grid, 2)
-                @test 1 ≤ env.agent_pos[2] ≤ size(env.world.grid, 3)
-                @test env.world[WALL, env.agent_pos] == false
+                @test 1 ≤ get_agent_pos(env)[1] ≤ get_height(env)
+                @test 1 ≤ get_agent_pos(env)[2] ≤ get_width(env)
+                @test get_world(env)[WALL, get_agent_pos(env)] == false
                 view = get_agent_view(env)
                 @test typeof(view) <: BitArray{3}
-                @test size(view,1) == length(env.world.objects)
+                @test size(view,1) == length(get_objects(env))
                 @test size(view,2) == 7
                 @test size(view,3) == 7
             end
