@@ -3,7 +3,6 @@ export COLORS, EMPTY, WALL, GOAL, GEM, OBSTACLE, TRANSPORTABLE, NONTRANSPORTABLE
 export get_char, get_color, get_dir, set_dir!, get_pos, set_pos!, istransportable
 
 using Crayons
-using Colors
 
 const COLORS = (:red, :green, :blue, :magenta, :yellow, :white)
 
@@ -78,6 +77,10 @@ get_dir(agent::Agent) = agent.dir
 set_dir!(agent::Agent, dir::Direction) = agent.dir = dir
 get_pos(agent::Agent) = agent.pos
 set_pos!(agent::Agent, pos::CartesianIndex) = agent.pos = pos
+
+#####
+# Pickup & Drop objects
+#####
 
 struct Transportable end
 const TRANSPORTABLE = Transportable()
