@@ -56,6 +56,7 @@ RLBase.get_terminal(env::CollectGems) = env.num_gem_current <= 0
 function RLBase.reset!(env::CollectGems; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT)
     world = get_world(env)
     n = get_width(env)
+    rng = get_rng(env)
 
     world[EMPTY, 2:n-1, 2:n-1] .= true
     world[GEM, 1:n, 1:n] .= false
@@ -70,7 +71,7 @@ function RLBase.reset!(env::CollectGems; agent_start_pos = CartesianIndex(2, 2),
 
     gem_placed = 0
     while gem_placed < env.num_gem_init
-        gem_pos = CartesianIndex(rand(env.rng, 2:n-1), rand(env.rng, 2:n-1))
+        gem_pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 2:n-1))
         if (gem_pos == get_agent_pos(env)) || (world[GEM, gem_pos] == true)
             continue
         else

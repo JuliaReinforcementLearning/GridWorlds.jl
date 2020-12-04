@@ -59,6 +59,7 @@ RLBase.get_terminal(env::GoToDoor) = any([get_world(env)[x, get_agent_pos(env)] 
 
 function RLBase.reset!(env::GoToDoor)
     world = get_world(env)
+    rng = get_rng(env)
 
     n = get_width(env)
 
@@ -70,15 +71,15 @@ function RLBase.reset!(env::GoToDoor)
         world[door, :, :] .= false
     end
 
-    env.target = rand(env.rng, doors)
+    env.target = rand(rng, doors)
     set_reward!(env, 0.0)
 
-    door_pos = [CartesianIndex(rand(env.rng, 2:n-1),1),
-                CartesianIndex(rand(env.rng, 2:n-1),n),
-                CartesianIndex(1,rand(env.rng, 2:n-1)),
-                CartesianIndex(n,rand(env.rng, 2:n-1))]
+    door_pos = [CartesianIndex(rand(rng, 2:n-1),1),
+                CartesianIndex(rand(rng, 2:n-1),n),
+                CartesianIndex(1,rand(rng, 2:n-1)),
+                CartesianIndex(n,rand(rng, 2:n-1))]
 
-    rp = randperm(env.rng, length(door_pos))
+    rp = randperm(rng, length(door_pos))
 
     for (door, pos) in zip(doors, door_pos[rp])
         world[door, pos] = true

@@ -70,6 +70,8 @@ function get_world_with_agent(env::AbstractGridWorld; view_type::Symbol = :full_
     GridWorldBase(grid_with_agent, objects_with_agent)
 end
 
+get_rng(env::AbstractGridWorld) = env.rng
+
 #####
 # RLBase API defaults
 #####

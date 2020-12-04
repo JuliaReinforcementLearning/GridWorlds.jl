@@ -56,6 +56,7 @@ end
 
 function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
     world = get_world(env)
+    rng = get_rng(env)
 
     world[:, :, :] .= false
 
@@ -76,10 +77,10 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
         candidate_rooms = generate_candidate_rooms(env)
 
         if length(candidate_rooms) > 0
-            room = rand(env.rng, candidate_rooms)
+            room = rand(rng, candidate_rooms)
             add_room!(env, room)
 
-            door_pos = rand(env.rng, intersect(env.rooms[end - 1].region, room.region)[2:end-1])
+            door_pos = rand(rng, intersect(env.rooms[end - 1].region, room.region)[2:end-1])
             world[WALL, door_pos] = false
             world[EMPTY, door_pos] = true
         end
@@ -93,13 +94,13 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
     set_world!(env, centered_world)
 
     # add the agent randomly in the first room
-    set_agent_pos!(env, rand(env.rng, get_interior(env.rooms[1])))
+    set_agent_pos!(env, rand(rng, get_interior(env.rooms[1])))
 
     # add the GOAL randomly in the last room
     world = get_world(env)
-    goal_pos = rand(env.rng, get_interior(env.rooms[end]))
+    goal_pos = rand(rng, get_interior(env.rooms[end]))
     while goal_pos == get_agent_pos(env)
-        goal_pos = rand(env.rng, get_interior(env.rooms[end]))
+        goal_pos = rand(rng, get_interior(env.rooms[end]))
     end
     world[GOAL, goal_pos] = true
     world[EMPTY, goal_pos] = false
@@ -113,9 +114,10 @@ end
 
 function generate_first_room(env::AbstractGridWorld)
     big_n = get_width(env)
+    rng = get_rng(env)
     origin = CartesianIndex(big_n ÷ 2 + 1, big_n ÷ 2 + 1)
-    height = rand(env.rng, env.room_length_range)
-    width = rand(env.rng, env.room_length_range)
+    height = rand(rng, env.room_length_range)
+    width = rand(rng, env.room_length_range)
     room = Room(origin, height, width)
     return room
 end

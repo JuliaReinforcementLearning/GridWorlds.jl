@@ -70,6 +70,7 @@ RLBase.get_terminal(env::DoorKey) = get_world(env)[GOAL, get_agent_pos(env)]
 function RLBase.reset!(env::DoorKey; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(get_width(env) - 1, get_width(env) - 1))
     world = get_world(env)
     n = get_width(env)
+    rng = get_rng(env)
 
     objects = get_objects(env)
     door = objects[end - 1]
@@ -81,16 +82,16 @@ function RLBase.reset!(env::DoorKey; agent_start_pos = CartesianIndex(2, 2), age
 
     set_agent_dir!(env, agent_start_dir)
 
-    door_pos = CartesianIndex(rand(env.rng, 2:n-1), rand(env.rng, 3:n-2))
+    door_pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 3:n-2))
     @assert agent_start_pos[2] < door_pos[2] "Agent should start on the left side of the door"
     @assert goal_pos[2] > door_pos[2] "Goal should be placed on the right side of the door"
     world[WALL, :, door_pos[2]] .= true
     world[door, door_pos] = true
     world[WALL, door_pos] = false
 
-    key_pos = CartesianIndex(rand(env.rng, 2:n-1), rand(env.rng, 2:door_pos[2]-1))
+    key_pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 2:door_pos[2]-1))
     while key_pos == agent_start_pos
-        key_pos = CartesianIndex(rand(env.rng, 2:n-1), rand(env.rng, 2:door_pos[2]-1))
+        key_pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 2:door_pos[2]-1))
     end
     world[key, key_pos] = true
 
