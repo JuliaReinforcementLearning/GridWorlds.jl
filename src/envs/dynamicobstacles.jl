@@ -82,7 +82,7 @@ function update_obstacles!(env::DynamicObstacles)
         world[EMPTY, pos] = true
         world[OBSTACLE, pos] = false
 
-        new_pos = rand(env.rng, valid_obstacle_dest(env, pos))
+        new_pos = rand(get_rng(env), valid_obstacle_dest(env, pos))
         env.obstacle_pos[i] = new_pos
 
         world[EMPTY, new_pos] = false
@@ -97,6 +97,7 @@ RLBase.get_terminal(env::DynamicObstacles) = iscollision(env) || get_world(env)[
 function RLBase.reset!(env::DynamicObstacles; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(get_width(env) - 1, get_width(env) - 1))
     world = get_world(env)
     n = get_width(env)
+    rng = get_rng(env)
 
     world[EMPTY, 2:n-1, 2:n-1] .= true
     world[GOAL, goal_pos] = true
@@ -110,7 +111,7 @@ function RLBase.reset!(env::DynamicObstacles; agent_start_pos = CartesianIndex(2
 
     obstacles_placed = 0
     while obstacles_placed < env.num_obstacles
-        pos = CartesianIndex(rand(env.rng, 2:n-1), rand(env.rng, 2:n-1))
+        pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 2:n-1))
         if (pos == get_agent_pos(env)) || (world[OBSTACLE, pos] == true) || (pos == goal_pos)
             continue
         else
