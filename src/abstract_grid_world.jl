@@ -1,5 +1,5 @@
 export AbstractGridWorld
-export get_world, get_grid, get_objects, get_height, get_width, get_agent, get_agent_pos, get_agent_dir, get_agent_view, get_agent_view!, get_full_view
+export get_world, get_grid, get_objects, get_num_objects, get_height, get_width, get_agent, get_agent_pos, get_agent_dir, get_agent_view, get_agent_view!, get_full_view
 export set_world!, set_agent!, set_agent_pos!, set_agent_dir!, set_reward!
 
 abstract type AbstractGridWorld <: AbstractEnv end
@@ -17,6 +17,7 @@ get_grid(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_grid(env,
 
 get_objects(env::AbstractGridWorld) = env |> get_world |> get_objects
 
+get_num_objects(env::AbstractGridWorld) = env |> get_world |> get_num_objects
 get_height(env::AbstractGridWorld) = size(get_world(env), 2)
 get_width(env::AbstractGridWorld) = size(get_world(env), 3)
 
