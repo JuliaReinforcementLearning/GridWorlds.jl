@@ -3,6 +3,7 @@ module GridWorlds
 export GW
 
 import Requires
+using Random
 using ReinforcementLearningBase
 
 const GW = GridWorlds
