@@ -11,7 +11,7 @@ end
 function EmptyGridWorld(; n = 8, agent_start_pos = CartesianIndex(2,2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(n-1, n-1), rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, GOAL)
     world = GridWorldBase(objects, n, n)
-    agent = Agent(dir = agent_start_dir, pos = agent_start_pos)
+    agent = Agent(pos = agent_start_pos, dir = agent_start_dir)
     reward = 0.0
     goal_reward = 1.0
 

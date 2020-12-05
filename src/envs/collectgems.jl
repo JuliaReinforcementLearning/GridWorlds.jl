@@ -13,7 +13,7 @@ end
 function CollectGems(; n = 8, agent_start_pos = CartesianIndex(2,2), agent_start_dir = RIGHT, rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, GEM)
     world = GridWorldBase(objects, n, n)
-    agent = Agent(dir = agent_start_dir, pos = agent_start_pos)
+    agent = Agent(pos = agent_start_pos, dir = agent_start_dir)
     reward = 0.0
     num_gem_init = n - 1
     num_gem_current = num_gem_init

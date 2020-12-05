@@ -14,7 +14,7 @@ function GoToDoor(; n = 8, agent_start_pos = CartesianIndex(2,2), agent_start_di
     doors = [Door(c) for c in COLORS[1:4]]
     objects = (EMPTY, WALL, doors...)
     world = GridWorldBase(objects, n, n)
-    agent = Agent(dir = agent_start_dir, pos = agent_start_pos)
+    agent = Agent(pos = agent_start_pos, dir = agent_start_dir)
     reward = 0.0
     target = doors[1]
     target_reward = 1.0

@@ -13,7 +13,7 @@ function DoorKey(; n = 7, agent_start_pos = CartesianIndex(2,2), agent_start_dir
     key = Key(:yellow)
     objects = (EMPTY, WALL, GOAL, door, key)
     world = GridWorldBase(objects, n, n)
-    agent = Agent(dir = agent_start_dir, pos = agent_start_pos)
+    agent = Agent(pos = agent_start_pos, dir = agent_start_dir)
     reward = 0.0
     goal_reward = 1.0
 
