@@ -1,31 +1,23 @@
 export DoorKey
 
-using Random
-
 mutable struct DoorKey{W<:GridWorldBase, R} <: AbstractGridWorld
     world::W
     agent::Agent
-    goal_reward::Float64
     reward::Float64
     rng::R
+    goal_reward::Float64
 end
 
 function DoorKey(; n = 7, agent_start_pos = CartesianIndex(2,2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(n-1, n-1), rng = Random.GLOBAL_RNG)
     door = Door(:yellow)
     key = Key(:yellow)
-
     objects = (EMPTY, WALL, GOAL, door, key)
-
     world = GridWorldBase(objects, n, n)
-
-    world[WALL, [1,n], 1:n] .= true
-    world[WALL, 1:n, [1,n]] .= true
-    world[GOAL, goal_pos] = true
-
-    goal_reward = 1.0
+    agent = Agent(dir = agent_start_dir, pos = agent_start_pos)
     reward = 0.0
+    goal_reward = 1.0
 
-    env = DoorKey(world, Agent(dir = agent_start_dir, pos = agent_start_pos), goal_reward, reward, rng)
+    env = DoorKey(world, agent, reward, rng, goal_reward)
 
     reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir, goal_pos = goal_pos)
 
@@ -37,13 +29,13 @@ function (env::DoorKey)(::MoveForward)
     objects = get_objects(env)
     agent = get_agent(env)
 
-    set_reward!(env, 0.0)
-
     door = objects[end - 1]
     key = objects[end]
 
     dir = get_agent_dir(env)
     dest = dir(get_agent_pos(env))
+
+    set_reward!(env, 0.0)
 
     if world[key, dest]
         if PICK_UP(agent, key)
@@ -76,11 +68,10 @@ function RLBase.reset!(env::DoorKey; agent_start_pos = CartesianIndex(2, 2), age
     door = objects[end - 1]
     key = objects[end]
 
-    set_reward!(env, 0.0)
-
-    set_agent_pos!(env, agent_start_pos)
-
-    set_agent_dir!(env, agent_start_dir)
+    world[:, :, :] .= false
+    world[WALL, [1,n], 1:n] .= true
+    world[WALL, 1:n, [1,n]] .= true
+    world[GOAL, goal_pos] = true
 
     door_pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 3:n-2))
     @assert agent_start_pos[2] < door_pos[2] "Agent should start on the left side of the door"
@@ -96,4 +87,10 @@ function RLBase.reset!(env::DoorKey; agent_start_pos = CartesianIndex(2, 2), age
     world[key, key_pos] = true
 
     world[EMPTY, :, :] .= .!(.|((world[x, :, :] for x in [WALL, GOAL, door, key])...))
+
+    set_agent_pos!(env, agent_start_pos)
+    set_agent_dir!(env, agent_start_dir)
+
+    set_reward!(env, 0.0)
+
 end
