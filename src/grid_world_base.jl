@@ -1,7 +1,7 @@
 export GridWorldBase
 export get_grid, get_objects, get_num_objects, get_height, get_width, switch!, get_agent_view!
 
-using MacroTools:@forward
+import MacroTools
 import Random
 
 """
@@ -33,7 +33,7 @@ get_num_objects(world::GridWorldBase) = world |> get_grid |> get_num_objects
 get_height(world::GridWorldBase) = world |> get_grid |> get_height
 get_width(world::GridWorldBase) = world |> get_grid |> get_width
 
-@forward GridWorldBase.grid Base.size, Base.getindex, Base.setindex!
+MacroTools.@forward GridWorldBase.grid Base.size, Base.getindex, Base.setindex!
 
 @generated function Base.to_index(::GridWorldBase{O}, object::X) where {X<:AbstractObject, O}
     i = findfirst(X .=== O.parameters)
