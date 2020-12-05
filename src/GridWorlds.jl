@@ -1,10 +1,12 @@
 module GridWorlds
 
-using Requires
+export GW
+
+import Requires
+using Random
 using ReinforcementLearningBase
 
 const GW = GridWorlds
-export GW
 
 include("directions.jl")
 include("actions.jl")
@@ -15,7 +17,7 @@ include("envs/envs.jl")
 include("terminal_rendering.jl")
 
 function __init__()
-    @require Makie="ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a" include("makie_rendering.jl")
+    Requires.@require Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a" include("makie_rendering.jl")
 end
 
 end

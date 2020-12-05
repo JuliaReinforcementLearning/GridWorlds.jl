@@ -1,32 +1,26 @@
 export DynamicObstacles
 
-using Random
-
 mutable struct DynamicObstacles{R} <: AbstractGridWorld
-    world::GridWorldBase{Tuple{Empty,Wall,Obstacle,Goal}}
+    world::GridWorldBase{Tuple{Empty, Wall, Obstacle, Goal}}
     agent::Agent
+    reward::Float64
+    rng::R
+    goal_reward::Float64
     num_obstacles::Int
     obstacle_pos::Array{CartesianIndex{2},1}
     obstacle_reward::Float64
-    goal_reward::Float64
-    reward::Float64
-    rng::R
 end
 
 function DynamicObstacles(; n = 8, agent_start_pos = CartesianIndex(2,2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(n-1, n-1), num_obstacles = n-3, rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, OBSTACLE, GOAL)
     world = GridWorldBase(objects, n, n)
-
-    world[WALL, [1,n], 1:n] .= true
-    world[WALL, 1:n, [1,n]] .= true
-
-    obstacle_pos = Array{CartesianIndex{2},1}(undef,num_obstacles)
-
-    obstacle_reward = -1.0
-    goal_reward = 1.0
+    agent = Agent(pos = agent_start_pos, dir = agent_start_dir)
     reward = 0.0
+    goal_reward = 1.0
+    obstacle_pos = Array{CartesianIndex{2}, 1}(undef, num_obstacles)
+    obstacle_reward = -1.0
 
-    env = DynamicObstacles(world, Agent(dir = agent_start_dir, pos = agent_start_pos), num_obstacles, obstacle_pos, obstacle_reward, goal_reward, reward, rng)
+    env = DynamicObstacles(world, agent, reward, rng, goal_reward, num_obstacles, obstacle_pos, obstacle_reward)
 
     reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir, goal_pos = goal_pos)
 
@@ -38,17 +32,15 @@ iscollision(env::DynamicObstacles) = get_world(env)[OBSTACLE, get_agent_pos(env)
 function (env::DynamicObstacles)(::MoveForward)
     world = get_world(env)
 
-    set_reward!(env, 0.0)
-
     update_obstacles!(env)
 
     dir = get_agent_dir(env)
     dest = dir(get_agent_pos(env))
-
     if !world[WALL, dest]
         set_agent_pos!(env, dest)
     end
 
+    set_reward!(env, 0.0)
     if iscollision(env)
         set_reward!(env, env.obstacle_reward)
     end
@@ -57,12 +49,11 @@ function (env::DynamicObstacles)(::MoveForward)
 end
 
 function (env::DynamicObstacles)(action::Union{TurnRight, TurnLeft})
-    set_reward!(env, 0.0)
-
     update_obstacles!(env)
 
     set_dir!(get_agent(env), action(get_agent_dir(env)))
 
+    set_reward!(env, 0.0)
     if iscollision(env)
         set_reward!(env, env.obstacle_reward)
     end
@@ -99,15 +90,12 @@ function RLBase.reset!(env::DynamicObstacles; agent_start_pos = CartesianIndex(2
     n = get_width(env)
     rng = get_rng(env)
 
+    world[:, :, :] .= false
+    world[WALL, [1,n], 1:n] .= true
+    world[WALL, 1:n, [1,n]] .= true
     world[EMPTY, 2:n-1, 2:n-1] .= true
     world[GOAL, goal_pos] = true
     world[EMPTY, goal_pos] = false
-
-    set_reward!(env, 0.0)
-
-    set_agent_pos!(env, agent_start_pos)
-
-    set_agent_dir!(env, agent_start_dir)
 
     obstacles_placed = 0
     while obstacles_placed < env.num_obstacles
@@ -121,6 +109,11 @@ function RLBase.reset!(env::DynamicObstacles; agent_start_pos = CartesianIndex(2
             env.obstacle_pos[obstacles_placed] = pos
         end
     end
+
+    set_agent_pos!(env, agent_start_pos)
+    set_agent_dir!(env, agent_start_dir)
+
+    set_reward!(env, 0.0)
 
     return env
 end

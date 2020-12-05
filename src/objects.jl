@@ -1,9 +1,8 @@
-export COLORS, EMPTY, WALL, GOAL, GEM, OBSTACLE
-export AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Obstacle, Agent
-export get_color, get_dir, set_dir!
+export AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Obstacle, Agent, Transportable, NonTransportable
+export COLORS, EMPTY, WALL, GOAL, GEM, OBSTACLE, TRANSPORTABLE, NONTRANSPORTABLE
+export get_char, get_color, get_dir, set_dir!, get_pos, set_pos!, istransportable
 
-using Crayons
-using Colors
+import Crayons
 
 const COLORS = (:red, :green, :blue, :magenta, :yellow, :white)
 
@@ -13,7 +12,7 @@ const COLORS = (:red, :green, :blue, :magenta, :yellow, :white)
 
 abstract type AbstractObject end
 
-Base.show(io::IO, object::AbstractObject) = print(io, Crayon(foreground = get_color(object), reset = true), get_char(object))
+Base.show(io::IO, object::AbstractObject) = print(io, Crayons.Crayon(foreground = get_color(object), reset = true), get_char(object))
 
 struct Empty <: AbstractObject end
 const EMPTY = Empty()
@@ -55,10 +54,10 @@ get_color(::Obstacle) = :blue
 #####
 
 Base.@kwdef mutable struct Agent <: AbstractObject
-    color::Symbol = :red
-    dir::Direction = RIGHT
     pos::CartesianIndex = CartesianIndex(1, 1)
+    dir::Direction = RIGHT
     inventory::Union{Nothing, AbstractObject, Vector} = nothing
+    color::Symbol = :red
 end
 
 function get_char(agent::Agent)
@@ -78,6 +77,10 @@ get_dir(agent::Agent) = agent.dir
 set_dir!(agent::Agent, dir::Direction) = agent.dir = dir
 get_pos(agent::Agent) = agent.pos
 set_pos!(agent::Agent, pos::CartesianIndex) = agent.pos = pos
+
+#####
+# Pickup & Drop objects
+#####
 
 struct Transportable end
 const TRANSPORTABLE = Transportable()
