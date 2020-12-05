@@ -25,25 +25,25 @@ end
 #####
 
 mutable struct SequentialRooms{R} <: AbstractGridWorld
-    world::GridWorldBase{Tuple{Empty,Wall,Goal}}
+    world::GridWorldBase{Tuple{Empty, Wall, Goal}}
     agent::Agent
+    reward::Float64
+    rng::R
+    goal_reward::Float64
     num_rooms::Int
     room_length_range::UnitRange{Int}
     rooms::Array{Room, 1}
-    goal_reward::Float64
-    reward::Float64
-    rng::R
 end
 
 function SequentialRooms(; num_rooms = 3, room_length_range = 4:6, agent_start_dir = RIGHT, rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, GOAL)
     big_n = 2 * num_rooms * room_length_range.stop
     world = GridWorldBase(objects, big_n, big_n)
-
-    goal_reward = 1.0
+    agent = Agent(dir = agent_start_dir)
     reward = 0.0
+    goal_reward = 1.0
 
-    env = SequentialRooms(world, Agent(dir = agent_start_dir), num_rooms, room_length_range, Room[], goal_reward, reward, rng)
+    env = SequentialRooms(world, agent, reward, rng, goal_reward, num_rooms, room_length_range, Room[])
 
     reset!(env, agent_start_dir = agent_start_dir)
 
@@ -60,13 +60,7 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
 
     world[:, :, :] .= false
 
-    set_agent_pos!(env, CartesianIndex(1, 1))
-
     env.rooms = Room[]
-
-    set_reward!(env, 0.0)
-
-    set_agent_dir!(env, agent_start_dir)
 
     room = generate_first_room(env)
     add_room!(env, room)
@@ -93,9 +87,6 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
     shift_rooms!(env)
     set_world!(env, centered_world)
 
-    # add the agent randomly in the first room
-    set_agent_pos!(env, rand(rng, get_interior(env.rooms[1])))
-
     # add the GOAL randomly in the last room
     world = get_world(env)
     goal_pos = rand(rng, get_interior(env.rooms[end]))
@@ -104,6 +95,12 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
     end
     world[GOAL, goal_pos] = true
     world[EMPTY, goal_pos] = false
+
+    # add the agent randomly in the first room
+    set_agent_pos!(env, rand(rng, get_interior(env.rooms[1])))
+    set_agent_dir!(env, agent_start_dir)
+
+    set_reward!(env, 0.0)
 
     return env
 end
