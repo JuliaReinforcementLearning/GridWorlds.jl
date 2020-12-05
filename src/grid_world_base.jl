@@ -2,14 +2,14 @@ export GridWorldBase
 export get_grid, get_objects, get_num_objects, get_height, get_width, switch!, get_agent_view!
 
 using MacroTools:@forward
-using Random
+import Random
 
 """
     GridWorldBase{O} <: AbstractArray{Bool, 3}
 
 A basic representation of grid world.
 The first dimension uses multi-hot encoding to encode objects in a tile.
-The second and third dimension means the height and width of the grid.
+The second and third dimensions correspond to the height and width of the grid respectively.
 """
 struct GridWorldBase{O} <: AbstractArray{Bool, 3}
     grid::BitArray{3}
@@ -25,9 +25,13 @@ end
 get_grid(world::GridWorldBase) = world.grid
 get_objects(world::GridWorldBase) = world.objects
 
-get_num_objects(world::GridWorldBase) = world |> get_objects |> length
-get_height(world::GridWorldBase) = size(world, 2)
-get_width(world::GridWorldBase) = size(world, 3)
+get_num_objects(grid::BitArray{3}) = size(grid, 1)
+get_height(grid::BitArray{3}) = size(grid, 2)
+get_width(grid::BitArray{3}) = size(grid, 3)
+
+get_num_objects(world::GridWorldBase) = world |> get_grid |> get_num_objects
+get_height(world::GridWorldBase) = world |> get_grid |> get_height
+get_width(world::GridWorldBase) = world |> get_grid |> get_width
 
 @forward GridWorldBase.grid Base.size, Base.getindex, Base.setindex!
 
@@ -37,12 +41,12 @@ get_width(world::GridWorldBase) = size(world, 3)
     :($i)
 end
 
-Base.setindex!(world::GridWorldBase, ispresent::Bool, object::AbstractObject, height::Int, width::Int) = setindex!(world.grid, ispresent, Base.to_index(world, object), height, width)
-Base.setindex!(world::GridWorldBase, ispresent::Bool, object::AbstractObject, pos::CartesianIndex{2}) = setindex!(world, ispresent, object, pos[1], pos[2])
-
-Base.getindex(world::GridWorldBase, object::AbstractObject, height::Int, width::Int) = getindex(world.grid, Base.to_index(world, object), height, width)
+Base.getindex(world::GridWorldBase, object::AbstractObject, height::Int, width::Int) = getindex(get_grid(world), Base.to_index(world, object), height, width)
 Base.getindex(world::GridWorldBase, object::AbstractObject, pos::CartesianIndex{2}) = getindex(world, object, pos[1], pos[2])
-Base.getindex(world::GridWorldBase, object::AbstractObject, heights::Colon, widths::Colon) = getindex(world.grid, Base.to_index(world, object), heights, widths)
+Base.getindex(world::GridWorldBase, object::AbstractObject, heights::Colon, widths::Colon) = getindex(get_grid(world), Base.to_index(world, object), heights, widths)
+
+Base.setindex!(world::GridWorldBase, ispresent::Bool, object::AbstractObject, height::Int, width::Int) = setindex!(get_grid(world), ispresent, Base.to_index(world, object), height, width)
+Base.setindex!(world::GridWorldBase, ispresent::Bool, object::AbstractObject, pos::CartesianIndex{2}) = setindex!(world, ispresent, object, pos[1], pos[2])
 
 #####
 # utils
@@ -56,8 +60,8 @@ function switch!(world::GridWorldBase, src::CartesianIndex{2}, dest::CartesianIn
     end
 end
 
-function Random.rand(f::Function, world::GridWorldBase; max_try = typemax(Int), rng=Random.GLOBAL_RNG)
-    inds = CartesianIndices((size(world, 2), size(world, 3)))
+function Random.rand(f::Function, world::GridWorldBase; max_try = typemax(Int), rng = Random.GLOBAL_RNG)
+    inds = CartesianIndices((get_height(world), get_width(world)))
     for _ in 1:max_try
         pos = rand(rng, inds)
         f(view(world, :, pos)) && return pos
@@ -75,14 +79,14 @@ get_agent_view_inds((i, j), (m, n), ::Right) = CartesianIndices((i-(n-1)÷2:i+(n
 get_agent_view_inds((i, j), (m, n), ::Up) = CartesianIndices((i-m+1:i, j-(n-1)÷2:j+(n-(n-1)÷2)-1))
 get_agent_view_inds((i, j), (m, n), ::Down) = CartesianIndices((i:i+m-1, j-(n-1)÷2:j+(n-(n-1)÷2)-1))
 
-ind_map((i,j), (m, n), ::Left) = (m-j+1, i)
-ind_map((i,j), (m, n), ::Right) = (j, n-i+1)
 ind_map((i,j), (m, n), ::Up) = (m-i+1, n-j+1)
 ind_map((i,j), (m, n), ::Down) = (i,j)
+ind_map((i,j), (m, n), ::Left) = (m-j+1, i)
+ind_map((i,j), (m, n), ::Right) = (j, n-i+1)
 
 function get_agent_view!(agent_view::AbstractArray{Bool,3}, grid::AbstractArray{Bool,3}, agent_pos::CartesianIndex{2}, dir::Direction)
-    view_size = (size(agent_view, 2), size(agent_view, 3))
-    grid_size = (size(grid,2),size(grid,3))
+    view_size = (get_height(agent_view), get_width(agent_view))
+    grid_size = (get_height(grid), get_width(grid))
     inds = get_agent_view_inds(agent_pos.I, view_size, dir)
     valid_inds = CartesianIndices(grid_size)
     for ind in CartesianIndices(inds)
@@ -90,5 +94,5 @@ function get_agent_view!(agent_view::AbstractArray{Bool,3}, grid::AbstractArray{
             agent_view[:, ind_map(ind.I, view_size, dir)...] .= grid[:, inds[ind]]
         end
     end
-    agent_view
+    return agent_view
 end
