@@ -55,6 +55,10 @@ play(env;file_name="example.gif",frame_rate=5)
 
     <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/FourRooms.gif" width="300px">
 
+1. ### SequentialRooms
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/SequentialRooms.gif" width="300px">
+
 1. ### GoToDoor
 
     <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/GoToDoor.gif" width="300px">
@@ -70,7 +74,3 @@ play(env;file_name="example.gif",frame_rate=5)
 1. ### DynamicObstacles
 
     <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/DynamicObstacles.gif" width="300px">
-
-1. ### SequentialRooms
-
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/SequentialRooms.gif" width="300px">
