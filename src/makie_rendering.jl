@@ -1,20 +1,18 @@
 export play
 
-using Colors
-
-# coordinate transform for Makie.jl
-transform(x::Int) = p -> CartesianIndex(p[2], x-p[1]+1)
-
 using .Makie
 
-function init_screen(env::Observable{<:AbstractGridWorld}; resolution=(1000,1000))
+# coordinate transform for Makie.jl
+get_transform(x::Int) = pos -> CartesianIndex(pos[2], x - pos[1] + 1)
+
+function init_screen(env_node::Observable{<:AbstractGridWorld}; resolution=(1000,1000))
     scene = Scene(resolution = resolution, raw = true, camera = campixel!)
 
     area = scene.px_area
-    grid_size = size(env[].world)[2:3]
+    grid_size = size(env_node[].world)[2:3]
     grid_inds = CartesianIndices(grid_size)
-    tile_size = @lift((widths($area)[1] / size($env.world, 2), widths($area)[2] / size($env.world, 3)))
-    T = transform(size(env[].world, 2))
+    tile_size = @lift((widths($area)[1] / size($env_node.world, 2), widths($area)[2] / size($env_node.world, 3)))
+    T = get_transform(size(env_node[].world, 2))
     boxes(pos, s) = [FRect2D((T(p).I .- (1,1)) .* s, s) for p in pos]
     centers(pos, s) = [(T(p).I .- (0.5,0.5)) .* s for p in pos]
 
@@ -22,9 +20,9 @@ function init_screen(env::Observable{<:AbstractGridWorld}; resolution=(1000,1000
     poly!(scene, area)
 
     # 2. paint each kind of object
-    for o in get_objects(env[])
+    for o in get_objects(env_node[])
         if o !== EMPTY
-            scatter!(scene, @lift(centers(findall($env.world[o,:,:]), $tile_size)), color=get_color(o), marker=get_char(o), markersize=@lift(minimum($tile_size)))
+            scatter!(scene, @lift(centers(findall($env_node.world[o,:,:]), $tile_size)), color=get_color(o), marker=get_char(o), markersize=@lift(minimum($tile_size)))
         end
     end
 
@@ -32,12 +30,12 @@ function init_screen(env::Observable{<:AbstractGridWorld}; resolution=(1000,1000
     poly!(scene, @lift(boxes(vec(grid_inds), $tile_size)), color=:transparent, strokecolor = :lightgray, strokewidth = 4)
 
     # 3. paint agent's view
-    view_boxes = @lift boxes([p for p in get_agent_view_inds($env) if p ∈ grid_inds], $tile_size)
+    view_boxes = @lift boxes([p for p in get_agent_view_inds($env_node) if p ∈ grid_inds], $tile_size)
     poly!(scene, view_boxes, color="rgba(255,255,255,0.2)")
 
     # 4. paint agent
-    agent = @lift(get_agent($env))
-    agent_position = @lift((T(get_agent_pos($env)).I .- (0.5, 0.5)).* $tile_size)
+    agent = @lift(get_agent($env_node))
+    agent_position = @lift((T(get_agent_pos($env_node)).I .- (0.5, 0.5)).* $tile_size)
     scatter!(scene, agent_position, color=@lift(get_color($agent)), marker=@lift(get_char($agent)), markersize=@lift(minimum($tile_size)))
 
     display(scene)
