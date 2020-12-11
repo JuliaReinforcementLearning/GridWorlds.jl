@@ -1,6 +1,6 @@
 export AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Obstacle, Agent, Transportable, NonTransportable
 export COLORS, EMPTY, WALL, GOAL, GEM, OBSTACLE, TRANSPORTABLE, NONTRANSPORTABLE
-export get_char, get_color, get_dir, set_dir!, get_pos, set_pos!, istransportable
+export get_char, get_color, get_dir, set_dir!, get_pos, set_pos!, istransportable, get_inventory_type, get_inventory, set_inventory!
 
 import Crayons
 
@@ -53,11 +53,15 @@ get_color(::Obstacle) = :blue
 # Agent
 #####
 
-Base.@kwdef mutable struct Agent <: AbstractObject
-    pos::CartesianIndex = CartesianIndex(1, 1)
-    dir::Direction = RIGHT
-    inventory::Union{Nothing, AbstractObject, Vector} = nothing
-    color::Symbol = :red
+mutable struct Agent{I} <: AbstractObject
+    pos::CartesianIndex
+    dir::Direction
+    inventory::I
+    color::Symbol
+end
+
+function Agent(; inventory_type = Union{Nothing, AbstractObject}, pos = CartesianIndex(1, 1), dir = RIGHT, inventory = nothing, color = :red)
+    Agent{inventory_type}(pos, dir, inventory, color)
 end
 
 function get_char(agent::Agent)
@@ -78,59 +82,13 @@ set_dir!(agent::Agent, dir::Direction) = agent.dir = dir
 get_pos(agent::Agent) = agent.pos
 set_pos!(agent::Agent, pos::CartesianIndex) = agent.pos = pos
 
-#####
-# Pickup & Drop objects
-#####
+get_inventory_type(agent::Agent{I}) where I = I
+get_inventory(agent::Agent) = agent.inventory
 
-struct Transportable end
-const TRANSPORTABLE = Transportable()
-
-struct NonTransportable end
-const NONTRANSPORTABLE = NonTransportable()
-
-istransportable(::Type{<:AbstractObject}) = NONTRANSPORTABLE
-istransportable(::Type{<:Key}) = TRANSPORTABLE
-istransportable(::Type{Gem}) = TRANSPORTABLE
-istransportable(x::AbstractObject) = istransportable(typeof(x))
-
-(x::Pickup)(a::Agent, o) = x(istransportable(o), a, o)
-
-(::Pickup)(::NonTransportable, a::Agent, o::AbstractObject) = false
-
-function (::Pickup)(::Transportable, a::Agent, o::AbstractObject) 
-    if isnothing(a.inventory)
-        a.inventory = o
-        true
-    elseif a.inventory isa Vector
-        i = findfirst(isnothing, a.v)
-        if isnothing(i)
-            false
-        else
-            a.inventory[i] = o
-            true
-        end
+function set_inventory!(agent::Agent, item)
+    if isa(item, get_inventory_type(agent))
+        agent.inventory = item
     else
-        false
-    end
-end
-
-function (::Drop)(a::Agent)
-    if isnothing(a.inventory)
-        nothing
-    elseif a.inventory isa AbstractObject
-        x = a.inventory
-        a.inventory = nothing
-        x
-    elseif a.inventory isa Vector
-        i = findlast(x -> x isa AbstractObject, a.inventory)
-        if isnothing(i)
-            nothing
-        else
-            x = a.inventory[i]
-            a.inventory[i] = nothing
-            x
-        end
-    else
-        @error "unknown inventory type $(a.inventory)"
+        error("$item is not of type $(get_inventory_type(agent))")
     end
 end
