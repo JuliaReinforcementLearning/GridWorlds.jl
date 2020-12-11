@@ -1,6 +1,6 @@
 export AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Obstacle, Agent, Transportable, NonTransportable
 export COLORS, EMPTY, WALL, GOAL, GEM, OBSTACLE, TRANSPORTABLE, NONTRANSPORTABLE
-export get_char, get_color, get_dir, set_dir!, get_pos, set_pos!, istransportable
+export get_char, get_color, get_dir, set_dir!, get_pos, set_pos!, istransportable, get_inventory_type, get_inventory, set_inventory!
 
 import Crayons
 
@@ -81,6 +81,17 @@ get_dir(agent::Agent) = agent.dir
 set_dir!(agent::Agent, dir::Direction) = agent.dir = dir
 get_pos(agent::Agent) = agent.pos
 set_pos!(agent::Agent, pos::CartesianIndex) = agent.pos = pos
+
+get_inventory_type(agent::Agent{I}) where I = I
+get_inventory(agent::Agent) = agent.inventory
+
+function set_inventory!(agent::Agent, item)
+    if isa(item, get_inventory_type(agent))
+        agent.inventory = item
+    else
+        error("$item is not of type $(get_inventory_type(agent))")
+    end
+end
 
 #####
 # Pickup & Drop objects

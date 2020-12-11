@@ -32,6 +32,10 @@ set_agent_pos!(env::AbstractGridWorld, pos::CartesianIndex) = set_pos!(get_agent
 get_agent_dir(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_dir(get_agent(env, Val{view_type}()))
 set_agent_dir!(env::AbstractGridWorld, dir::Direction) = set_dir!(get_agent(env), dir)
 
+get_inventory_type(env::AbstractGridWorld) = env |> get_agent |> get_inventory_type
+get_inventory(env::AbstractGridWorld) = env |> get_agent |> get_inventory
+set_inventory!(env::AbstractGridWorld, item) = set_inventory!(get_agent(env), item)
+
 function get_agent_view(env::AbstractGridWorld, agent_view_size = (7,7))
     world = get_world(env)
     agent_view = BitArray{3}(undef, get_num_objects(env), agent_view_size...)
