@@ -37,21 +37,17 @@ function (env::DoorKey)(::MoveForward)
 
     set_reward!(env, 0.0)
 
-    if world[key, dest]
-        if PICK_UP(agent, key)
-            world[key, dest] = false
-            world[EMPTY, dest] = true
+    if world[door, dest]
+        if get_inventory(env) === key
+            set_agent_pos!(env, dest)
         end
+    elseif !world[WALL, dest]
         set_agent_pos!(env, dest)
-    elseif world[door, dest] && agent.inventory !== key
-        nothing
-    elseif world[door, dest] && agent.inventory === key
-        set_agent_pos!(env, dest)
-    elseif !world[WALL,dest]
-        set_agent_pos!(env, dest)
-        if world[GOAL, get_agent_pos(env)]
-            set_reward!(env, env.goal_reward)
-        end
+    end
+
+    set_reward!(env, 0.0)
+    if world[GOAL, get_agent_pos(env)]
+        set_reward!(env, env.goal_reward)
     end
 
     return env
@@ -93,4 +89,21 @@ function RLBase.reset!(env::DoorKey; agent_start_pos = CartesianIndex(2, 2), age
 
     set_reward!(env, 0.0)
 
+end
+
+RLBase.get_actions(env::DoorKey) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, PICK_UP)
+
+function (env::DoorKey)(::Pickup)
+    world = get_world(env)
+    objects = get_objects(env)
+    key = objects[end]
+    agent_pos = get_agent_pos(env)
+
+    if world[key, agent_pos] && isnothing(get_inventory(env))
+        world[key, agent_pos] = false
+        world[EMPTY, agent_pos] = true
+        set_inventory!(env, key)
+    end
+
+    return env
 end
