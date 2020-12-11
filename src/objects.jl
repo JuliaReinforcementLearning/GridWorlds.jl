@@ -53,11 +53,15 @@ get_color(::Obstacle) = :blue
 # Agent
 #####
 
-Base.@kwdef mutable struct Agent <: AbstractObject
-    pos::CartesianIndex = CartesianIndex(1, 1)
-    dir::Direction = RIGHT
-    inventory::Union{Nothing, AbstractObject, Vector} = nothing
-    color::Symbol = :red
+mutable struct Agent{I} <: AbstractObject
+    pos::CartesianIndex
+    dir::Direction
+    inventory::I
+    color::Symbol
+end
+
+function Agent(; inventory_type = Union{Nothing, AbstractObject}, pos = CartesianIndex(1, 1), dir = RIGHT, inventory = nothing, color = :red)
+    Agent{inventory_type}(pos, dir, inventory, color)
 end
 
 function get_char(agent::Agent)
