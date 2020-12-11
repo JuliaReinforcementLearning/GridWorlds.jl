@@ -5,7 +5,6 @@ using ReinforcementLearningBase
 
 ENVS = [EmptyGridWorld, FourRooms, GoToDoor, DoorKey, CollectGems, DynamicObstacles, SequentialRooms]
 ENVS_RLBASE = [EmptyGridWorld, FourRooms, GoToDoor, DoorKey, CollectGems, DynamicObstacles, SequentialRooms]
-ACTIONS = [TURN_LEFT, TURN_RIGHT, MOVE_FORWARD]
 
 @testset "GridWorlds.jl" begin
     for Env in ENVS
@@ -18,7 +17,7 @@ ACTIONS = [TURN_LEFT, TURN_RIGHT, MOVE_FORWARD]
             @test 1 ≤ get_agent_pos(env)[2] ≤ get_width(env)
 
             for _=1:1000
-                env = env(rand(ACTIONS))
+                env = env(rand(get_actions(env)))
                 @test 1 ≤ get_agent_pos(env)[1] ≤ get_height(env)
                 @test 1 ≤ get_agent_pos(env)[2] ≤ get_width(env)
                 @test get_world(env)[WALL, get_agent_pos(env)] == false
