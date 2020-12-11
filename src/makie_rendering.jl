@@ -5,16 +5,17 @@ using .Makie
 # coordinate transform for Makie.jl
 get_transform(x::Int) = pos -> CartesianIndex(pos[2], x - pos[1] + 1)
 
-function init_screen(env_node::Observable{<:AbstractGridWorld}; resolution=(1000,1000))
+function init_screen(env_node::Observable{<:AbstractGridWorld}; resolution = (1000, 1000))
     scene = Scene(resolution = resolution, raw = true, camera = campixel!)
 
     area = scene.px_area
-    grid_size = size(env_node[].world)[2:3]
+    grid_size = (get_height(env_node[]), get_width(env_node[]))
+    # tile_inds = 
     grid_inds = CartesianIndices(grid_size)
-    tile_size = @lift((widths($area)[1] / size($env_node.world, 2), widths($area)[2] / size($env_node.world, 3)))
-    T = get_transform(size(env_node[].world, 2))
-    boxes(pos, s) = [FRect2D((T(p).I .- (1,1)) .* s, s) for p in pos]
-    centers(pos, s) = [(T(p).I .- (0.5,0.5)) .* s for p in pos]
+    tile_size = @lift((widths($area)[1] / get_height($env_node), widths($area)[2] / get_width($env_node)))
+    transform = get_transform(get_height(env_node[]))
+    boxes(pos, tile_size) = [FRect2D((transform(p).I .- (1,1)) .* tile_size, tile_size) for p in pos]
+    centers(pos, tile_size) = [(transform(p).I .- (0.5,0.5)) .* tile_size for p in pos]
 
     # 1. paint background
     poly!(scene, area)
@@ -35,7 +36,7 @@ function init_screen(env_node::Observable{<:AbstractGridWorld}; resolution=(1000
 
     # 4. paint agent
     agent = @lift(get_agent($env_node))
-    agent_position = @lift((T(get_agent_pos($env_node)).I .- (0.5, 0.5)).* $tile_size)
+    agent_position = @lift((transform(get_agent_pos($env_node)).I .- (0.5, 0.5)).* $tile_size)
     scatter!(scene, agent_position, color=@lift(get_color($agent)), marker=@lift(get_char($agent)), markersize=@lift(minimum($tile_size)))
 
     display(scene)
