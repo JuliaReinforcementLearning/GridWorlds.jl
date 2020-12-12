@@ -86,6 +86,7 @@ function RLBase.reset!(env::DoorKey; agent_start_pos = CartesianIndex(2, 2), age
 
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)
+    set_inventory!(env, nothing)
 
     set_reward!(env, 0.0)
 
