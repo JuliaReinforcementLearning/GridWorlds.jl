@@ -3,12 +3,12 @@ using Test
 using Random
 using ReinforcementLearningBase
 
-ENVS = [EmptyGridWorld, FourRooms, SequentialRooms, GoToDoor, DoorKey, CollectGems, DynamicObstacles]
+ENVS = [EmptyGridWorld, FourRooms, GridRooms, SequentialRooms, GoToDoor, DoorKey, CollectGems, DynamicObstacles]
 
 MAX_STEPS = 3000
 NUM_RESETS = 3
 
-get_terminal_rewards(env::Union{EmptyGridWorld, FourRooms, SequentialRooms, DoorKey}) = (env.goal_reward,)
+get_terminal_rewards(env::Union{EmptyGridWorld, FourRooms, GridRooms, SequentialRooms, DoorKey}) = (env.goal_reward,)
 get_terminal_rewards(env::DynamicObstacles) = (env.goal_reward, env.obstacle_reward)
 get_terminal_rewards(env::CollectGems) = (env.num_gem_init * env.gem_reward,)
 get_terminal_rewards(env::GoToDoor) = (env.target_reward, env.penalty)
