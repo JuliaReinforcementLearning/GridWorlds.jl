@@ -1,5 +1,6 @@
+include("utils.jl")
 include("emptygridworld.jl")
-include("fourrooms.jl")
+include("gridrooms.jl")
 include("sequentialrooms.jl")
 include("gotodoor.jl")
 include("doorkey.jl")

@@ -1,28 +1,4 @@
-export Room, SequentialRooms
-
-#####
-# Room struct
-#####
-
-struct Room
-    region::CartesianIndices{2}
-end
-
-Room(origin, height, width) = Room(CartesianIndices((origin.I[1] : origin.I[1] + height - 1, origin.I[2] : origin.I[2] + width - 1)))
-
-get_origin(region::CartesianIndices{2}) = region[1, 1]
-get_origin(room::Room) = get_origin(room.region)
-
-get_interior(room::Room) = room.region[2:end-1, 2:end-1]
-
-function is_intersecting(room1::Room, room2::Room)
-    intersection = intersect(get_interior(room1), room2.region)
-    length(intersection) > 0 ? true : false
-end
-
-#####
-# Environment struct
-#####
+export SequentialRooms
 
 mutable struct SequentialRooms{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Goal}}
@@ -65,6 +41,7 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
 
     room = generate_first_room(env)
     add_room!(env, room)
+    push!(env.rooms, room)
 
     tries = 1
 
@@ -74,6 +51,7 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
         if length(candidate_rooms) > 0
             room = rand(rng, candidate_rooms)
             add_room!(env, room)
+            push!(env.rooms, room)
 
             door_pos = rand(rng, intersect(env.rooms[end - 1].region, room.region)[2:end-1])
             world[WALL, door_pos] = false
@@ -118,14 +96,6 @@ function generate_first_room(env::AbstractGridWorld)
     width = rand(rng, env.room_length_range)
     room = Room(origin, height, width)
     return room
-end
-
-function add_room!(env::AbstractGridWorld, room::Room)
-    world = get_world(env)
-    world[WALL, room.region] .= true
-    world[WALL, get_interior(room)] .= false
-    world[EMPTY, get_interior(room)] .= true
-    push!(env.rooms, room)
 end
 
 is_valid_room(env::SequentialRooms, room::Room) = !any(x -> is_intersecting(room, x), env.rooms)

@@ -51,9 +51,9 @@ play(env;file_name="example.gif",frame_rate=5)
 
     <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/EmptyGridWorld.gif" width="300px">
 
-1. ### FourRooms
+1. ### GridRooms
 
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/FourRooms.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/GridRooms.gif" width="300px">
 
 1. ### SequentialRooms
 
