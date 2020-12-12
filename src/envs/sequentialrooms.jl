@@ -55,10 +55,11 @@ end
 #####
 
 function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
-    world = get_world(env)
-    rng = get_rng(env)
+    big_n = 2 * env.num_rooms * env.room_length_range.stop
+    world = GridWorldBase(get_objects(env), big_n, big_n)
+    set_world!(env, world)
 
-    world[:, :, :] .= false
+    rng = get_rng(env)
 
     env.rooms = Room[]
 
