@@ -2,43 +2,41 @@ export play
 
 using .Makie
 
-# coordinate transform for Makie.jl
 get_transform(x::Int) = pos -> CartesianIndex(pos[2], x - pos[1] + 1)
+get_center(pos, tile_size, transform) = (transform(pos).I .- (0.5,0.5)) .* reverse(tile_size)
+get_box(pos, tile_size, transform) = FRect2D((transform(pos).I .- (1,1)) .* reverse(tile_size), reverse(tile_size))
 
-get_markersize(object::Nothing, tile_size) = reverse(tile_size) ./ 2
 get_markersize(object::AbstractObject, tile_size) = reverse(tile_size)
 get_markersize(object::Empty, tile_size) = reverse(tile_size) ./ 5
 
-function init_screen(env_node::Observable{<:AbstractGridWorld}; resolution = (1000, 1000))
+function init_screen(env_node::Observable{<:AbstractGridWorld}; resolution = (720, 480))
     scene = Scene(resolution = resolution, raw = true, camera = campixel!)
-    area = scene.px_area
 
     height = get_height(env_node[])
     width = get_width(env_node[])
-
     tile_inds = CartesianIndices((height, width))
-    tile_size = @lift((widths($area)[1] / get_height($env_node), widths($area)[2] / get_width($env_node)))
-    @show tile_size.val
 
-    transform = get_transform(get_height(env_node[]))
-    boxes(pos, tile_size) = [FRect2D((transform(p).I .- (1,1)) .* reverse(tile_size), reverse(tile_size)) for p in pos]
-    centers(pos, tile_size) = [(transform(p).I .- (0.5,0.5)) .* reverse(tile_size) for p in pos]
+    transform = get_transform(height)
+
+    area = scene.px_area
+    tile_size = @lift((widths($area)[2] / height, widths($area)[1] / width))
 
     # 1. paint background
     poly!(scene, area)
+    scatter!(scene, @lift(map(x -> get_center(x, $tile_size, transform), filter(pos -> !any(get_world($env_node)[:, pos]), $tile_inds))), color = :white, marker = '~', markersize = @lift((reverse($tile_size) ./ 2)))
 
     # 2. paint each kind of object
     for object in get_objects(env_node[])
-        scatter!(scene, @lift(centers(findall($env_node.world[object, :, :]), $tile_size)), color = get_color(object), marker = get_char(object), markersize = @lift(get_markersize(object, $tile_size)))
+        scatter!(scene, @lift(broadcast(x -> get_center(x, $tile_size, transform), findall(get_world($env_node)[object, :, :]))), color = get_color(object), marker = get_char(object), markersize = @lift(get_markersize(object, $tile_size)))
     end
 
     # 3. paint agent's view
-    view_boxes = @lift(boxes([p for p in get_agent_view_inds($env_node) if p ∈ tile_inds], $tile_size))
-    poly!(scene, view_boxes, color = "rgba(255,255,255,0.2)")
+    view_boxes = @lift(map(pos -> get_box(pos, $tile_size, transform), filter(pos -> pos in tile_inds, get_agent_view_inds($env_node))))
+    poly!(scene, view_boxes, color = "rgba(255,255,255,0.3)")
 
     # 4. paint agent
     agent = @lift(get_agent($env_node))
-    agent_center = @lift(centers([get_agent_pos($env_node)], $tile_size)[1])
+    agent_center = @lift(get_center(get_agent_pos($env_node), $tile_size, transform))
     scatter!(scene, agent_center, color = @lift(get_color($agent)), marker = @lift(get_char($agent)), markersize = @lift(get_markersize($agent, $tile_size)))
 
     display(scene)
