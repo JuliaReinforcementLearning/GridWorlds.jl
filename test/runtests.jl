@@ -23,9 +23,7 @@ ENVS_RLBASE = [EmptyGridWorld, FourRooms, GoToDoor, DoorKey, CollectGems, Dynami
                 @test get_world(env)[WALL, get_agent_pos(env)] == false
                 view = get_agent_view(env)
                 @test typeof(view) <: BitArray{3}
-                @test size(view,1) == length(get_objects(env))
-                @test size(view,2) == 7
-                @test size(view,3) == 7
+                @test size(view, 1) == length(get_objects(env))
             end
         end
     end
