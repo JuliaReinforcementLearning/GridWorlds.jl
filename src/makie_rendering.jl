@@ -9,7 +9,7 @@ get_box(pos, tile_size, transform) = FRect2D((transform(pos).I .- (1,1)) .* reve
 get_markersize(object::AbstractObject, tile_size) = reverse(tile_size)
 get_markersize(object::Empty, tile_size) = reverse(tile_size) ./ 5
 
-function init_screen(env_node::Observable{<:AbstractGridWorld}; resolution = (720, 480))
+function init_screen(env_node::Observable{<:AbstractGridWorld}; resolution = (720, 720))
     scene = Scene(resolution = resolution, raw = true, camera = campixel!)
 
     height = get_height(env_node[])
