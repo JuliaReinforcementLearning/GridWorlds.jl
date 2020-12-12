@@ -76,6 +76,9 @@ end
 
 get_rng(env::AbstractGridWorld) = env.rng
 
+get_goal_pos(env::AbstractGridWorld) = env.goal_pos
+set_goal_pos!(env::AbstractGridWorld, pos::CartesianIndex) = env.goal_pos = pos
+
 #####
 # RLBase API defaults
 #####
