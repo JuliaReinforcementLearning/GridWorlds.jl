@@ -1,6 +1,6 @@
-export EmptyGridWorld
+export EmptyRoom
 
-mutable struct EmptyGridWorld{R} <: AbstractGridWorld
+mutable struct EmptyRoom{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Goal}}
     agent::Agent
     reward::Float64
@@ -9,7 +9,7 @@ mutable struct EmptyGridWorld{R} <: AbstractGridWorld
     goal_pos::CartesianIndex
 end
 
-function EmptyGridWorld(; height = 8, width = 8, agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(height - 1, width - 1), rng = Random.GLOBAL_RNG)
+function EmptyRoom(; height = 8, width = 8, agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(height - 1, width - 1), rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, GOAL)
     world = GridWorldBase(objects, height, width)
     room = Room(CartesianIndex(1, 1), height, width)
@@ -18,14 +18,14 @@ function EmptyGridWorld(; height = 8, width = 8, agent_start_pos = CartesianInde
     reward = 0.0
     goal_reward = 1.0
 
-    env = EmptyGridWorld(world, agent, reward, rng, goal_reward, goal_pos)
+    env = EmptyRoom(world, agent, reward, rng, goal_reward, goal_pos)
 
     reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir, goal_pos = goal_pos)
 
     return env
 end
 
-function RLBase.reset!(env::EmptyGridWorld; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(get_height(env) - 1, get_width(env) - 1))
+function RLBase.reset!(env::EmptyRoom; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(get_height(env) - 1, get_width(env) - 1))
     world = get_world(env)
 
     old_goal_pos = get_goal_pos(env)
