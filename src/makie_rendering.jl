@@ -49,6 +49,8 @@ function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
     ←: TurnLeft
     →: TurnRight
     ↑: MoveForward
+    p: Pickup
+    r: reset!
     q: Quit
     """)
     env_node = Node(env)
@@ -69,6 +71,12 @@ function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
             env_node[] = env
         elseif ispressed(b, Keyboard.up)
             env(MOVE_FORWARD)
+            env_node[] = env
+        elseif ispressed(b, Keyboard.p)
+            env(PICK_UP)
+            env_node[] = env
+        elseif ispressed(b, Keyboard.r)
+            reset!(env)
             env_node[] = env
         elseif ispressed(b, Keyboard.q)
             is_quit[] = true
