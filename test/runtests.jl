@@ -13,8 +13,6 @@ ENVS_RLBASE = [EmptyGridWorld, FourRooms, GoToDoor, DoorKey, CollectGems, Dynami
             @test typeof(get_agent_pos(env)) == CartesianIndex{2}
             @test typeof(get_agent_dir(env)) <: Direction
             @test size(get_grid(env), 1) == length(get_objects(env))
-            @test 1 ≤ get_agent_pos(env)[1] ≤ get_height(env)
-            @test 1 ≤ get_agent_pos(env)[2] ≤ get_width(env)
 
             for _=1:1000
                 env = env(rand(get_actions(env)))
