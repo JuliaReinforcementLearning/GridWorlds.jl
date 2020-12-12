@@ -97,16 +97,17 @@ function RLBase.reset!(env::DynamicObstacles; agent_start_pos = CartesianIndex(2
     world[GOAL, goal_pos] = true
     world[EMPTY, goal_pos] = false
 
+    env.obstacle_pos = Array{CartesianIndex{2}, 1}[]
     obstacles_placed = 0
     while obstacles_placed < env.num_obstacles
         pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 2:n-1))
-        if (pos == get_agent_pos(env)) || (world[OBSTACLE, pos] == true) || (pos == goal_pos)
+        if (pos == agent_start_pos) || (world[OBSTACLE, pos] == true) || (pos == goal_pos)
             continue
         else
             world[OBSTACLE, pos] = true
             world[EMPTY, pos] = false
-            obstacles_placed = obstacles_placed + 1
-            env.obstacle_pos[obstacles_placed] = pos
+            obstacles_placed += 1
+            push!(env.obstacle_pos, pos)
         end
     end
 
