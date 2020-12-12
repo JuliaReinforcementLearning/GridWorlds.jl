@@ -1,44 +1,43 @@
 export play
 
-using Colors
-
-# coordinate transform for Makie.jl
-transform(x::Int) = p -> CartesianIndex(p[2], x-p[1]+1)
-
 using .Makie
 
-function init_screen(env::Observable{<:AbstractGridWorld}; resolution=(1000,1000))
+get_transform(x::Int) = pos -> CartesianIndex(pos[2], x - pos[1] + 1)
+get_center(pos, tile_size, transform) = (transform(pos).I .- (0.5,0.5)) .* reverse(tile_size)
+get_box(pos, tile_size, transform) = FRect2D((transform(pos).I .- (1,1)) .* reverse(tile_size), reverse(tile_size))
+
+get_markersize(object::AbstractObject, tile_size) = reverse(tile_size)
+get_markersize(object::Empty, tile_size) = reverse(tile_size) ./ 5
+
+function init_screen(env_node::Observable{<:AbstractGridWorld}; resolution = (720, 720))
     scene = Scene(resolution = resolution, raw = true, camera = campixel!)
 
+    height = get_height(env_node[])
+    width = get_width(env_node[])
+    tile_inds = CartesianIndices((height, width))
+
+    transform = get_transform(height)
+
     area = scene.px_area
-    grid_size = size(env[].world)[2:3]
-    grid_inds = CartesianIndices(grid_size)
-    tile_size = @lift((widths($area)[1] / size($env.world, 2), widths($area)[2] / size($env.world, 3)))
-    T = transform(size(env[].world, 2))
-    boxes(pos, s) = [FRect2D((T(p).I .- (1,1)) .* s, s) for p in pos]
-    centers(pos, s) = [(T(p).I .- (0.5,0.5)) .* s for p in pos]
+    tile_size = @lift((widths($area)[2] / height, widths($area)[1] / width))
 
     # 1. paint background
     poly!(scene, area)
+    scatter!(scene, @lift(map(x -> get_center(x, $tile_size, transform), filter(pos -> !any(get_world($env_node)[:, pos]), $tile_inds))), color = :white, marker = '~', markersize = @lift((reverse($tile_size) ./ 2)))
 
     # 2. paint each kind of object
-    for o in get_objects(env[])
-        if o !== EMPTY
-            scatter!(scene, @lift(centers(findall($env.world[o,:,:]), $tile_size)), color=get_color(o), marker=get_char(o), markersize=@lift(minimum($tile_size)))
-        end
+    for object in get_objects(env_node[])
+        scatter!(scene, @lift(broadcast(x -> get_center(x, $tile_size, transform), findall(get_world($env_node)[object, :, :]))), color = get_color(object), marker = get_char(object), markersize = @lift(get_markersize(object, $tile_size)))
     end
 
-    # 3. paint stroke
-    poly!(scene, @lift(boxes(vec(grid_inds), $tile_size)), color=:transparent, strokecolor = :lightgray, strokewidth = 4)
-
     # 3. paint agent's view
-    view_boxes = @lift boxes([p for p in get_agent_view_inds($env) if p ∈ grid_inds], $tile_size)
-    poly!(scene, view_boxes, color="rgba(255,255,255,0.2)")
+    view_boxes = @lift(map(pos -> get_box(pos, $tile_size, transform), filter(pos -> pos in tile_inds, get_agent_view_inds($env_node))))
+    poly!(scene, view_boxes, color = "rgba(255,255,255,0.3)")
 
     # 4. paint agent
-    agent = @lift(get_agent($env))
-    agent_position = @lift((T(get_agent_pos($env)).I .- (0.5, 0.5)).* $tile_size)
-    scatter!(scene, agent_position, color=@lift(get_color($agent)), marker=@lift(get_char($agent)), markersize=@lift(minimum($tile_size)))
+    agent = @lift(get_agent($env_node))
+    agent_center = @lift(get_center(get_agent_pos($env_node), $tile_size, transform))
+    scatter!(scene, agent_center, color = @lift(get_color($agent)), marker = @lift(get_char($agent)), markersize = @lift(get_markersize($agent, $tile_size)))
 
     display(scene)
     scene
@@ -50,6 +49,8 @@ function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
     ←: TurnLeft
     →: TurnRight
     ↑: MoveForward
+    p: Pickup
+    r: reset!
     q: Quit
     """)
     env_node = Node(env)
@@ -70,6 +71,12 @@ function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
             env_node[] = env
         elseif ispressed(b, Keyboard.up)
             env(MOVE_FORWARD)
+            env_node[] = env
+        elseif ispressed(b, Keyboard.p)
+            env(PICK_UP)
+            env_node[] = env
+        elseif ispressed(b, Keyboard.r)
+            reset!(env)
             env_node[] = env
         elseif ispressed(b, Keyboard.q)
             is_quit[] = true
