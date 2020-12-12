@@ -20,8 +20,9 @@ function is_intersecting(room1::Room, room2::Room)
     length(intersection) > 0 ? true : false
 end
 
-function place_room!(env::AbstractGridWorld, room::Room)
-    world = get_world(env)
+place_room!(env::AbstractGridWorld, room::Room) = place_room!(get_world(env), room)
+
+function place_room!(world::GridWorldBase, room::Room)
     world[WALL, room.region] .= true
     world[WALL, get_interior(room)] .= false
     world[EMPTY, get_interior(room)] .= true
