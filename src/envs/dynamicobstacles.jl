@@ -6,23 +6,31 @@ mutable struct DynamicObstacles{R} <: AbstractGridWorld
     reward::Float64
     rng::R
     goal_reward::Float64
+    goal_pos::CartesianIndex
     num_obstacles::Int
-    obstacle_pos::Array{CartesianIndex{2},1}
+    obstacle_pos::Vector{CartesianIndex{2}}
     obstacle_reward::Float64
 end
 
-function DynamicObstacles(; n = 8, agent_start_pos = CartesianIndex(2,2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(n-1, n-1), num_obstacles = n-3, rng = Random.GLOBAL_RNG)
+function DynamicObstacles(; n = 8, num_obstacles = n-3, rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, OBSTACLE, GOAL)
     world = GridWorldBase(objects, n, n)
-    agent = Agent(pos = agent_start_pos, dir = agent_start_dir)
+    room = Room(CartesianIndex(1, 1), n, n)
+    place_room!(world, room)
+
+    goal_pos = CartesianIndex(n - 1, n - 1)
+    world[GOAL, goal_pos] = true
+    world[EMPTY, goal_pos] = false
+
+    agent = Agent(pos = CartesianIndex(2, 2), dir = RIGHT)
     reward = 0.0
     goal_reward = 1.0
-    obstacle_pos = Array{CartesianIndex{2}, 1}(undef, num_obstacles)
+    obstacle_pos = CartesianIndex{2}[]
     obstacle_reward = -1.0
 
-    env = DynamicObstacles(world, agent, reward, rng, goal_reward, num_obstacles, obstacle_pos, obstacle_reward)
+    env = DynamicObstacles(world, agent, reward, rng, goal_reward, goal_pos, num_obstacles, obstacle_pos, obstacle_reward)
 
-    reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir, goal_pos = goal_pos)
+    reset!(env)
 
     return env
 end
@@ -54,7 +62,7 @@ function (env::DynamicObstacles)(action::Union{TurnRight, TurnLeft})
     world = get_world(env)
     update_obstacles!(env)
 
-    set_dir!(get_agent(env), action(get_agent_dir(env)))
+    set_agent_dir!(env, action(get_agent_dir(env)))
 
     set_reward!(env, 0.0)
     if world[GOAL, get_agent_pos(env)]
@@ -68,21 +76,21 @@ end
 
 function valid_obstacle_dest(env::DynamicObstacles, pos::CartesianIndex{2})
     candidate_pos = [CartesianIndex(pos[1] + i, pos[2] + j) for i in [-1, 0, 1] for j in [-1, 0, 1]]
-    filter(p -> get_world(env)[EMPTY, p] || pos == p, candidate_pos)
+    filter(p -> (get_world(env)[EMPTY, p] || p == pos), candidate_pos)
 end
 
 function update_obstacles!(env::DynamicObstacles)
     world = get_world(env)
 
     for (i, pos) in enumerate(env.obstacle_pos)
-        world[EMPTY, pos] = true
         world[OBSTACLE, pos] = false
+        world[EMPTY, pos] = true
 
         new_pos = rand(get_rng(env), valid_obstacle_dest(env, pos))
         env.obstacle_pos[i] = new_pos
 
-        world[EMPTY, new_pos] = false
         world[OBSTACLE, new_pos] = true
+        world[EMPTY, new_pos] = false
     end
     
     return env
@@ -90,31 +98,37 @@ end
 
 RLBase.get_terminal(env::DynamicObstacles) = iscollision(env) || get_world(env)[GOAL, get_agent_pos(env)]
 
-function RLBase.reset!(env::DynamicObstacles; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, goal_pos = CartesianIndex(get_width(env) - 1, get_width(env) - 1))
+function RLBase.reset!(env::DynamicObstacles)
     world = get_world(env)
     n = get_width(env)
     rng = get_rng(env)
 
-    world[:, :, :] .= false
-    world[WALL, [1,n], 1:n] .= true
-    world[WALL, 1:n, [1,n]] .= true
-    world[EMPTY, 2:n-1, 2:n-1] .= true
-    world[GOAL, goal_pos] = true
-    world[EMPTY, goal_pos] = false
-
-    env.obstacle_pos = Array{CartesianIndex{2}, 1}[]
-    obstacles_placed = 0
-    while obstacles_placed < env.num_obstacles
-        pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 2:n-1))
-        if (pos == agent_start_pos) || (world[OBSTACLE, pos] == true) || (pos == goal_pos)
-            continue
-        else
-            world[OBSTACLE, pos] = true
-            world[EMPTY, pos] = false
-            obstacles_placed += 1
-            push!(env.obstacle_pos, pos)
-        end
+    for pos in env.obstacle_pos
+        world[OBSTACLE, pos] = false
+        world[EMPTY, pos] = true
     end
+
+    old_goal_pos = get_goal_pos(env)
+    world[GOAL, old_goal_pos] = false
+    world[EMPTY, old_goal_pos] = true
+
+    new_goal_pos = rand(rng, pos -> !world[WALL, pos], world)
+
+    set_goal_pos!(env, new_goal_pos)
+    world[GOAL, new_goal_pos] = true
+    world[EMPTY, new_goal_pos] = false
+
+    env.obstacle_pos = CartesianIndex{2}[]
+
+    for i in 1:env.num_obstacles
+        pos = rand(rng, pos -> world[EMPTY, pos], world)
+        world[OBSTACLE, pos] = true
+        world[EMPTY, pos] = false
+        push!(env.obstacle_pos, pos)
+    end
+
+    agent_start_pos = rand(rng, pos -> world[EMPTY, pos], world)
+    agent_start_dir = rand(rng, DIRECTIONS)
 
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)
