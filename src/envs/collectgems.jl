@@ -11,15 +11,14 @@ mutable struct CollectGems{R} <: AbstractGridWorld
     gem_pos::Vector{CartesianIndex{2}}
 end
 
-function CollectGems(; n = 8, rng = Random.GLOBAL_RNG)
+function CollectGems(; height = 8, width = 8, num_gem_init = floor(Int, sqrt(height * width)), rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, GEM)
-    world = GridWorldBase(objects, n, n)
-    room = Room(CartesianIndex(1, 1), n, n)
+    world = GridWorldBase(objects, height, width)
+    room = Room(CartesianIndex(1, 1), height, width)
     place_room!(world, room)
 
     agent = Agent(pos = CartesianIndex(2, 2), dir = RIGHT)
     reward = 0.0
-    num_gem_init = n
     num_gem_current = num_gem_init
     gem_reward = 1.0
     gem_pos = CartesianIndex{2}[]
@@ -56,7 +55,6 @@ end
 
 function RLBase.reset!(env::CollectGems)
     world = get_world(env)
-    n = get_width(env)
     rng = get_rng(env)
 
     for pos in env.gem_pos
