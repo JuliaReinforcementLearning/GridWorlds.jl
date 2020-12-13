@@ -11,18 +11,18 @@ mutable struct DoorKey{W<:GridWorldBase, R} <: AbstractGridWorld
     key_pos::CartesianIndex
 end
 
-function DoorKey(; n = 7, rng = Random.GLOBAL_RNG)
+function DoorKey(; height = 7, width = 7, rng = Random.GLOBAL_RNG)
     door = Door(:yellow)
     key = Key(:yellow)
     objects = (EMPTY, WALL, GOAL, door, key)
-    world = GridWorldBase(objects, n, n)
-    room = Room(CartesianIndex(1, 1), n, n)
+    world = GridWorldBase(objects, height, width)
+    room = Room(CartesianIndex(1, 1), height, width)
     place_room!(world, room)
 
     agent = Agent(pos = CartesianIndex(2, 2), dir = RIGHT)
     reward = 0.0
     goal_reward = 1.0
-    goal_pos = CartesianIndex(n - 1, n - 1)
+    goal_pos = CartesianIndex(height - 1, width - 1)
     door_pos = CartesianIndex(2, 3)
     key_pos = CartesianIndex(3, 2)
 
@@ -80,16 +80,17 @@ end
 
 function RLBase.reset!(env::DoorKey)
     world = get_world(env)
-    n = get_width(env)
+    height = get_height(env)
+    width = get_width(env)
     rng = get_rng(env)
 
     objects = get_objects(env)
     door = objects[end - 1]
     key = objects[end]
 
-    world[WALL, 2:n-1, env.door_pos[2]] .= false
+    world[WALL, 2:height-1, env.door_pos[2]] .= false
     world[door, env.door_pos] = false
-    world[EMPTY, 2:n-1, env.door_pos[2]] .= true
+    world[EMPTY, 2:height-1, env.door_pos[2]] .= true
 
     if isnothing(get_inventory(env))
         world[key, env.key_pos] = false
@@ -100,15 +101,15 @@ function RLBase.reset!(env::DoorKey)
     world[GOAL, old_goal_pos] = false
     world[EMPTY, old_goal_pos] = true
 
-    new_door_pos = rand(rng, CartesianIndices((2:n-1, 3:n-2)))
+    new_door_pos = rand(rng, CartesianIndices((2:height-1, 3:width-2)))
     env.door_pos = new_door_pos
     world[door, new_door_pos] = true
-    world[WALL, 2:n-1, new_door_pos[2]] .= true
+    world[WALL, 2:height-1, new_door_pos[2]] .= true
     world[WALL, new_door_pos] = false
-    world[EMPTY, 2:n-1, new_door_pos[2]] .= false
+    world[EMPTY, 2:height-1, new_door_pos[2]] .= false
 
-    left_region = CartesianIndices((2:n-1, 2:new_door_pos[2]-1))
-    right_region = CartesianIndices((2:n-1, new_door_pos[2]+1:n-1))
+    left_region = CartesianIndices((2:height-1, 2:new_door_pos[2]-1))
+    right_region = CartesianIndices((2:height-1, new_door_pos[2]+1:width-1))
 
     new_goal_pos = rand(rng, pos -> world[EMPTY, pos], right_region)
     set_goal_pos!(env, new_goal_pos)
