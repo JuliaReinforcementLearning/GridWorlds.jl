@@ -1,30 +1,36 @@
 export CollectGems
 
 mutable struct CollectGems{R} <: AbstractGridWorld
-    world::GridWorldBase{Tuple{Empty,Wall,Gem}}
+    world::GridWorldBase{Tuple{Empty, Wall, Gem}}
     agent::Agent
     reward::Float64
     rng::R
     num_gem_init::Int
     num_gem_current::Int
     gem_reward::Float64
+    gem_pos::Vector{CartesianIndex{2}}
 end
 
-function CollectGems(; n = 8, agent_start_pos = CartesianIndex(2,2), agent_start_dir = RIGHT, rng = Random.GLOBAL_RNG)
+function CollectGems(; height = 8, width = 8, num_gem_init = floor(Int, sqrt(height * width)), rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, GEM)
-    world = GridWorldBase(objects, n, n)
-    agent = Agent(pos = agent_start_pos, dir = agent_start_dir)
+    world = GridWorldBase(objects, height, width)
+    room = Room(CartesianIndex(1, 1), height, width)
+    place_room!(world, room)
+
+    agent = Agent(pos = CartesianIndex(2, 2), dir = RIGHT)
     reward = 0.0
-    num_gem_init = n - 1
     num_gem_current = num_gem_init
     gem_reward = 1.0
+    gem_pos = CartesianIndex{2}[]
 
-    env = CollectGems(world, agent, reward, rng, num_gem_init, num_gem_current, gem_reward)
+    env = CollectGems(world, agent, reward, rng, num_gem_init, num_gem_current, gem_reward, gem_pos)
 
-    reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir)
+    reset!(env)
 
     return env
 end
+
+RLBase.get_terminal(env::CollectGems) = env.num_gem_current <= 0
 
 function (env::CollectGems)(::MoveForward)
     world = get_world(env)
@@ -47,31 +53,26 @@ function (env::CollectGems)(::MoveForward)
     return env
 end
 
-RLBase.get_terminal(env::CollectGems) = env.num_gem_current <= 0
-
-function RLBase.reset!(env::CollectGems; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT)
+function RLBase.reset!(env::CollectGems)
     world = get_world(env)
-    n = get_width(env)
     rng = get_rng(env)
 
-    world[:, :, :] .= false
-    world[WALL, [1,n], 1:n] .= true
-    world[WALL, 1:n, [1,n]] .= true
-    world[EMPTY, 2:n-1, 2:n-1] .= true
+    for pos in env.gem_pos
+        world[GEM, pos] = false
+        world[EMPTY, pos] = true
+    end
 
+    env.gem_pos = CartesianIndex{2}[]
+    for i in 1:env.num_gem_init
+        pos = rand(rng, pos -> world[EMPTY, pos], world)
+        world[GEM, pos] = true
+        world[EMPTY, pos] = false
+        push!(env.gem_pos, pos)
+    end
     env.num_gem_current = env.num_gem_init
 
-    gem_placed = 0
-    while gem_placed < env.num_gem_init
-        gem_pos = CartesianIndex(rand(rng, 2:n-1), rand(rng, 2:n-1))
-        if (gem_pos == get_agent_pos(env)) || (world[GEM, gem_pos] == true)
-            continue
-        else
-            world[GEM, gem_pos] = true
-            world[EMPTY, gem_pos] = false
-            gem_placed = gem_placed + 1
-        end
-    end
+    agent_start_pos = rand(rng, pos -> world[EMPTY, pos], world)
+    agent_start_dir = rand(rng, DIRECTIONS)
 
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)
