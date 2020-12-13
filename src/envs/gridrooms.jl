@@ -6,11 +6,10 @@ mutable struct GridRooms{R} <: AbstractGridWorld
     reward::Float64
     rng::R
     goal_reward::Float64
-    grid_size::Tuple{Int, Int}
-    room_size::Tuple{Int, Int}
+    goal_pos::CartesianIndex
 end
 
-function GridRooms(; grid_size = (2, 2), room_size = (5, 5), agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT, rng = Random.GLOBAL_RNG)
+function GridRooms(; grid_size = (2, 2), room_size = (5, 5), rng = Random.GLOBAL_RNG)
     grid_height = grid_size[1]
     grid_width = grid_size[2]
     room_height = room_size[1]
@@ -20,27 +19,12 @@ function GridRooms(; grid_size = (2, 2), room_size = (5, 5), agent_start_pos = C
     width = room_width * grid_width - grid_width + 1
     objects = (EMPTY, WALL, GOAL)
     world = GridWorldBase(objects, height, width)
-    agent = Agent(pos = agent_start_pos, dir = agent_start_dir)
-    reward = 0.0
-    goal_reward = 1.0
 
-    env = GridRooms(world, agent, reward, rng, goal_reward, grid_size, room_size)
-
-    reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir)
-
-    return env
-end
-
-function RLBase.reset!(env::GridRooms; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT)
-    world = get_world(env)
-    height = get_height(env)
-    width = get_width(env)
-
-    origins = get_room_origins(env)
+    origins = get_room_origins(grid_size, room_size)
 
     for origin in origins
-        room = Room(origin, env.room_size[1], env.room_size[2])
-        place_room!(env, room)
+        room = Room(origin, room_height, room_width)
+        place_room!(world, room)
 
         world[WALL, room.region[(end + 1) ÷ 2, 1]] = false
         world[EMPTY, room.region[(end + 1) ÷ 2, 1]] = true
@@ -57,9 +41,46 @@ function RLBase.reset!(env::GridRooms; agent_start_pos = CartesianIndex(2, 2), a
     world[WALL, :, [1, width]] .= true
     world[EMPTY, :, [1, width]] .= false
 
+    agent = Agent(pos = CartesianIndex(2, 2), dir = RIGHT)
+    reward = 0.0
+    goal_reward = 1.0
     goal_pos = CartesianIndex(height - 1, width - 1)
-    world[GOAL, goal_pos] = true
-    world[EMPTY, goal_pos] = false
+
+    env = GridRooms(world, agent, reward, rng, goal_reward, goal_pos)
+
+    reset!(env)
+
+    return env
+end
+
+function get_room_origins(grid_size, room_size)
+    grid_height = grid_size[1]
+    grid_width = grid_size[2]
+    room_height = room_size[1]
+    room_width = room_size[2]
+
+    vertical_steps = 1 : room_height - 1 : 1 + (grid_height - 1) * (room_height - 1)
+    horizontal_steps = 1 : room_width - 1 : 1 + (grid_width - 1) * (room_width - 1)
+
+    return [CartesianIndex(i, j) for i in vertical_steps for j in horizontal_steps]
+end
+
+function RLBase.reset!(env::GridRooms)
+    world = get_world(env)
+    rng = get_rng(env)
+
+    old_goal_pos = get_goal_pos(env)
+    world[GOAL, old_goal_pos] = false
+    world[EMPTY, old_goal_pos] = true
+
+    new_goal_pos = rand(rng, pos -> world[EMPTY, pos], world)
+
+    set_goal_pos!(env, new_goal_pos)
+    world[GOAL, new_goal_pos] = true
+    world[EMPTY, new_goal_pos] = false
+
+    agent_start_pos = rand(rng, pos -> world[EMPTY, pos], world)
+    agent_start_dir = rand(rng, DIRECTIONS)
 
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)
@@ -67,15 +88,4 @@ function RLBase.reset!(env::GridRooms; agent_start_pos = CartesianIndex(2, 2), a
     set_reward!(env, 0.0)
 
     return env
-end
-
-function get_room_origins(env::GridRooms)
-    grid_height = env.grid_size[1]
-    grid_width = env.grid_size[2]
-    room_height = env.room_size[1]
-    room_width = env.room_size[2]
-    vertical_steps = 1 : room_height - 1 : get_height(env) - room_height + 1
-    horizontal_steps = 1 : room_width - 1 : get_width(env) - room_width + 1
-    origins = [CartesianIndex(i, j) for i in vertical_steps for j in horizontal_steps]
-    return origins
 end
