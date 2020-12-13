@@ -40,7 +40,7 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
     env.rooms = Room[]
 
     room = generate_first_room(env)
-    add_room!(env, room)
+    place_room!(env, room)
     push!(env.rooms, room)
 
     tries = 1
@@ -50,7 +50,7 @@ function RLBase.reset!(env::AbstractGridWorld; agent_start_dir = RIGHT)
 
         if length(candidate_rooms) > 0
             room = rand(rng, candidate_rooms)
-            add_room!(env, room)
+            place_room!(env, room)
             push!(env.rooms, room)
 
             door_pos = rand(rng, intersect(env.rooms[end - 1].region, room.region)[2:end-1])

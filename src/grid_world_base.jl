@@ -60,14 +60,20 @@ function switch!(world::GridWorldBase, src::CartesianIndex{2}, dest::CartesianIn
     end
 end
 
-function Random.rand(f::Function, world::GridWorldBase; max_try = typemax(Int), rng = Random.GLOBAL_RNG)
-    inds = CartesianIndices((get_height(world), get_width(world)))
+function Random.rand(rng::AbstractRNG, f::Function, inds::Union{Vector{CartesianIndex}, CartesianIndices}; max_try::Int = 1000)
     for _ in 1:max_try
         pos = rand(rng, inds)
-        f(view(world, :, pos)) && return pos
+        if f(pos)
+            return pos
+        end
     end
-    @warn "a rare case happened when sampling from GridWorldBase"
+    @warn "number of tries exceeded max_try = $max_try"
     return nothing
+end
+
+function Random.rand(rng::AbstractRNG, f::Function, world::GridWorldBase; max_try = 1000)
+    inds = CartesianIndices((get_height(world), get_width(world)))
+    rand(rng, f, inds, max_try = max_try)
 end
 
 #####

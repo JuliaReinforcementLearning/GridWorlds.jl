@@ -31,7 +31,7 @@ A `GridWorldBase` is used to represent the whole grid world. Inside of it, a 3-D
 ```julia
 using GridWorlds
 
-env = EmptyGridWorld()
+env = EmptyRoom()
 
 env(MOVE_FORWARD)
 env(TURN_LEFT)
@@ -47,9 +47,9 @@ play(env;file_name="example.gif",frame_rate=5)
 
 ## List of Environments
 
-1. ### EmptyGridWorld
+1. ### EmptyRoom
 
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/EmptyGridWorld.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/EmptyRoom.gif" width="300px">
 
 1. ### GridRooms
 

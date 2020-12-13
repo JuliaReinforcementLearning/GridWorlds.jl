@@ -40,7 +40,7 @@ function RLBase.reset!(env::GridRooms; agent_start_pos = CartesianIndex(2, 2), a
 
     for origin in origins
         room = Room(origin, env.room_size[1], env.room_size[2])
-        add_room!(env, room)
+        place_room!(env, room)
 
         world[WALL, room.region[(end + 1) ÷ 2, 1]] = false
         world[EMPTY, room.region[(end + 1) ÷ 2, 1]] = true
