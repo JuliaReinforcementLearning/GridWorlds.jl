@@ -12,13 +12,13 @@ mutable struct DynamicObstacles{R} <: AbstractGridWorld
     obstacle_reward::Float64
 end
 
-function DynamicObstacles(; n = 8, num_obstacles = n-3, rng = Random.GLOBAL_RNG)
+function DynamicObstacles(; height = 8, width = 8, num_obstacles = floor(Int, sqrt(height * width) / 2), rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, OBSTACLE, GOAL)
-    world = GridWorldBase(objects, n, n)
-    room = Room(CartesianIndex(1, 1), n, n)
+    world = GridWorldBase(objects, height, width)
+    room = Room(CartesianIndex(1, 1), height, width)
     place_room!(world, room)
 
-    goal_pos = CartesianIndex(n - 1, n - 1)
+    goal_pos = CartesianIndex(height - 1, width - 1)
     world[GOAL, goal_pos] = true
     world[EMPTY, goal_pos] = false
 
@@ -100,7 +100,6 @@ RLBase.get_terminal(env::DynamicObstacles) = iscollision(env) || get_world(env)[
 
 function RLBase.reset!(env::DynamicObstacles)
     world = get_world(env)
-    n = get_width(env)
     rng = get_rng(env)
 
     for pos in env.obstacle_pos
