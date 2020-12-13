@@ -41,7 +41,9 @@ function (env::DynamicObstacles)(::MoveForward)
     end
 
     set_reward!(env, 0.0)
-    if iscollision(env)
+    if world[GOAL, get_agent_pos(env)]
+        set_reward!(env, env.goal_reward)
+    elseif iscollision(env)
         set_reward!(env, env.obstacle_reward)
     end
 
@@ -49,12 +51,15 @@ function (env::DynamicObstacles)(::MoveForward)
 end
 
 function (env::DynamicObstacles)(action::Union{TurnRight, TurnLeft})
+    world = get_world(env)
     update_obstacles!(env)
 
     set_dir!(get_agent(env), action(get_agent_dir(env)))
 
     set_reward!(env, 0.0)
-    if iscollision(env)
+    if world[GOAL, get_agent_pos(env)]
+        set_reward!(env, env.goal_reward)
+    elseif iscollision(env)
         set_reward!(env, env.obstacle_reward)
     end
 
