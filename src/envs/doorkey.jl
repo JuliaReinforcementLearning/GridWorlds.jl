@@ -5,10 +5,10 @@ mutable struct DoorKey{W<:GridWorldBase, R} <: AbstractGridWorld
     agent::Agent
     reward::Float64
     rng::R
-    goal_reward::Float64
-    goal_pos::CartesianIndex
-    door_pos::CartesianIndex
-    key_pos::CartesianIndex
+    terminal_reward::Float64
+    goal_pos::CartesianIndex{2}
+    door_pos::CartesianIndex{2}
+    key_pos::CartesianIndex{2}
 end
 
 function DoorKey(; height = 7, width = 7, rng = Random.GLOBAL_RNG)
@@ -19,14 +19,14 @@ function DoorKey(; height = 7, width = 7, rng = Random.GLOBAL_RNG)
     room = Room(CartesianIndex(1, 1), height, width)
     place_room!(world, room)
 
-    agent = Agent(pos = CartesianIndex(2, 2), dir = RIGHT)
+    agent = Agent()
     reward = 0.0
-    goal_reward = 1.0
+    terminal_reward = 1.0
     goal_pos = CartesianIndex(height - 1, width - 1)
     door_pos = CartesianIndex(2, 3)
     key_pos = CartesianIndex(3, 2)
 
-    env = DoorKey(world, agent, reward, rng, goal_reward, goal_pos, door_pos, key_pos)
+    env = DoorKey(world, agent, reward, rng, terminal_reward, goal_pos, door_pos, key_pos)
 
     reset!(env)
 
@@ -55,14 +55,14 @@ function (env::DoorKey)(::MoveForward)
     end
 
     set_reward!(env, 0.0)
-    if world[GOAL, get_agent_pos(env)]
-        set_reward!(env, env.goal_reward)
+    if get_terminal(env)
+        set_reward!(env, env.terminal_reward)
     end
 
     return env
 end
 
-function (env::DoorKey)(::Pickup)
+function (env::DoorKey)(::PickUp)
     world = get_world(env)
     objects = get_objects(env)
 

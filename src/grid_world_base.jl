@@ -1,9 +1,6 @@
 export GridWorldBase
 export get_grid, get_objects, get_num_objects, get_height, get_width, switch!, get_agent_view!
 
-import MacroTools
-import Random
-
 """
     GridWorldBase{O} <: AbstractArray{Bool, 3}
 
@@ -60,7 +57,7 @@ function switch!(world::GridWorldBase, src::CartesianIndex{2}, dest::CartesianIn
     end
 end
 
-function Random.rand(rng::AbstractRNG, f::Function, inds::Union{Vector{CartesianIndex}, CartesianIndices}; max_try::Int = 1000)
+function Random.rand(rng::AbstractRNG, f::Function, inds::Union{Vector{CartesianIndex{2}}, CartesianIndices{2}}; max_try::Int = 1000)
     for _ in 1:max_try
         pos = rand(rng, inds)
         if f(pos)

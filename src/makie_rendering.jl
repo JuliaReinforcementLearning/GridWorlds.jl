@@ -49,7 +49,7 @@ function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
     ←: TurnLeft
     →: TurnRight
     ↑: MoveForward
-    p: Pickup
+    p: PickUp
     r: reset!
     q: Quit
     """)

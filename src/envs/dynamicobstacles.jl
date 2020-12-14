@@ -5,11 +5,11 @@ mutable struct DynamicObstacles{R} <: AbstractGridWorld
     agent::Agent
     reward::Float64
     rng::R
-    goal_reward::Float64
-    goal_pos::CartesianIndex
+    terminal_reward::Float64
+    goal_pos::CartesianIndex{2}
     num_obstacles::Int
     obstacle_pos::Vector{CartesianIndex{2}}
-    obstacle_reward::Float64
+    terminal_penalty::Float64
 end
 
 function DynamicObstacles(; height = 8, width = 8, num_obstacles = floor(Int, sqrt(height * width) / 2), rng = Random.GLOBAL_RNG)
@@ -22,13 +22,13 @@ function DynamicObstacles(; height = 8, width = 8, num_obstacles = floor(Int, sq
     world[GOAL, goal_pos] = true
     world[EMPTY, goal_pos] = false
 
-    agent = Agent(pos = CartesianIndex(2, 2), dir = RIGHT)
+    agent = Agent()
     reward = 0.0
-    goal_reward = 1.0
+    terminal_reward = 1.0
     obstacle_pos = CartesianIndex{2}[]
-    obstacle_reward = -1.0
+    terminal_penalty = -1.0
 
-    env = DynamicObstacles(world, agent, reward, rng, goal_reward, goal_pos, num_obstacles, obstacle_pos, obstacle_reward)
+    env = DynamicObstacles(world, agent, reward, rng, terminal_reward, goal_pos, num_obstacles, obstacle_pos, terminal_penalty)
 
     reset!(env)
 
@@ -50,9 +50,9 @@ function (env::DynamicObstacles)(::MoveForward)
 
     set_reward!(env, 0.0)
     if world[GOAL, get_agent_pos(env)]
-        set_reward!(env, env.goal_reward)
+        set_reward!(env, env.terminal_reward)
     elseif iscollision(env)
-        set_reward!(env, env.obstacle_reward)
+        set_reward!(env, env.terminal_penalty)
     end
 
     return env
@@ -66,9 +66,9 @@ function (env::DynamicObstacles)(action::Union{TurnRight, TurnLeft})
 
     set_reward!(env, 0.0)
     if world[GOAL, get_agent_pos(env)]
-        set_reward!(env, env.goal_reward)
+        set_reward!(env, env.terminal_reward)
     elseif iscollision(env)
-        set_reward!(env, env.obstacle_reward)
+        set_reward!(env, env.terminal_penalty)
     end
 
     return env

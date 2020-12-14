@@ -5,8 +5,8 @@ mutable struct EmptyRoom{R} <: AbstractGridWorld
     agent::Agent
     reward::Float64
     rng::R
-    goal_reward::Float64
-    goal_pos::CartesianIndex
+    terminal_reward::Float64
+    goal_pos::CartesianIndex{2}
 end
 
 function EmptyRoom(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
@@ -19,11 +19,11 @@ function EmptyRoom(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
     world[GOAL, goal_pos] = true
     world[EMPTY, goal_pos] = false
 
-    agent = Agent(pos = CartesianIndex(2, 2), dir = RIGHT)
+    agent = Agent()
     reward = 0.0
-    goal_reward = 1.0
+    terminal_reward = 1.0
 
-    env = EmptyRoom(world, agent, reward, rng, goal_reward, goal_pos)
+    env = EmptyRoom(world, agent, reward, rng, terminal_reward, goal_pos)
 
     reset!(env)
 
@@ -38,13 +38,13 @@ function RLBase.reset!(env::EmptyRoom)
     world[GOAL, old_goal_pos] = false
     world[EMPTY, old_goal_pos] = true
 
-    new_goal_pos = rand(rng, pos -> !world[WALL, pos], world)
+    new_goal_pos = rand(rng, pos -> world[EMPTY, pos], world)
 
     set_goal_pos!(env, new_goal_pos)
     world[GOAL, new_goal_pos] = true
     world[EMPTY, new_goal_pos] = false
 
-    agent_start_pos = rand(rng, pos -> !(world[WALL, pos] || world[GOAL, pos]), world)
+    agent_start_pos = rand(rng, pos -> world[EMPTY, pos], world)
     agent_start_dir = rand(rng, DIRECTIONS)
 
     set_agent_pos!(env, agent_start_pos)

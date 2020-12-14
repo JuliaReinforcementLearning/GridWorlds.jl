@@ -5,8 +5,8 @@ mutable struct GridRooms{R} <: AbstractGridWorld
     agent::Agent
     reward::Float64
     rng::R
-    goal_reward::Float64
-    goal_pos::CartesianIndex
+    terminal_reward::Float64
+    goal_pos::CartesianIndex{2}
 end
 
 function GridRooms(; grid_size = (2, 2), room_size = (5, 5), rng = Random.GLOBAL_RNG)
@@ -41,12 +41,12 @@ function GridRooms(; grid_size = (2, 2), room_size = (5, 5), rng = Random.GLOBAL
     world[WALL, :, [1, width]] .= true
     world[EMPTY, :, [1, width]] .= false
 
-    agent = Agent(pos = CartesianIndex(2, 2), dir = RIGHT)
+    agent = Agent()
     reward = 0.0
-    goal_reward = 1.0
+    terminal_reward = 1.0
     goal_pos = CartesianIndex(height - 1, width - 1)
 
-    env = GridRooms(world, agent, reward, rng, goal_reward, goal_pos)
+    env = GridRooms(world, agent, reward, rng, terminal_reward, goal_pos)
 
     reset!(env)
 

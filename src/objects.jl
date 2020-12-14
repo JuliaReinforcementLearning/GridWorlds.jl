@@ -1,8 +1,6 @@
-export AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Obstacle, Agent, Transportable, NonTransportable
-export COLORS, EMPTY, WALL, GOAL, GEM, OBSTACLE, TRANSPORTABLE, NONTRANSPORTABLE
-export get_char, get_color, get_dir, set_dir!, get_pos, set_pos!, istransportable, get_inventory_type, get_inventory, set_inventory!
-
-import Crayons
+export AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Obstacle, Agent
+export COLORS, EMPTY, WALL, GOAL, GEM, OBSTACLE
+export get_char, get_color, get_dir, set_dir!, get_pos, set_pos!, get_inventory_type, get_inventory, set_inventory!
 
 const COLORS = (:red, :green, :blue, :magenta, :yellow, :white)
 
@@ -53,34 +51,27 @@ get_color(::Obstacle) = :blue
 # Agent
 #####
 
-mutable struct Agent{I} <: AbstractObject
-    pos::CartesianIndex
+mutable struct Agent{I, C} <: AbstractObject
+    pos::CartesianIndex{2}
     dir::Direction
     inventory::I
-    color::Symbol
 end
 
-function Agent(; inventory_type = Union{Nothing, AbstractObject}, pos = CartesianIndex(1, 1), dir = RIGHT, inventory = nothing, color = :red)
-    Agent{inventory_type}(pos, dir, inventory, color)
+function Agent(; inventory_type = Union{Nothing, AbstractObject}, color = :red, pos = CartesianIndex(2, 2), dir = RIGHT, inventory = nothing)
+    Agent{inventory_type, color}(pos, dir, inventory)
 end
 
-function get_char(agent::Agent)
-    if     agent.dir === UP
-        '↑'
-    elseif agent.dir === DOWN
-        '↓'
-    elseif agent.dir === LEFT
-        '←'
-    elseif agent.dir === RIGHT
-        '→'
-    end
-end
+get_char(agent::Agent, ::Up) = '↑'
+get_char(agent::Agent, ::Down) = '↓'
+get_char(agent::Agent, ::Left) = '←'
+get_char(agent::Agent, ::Right) = '→'
+get_char(agent::Agent) = get_char(agent, get_dir(agent))
 
-get_color(agent::Agent) = agent.color
+get_color(agent::Agent{I, C}) where {I, C} = C
 get_dir(agent::Agent) = agent.dir
 set_dir!(agent::Agent, dir::Direction) = agent.dir = dir
 get_pos(agent::Agent) = agent.pos
-set_pos!(agent::Agent, pos::CartesianIndex) = agent.pos = pos
+set_pos!(agent::Agent, pos::CartesianIndex{2}) = agent.pos = pos
 
 get_inventory_type(agent::Agent{I}) where I = I
 get_inventory(agent::Agent) = agent.inventory

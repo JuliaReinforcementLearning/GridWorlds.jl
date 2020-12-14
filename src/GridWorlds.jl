@@ -3,6 +3,8 @@ module GridWorlds
 export GW
 
 import Requires
+import Crayons
+import MacroTools
 using Random
 using ReinforcementLearningBase
 

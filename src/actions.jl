@@ -1,4 +1,4 @@
-export AbstractGridWorldAction, MoveForward, TurnLeft, TurnRight, Pickup, Drop
+export AbstractGridWorldAction, MoveForward, TurnLeft, TurnRight, PickUp, Drop
 export MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, PICK_UP, DROP
 
 abstract type AbstractGridWorldAction end
@@ -22,8 +22,8 @@ const TURN_RIGHT = TurnRight()
 (x::TurnRight)(::Left) = UP
 (x::TurnRight)(::Right) = DOWN
 
-struct Pickup <: AbstractGridWorldAction end
-const PICK_UP = Pickup()
+struct PickUp <: AbstractGridWorldAction end
+const PICK_UP = PickUp()
 
 struct Drop <: AbstractGridWorldAction end
 const DROP = Drop()
