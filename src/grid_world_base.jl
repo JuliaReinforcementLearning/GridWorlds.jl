@@ -1,9 +1,6 @@
 export GridWorldBase
 export get_grid, get_objects, get_num_objects, get_height, get_width, switch!, get_agent_view!
 
-import MacroTools
-import Random
-
 """
     GridWorldBase{O} <: AbstractArray{Bool, 3}
 

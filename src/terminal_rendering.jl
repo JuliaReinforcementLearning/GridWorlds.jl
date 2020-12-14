@@ -1,5 +1,3 @@
-using Crayons
-
 get_background(env::AbstractGridWorld, pos::CartesianIndex{2}, ::Val{:agent_view}) = :dark_gray
 get_background(env::AbstractGridWorld, pos::CartesianIndex{2}, ::Val{:full_view}) = pos in get_agent_view_inds(env) ? :dark_gray : :black
 
@@ -24,9 +22,9 @@ function print_grid(io::IO, env::AbstractGridWorld, view_type)
         for j in 1:get_width(world)
             pos = CartesianIndex(i, j)
             object = get_first_object(world, pos)
-            print(io, Crayon(background = get_background(env, pos, Val{view_type}()), foreground = get_color(object), bold = true, reset = true), get_char(object))
+            print(io, Crayons.Crayon(background = get_background(env, pos, Val{view_type}()), foreground = get_color(object), bold = true, reset = true), get_char(object))
         end
-        println(io, Crayon(reset = true))
+        println(io, Crayons.Crayon(reset = true))
     end
 end
 
