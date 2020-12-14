@@ -38,13 +38,13 @@ function RLBase.reset!(env::EmptyRoom)
     world[GOAL, old_goal_pos] = false
     world[EMPTY, old_goal_pos] = true
 
-    new_goal_pos = rand(rng, pos -> !world[WALL, pos], world)
+    new_goal_pos = rand(rng, pos -> world[EMPTY, pos], world)
 
     set_goal_pos!(env, new_goal_pos)
     world[GOAL, new_goal_pos] = true
     world[EMPTY, new_goal_pos] = false
 
-    agent_start_pos = rand(rng, pos -> !(world[WALL, pos] || world[GOAL, pos]), world)
+    agent_start_pos = rand(rng, pos -> world[EMPTY, pos], world)
     agent_start_dir = rand(rng, DIRECTIONS)
 
     set_agent_pos!(env, agent_start_pos)
