@@ -54,7 +54,7 @@ get_color(::Obstacle) = :blue
 #####
 
 mutable struct Agent{I, C} <: AbstractObject
-    pos::CartesianIndex
+    pos::CartesianIndex{2}
     dir::Direction
     inventory::I
 end
@@ -79,7 +79,7 @@ get_color(agent::Agent{I, C}) where {I, C} = C
 get_dir(agent::Agent) = agent.dir
 set_dir!(agent::Agent, dir::Direction) = agent.dir = dir
 get_pos(agent::Agent) = agent.pos
-set_pos!(agent::Agent, pos::CartesianIndex) = agent.pos = pos
+set_pos!(agent::Agent, pos::CartesianIndex{2}) = agent.pos = pos
 
 get_inventory_type(agent::Agent{I}) where I = I
 get_inventory(agent::Agent) = agent.inventory

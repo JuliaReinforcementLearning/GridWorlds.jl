@@ -6,9 +6,9 @@ mutable struct DoorKey{W<:GridWorldBase, R} <: AbstractGridWorld
     reward::Float64
     rng::R
     goal_reward::Float64
-    goal_pos::CartesianIndex
-    door_pos::CartesianIndex
-    key_pos::CartesianIndex
+    goal_pos::CartesianIndex{2}
+    door_pos::CartesianIndex{2}
+    key_pos::CartesianIndex{2}
 end
 
 function DoorKey(; height = 7, width = 7, rng = Random.GLOBAL_RNG)

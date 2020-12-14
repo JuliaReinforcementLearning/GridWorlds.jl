@@ -6,7 +6,7 @@ mutable struct EmptyRoom{R} <: AbstractGridWorld
     reward::Float64
     rng::R
     goal_reward::Float64
-    goal_pos::CartesianIndex
+    goal_pos::CartesianIndex{2}
 end
 
 function EmptyRoom(; height = 8, width = 8, rng = Random.GLOBAL_RNG)

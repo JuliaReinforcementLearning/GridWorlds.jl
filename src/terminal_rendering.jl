@@ -6,7 +6,7 @@ get_background(env::AbstractGridWorld, pos::CartesianIndex{2}, ::Val{:full_view}
 get_color(::Nothing) = :white
 get_char(::Nothing) = '~'
 
-function get_first_object(world::GridWorldBase, pos::CartesianIndex)
+function get_first_object(world::GridWorldBase, pos::CartesianIndex{2})
     objects = get_objects(world)
     idx = findfirst(world[:, pos])
     if isnothing(idx)

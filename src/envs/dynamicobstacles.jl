@@ -6,7 +6,7 @@ mutable struct DynamicObstacles{R} <: AbstractGridWorld
     reward::Float64
     rng::R
     goal_reward::Float64
-    goal_pos::CartesianIndex
+    goal_pos::CartesianIndex{2}
     num_obstacles::Int
     obstacle_pos::Vector{CartesianIndex{2}}
     obstacle_reward::Float64

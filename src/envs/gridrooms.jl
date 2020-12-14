@@ -6,7 +6,7 @@ mutable struct GridRooms{R} <: AbstractGridWorld
     reward::Float64
     rng::R
     goal_reward::Float64
-    goal_pos::CartesianIndex
+    goal_pos::CartesianIndex{2}
 end
 
 function GridRooms(; grid_size = (2, 2), room_size = (5, 5), rng = Random.GLOBAL_RNG)

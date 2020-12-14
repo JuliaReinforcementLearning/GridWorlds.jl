@@ -27,7 +27,7 @@ get_agent(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_agent(en
 set_agent!(env::AbstractGridWorld, agent::Agent) = env.agent = agent
 
 get_agent_pos(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_pos(get_agent(env, Val{view_type}()))
-set_agent_pos!(env::AbstractGridWorld, pos::CartesianIndex) = set_pos!(get_agent(env), pos)
+set_agent_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = set_pos!(get_agent(env), pos)
 
 get_agent_dir(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_dir(get_agent(env, Val{view_type}()))
 set_agent_dir!(env::AbstractGridWorld, dir::Direction) = set_dir!(get_agent(env), dir)
@@ -77,7 +77,7 @@ end
 get_rng(env::AbstractGridWorld) = env.rng
 
 get_goal_pos(env::AbstractGridWorld) = env.goal_pos
-set_goal_pos!(env::AbstractGridWorld, pos::CartesianIndex) = env.goal_pos = pos
+set_goal_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = env.goal_pos = pos
 
 #####
 # RLBase API defaults
