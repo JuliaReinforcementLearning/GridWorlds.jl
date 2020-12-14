@@ -59,7 +59,7 @@ mutable struct Agent{I, C} <: AbstractObject
     inventory::I
 end
 
-function Agent(; inventory_type = Union{Nothing, AbstractObject}, pos = CartesianIndex(1, 1), dir = RIGHT, inventory = nothing, color = :red)
+function Agent(; inventory_type = Union{Nothing, AbstractObject}, color = :red, pos = CartesianIndex(2, 2), dir = RIGHT, inventory = nothing)
     Agent{inventory_type, color}(pos, dir, inventory)
 end
 
