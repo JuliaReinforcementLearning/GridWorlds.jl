@@ -62,7 +62,7 @@ function (env::DoorKey)(::MoveForward)
     return env
 end
 
-function (env::DoorKey)(::Pickup)
+function (env::DoorKey)(::PickUp)
     world = get_world(env)
     objects = get_objects(env)
 
