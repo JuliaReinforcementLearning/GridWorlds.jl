@@ -63,17 +63,11 @@ function Agent(; inventory_type = Union{Nothing, AbstractObject}, color = :red, 
     Agent{inventory_type, color}(pos, dir, inventory)
 end
 
-function get_char(agent::Agent)
-    if     agent.dir === UP
-        '↑'
-    elseif agent.dir === DOWN
-        '↓'
-    elseif agent.dir === LEFT
-        '←'
-    elseif agent.dir === RIGHT
-        '→'
-    end
-end
+get_char(agent::Agent, ::Up) = '↑'
+get_char(agent::Agent, ::Down) = '↓'
+get_char(agent::Agent, ::Left) = '←'
+get_char(agent::Agent, ::Right) = '→'
+get_char(agent::Agent) = get_char(agent, get_dir(agent))
 
 get_color(agent::Agent{I, C}) where {I, C} = C
 get_dir(agent::Agent) = agent.dir
