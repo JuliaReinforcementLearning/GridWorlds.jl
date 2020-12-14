@@ -4,10 +4,6 @@ export set_world!, set_agent!, set_agent_pos!, set_agent_dir!, set_reward!
 
 abstract type AbstractGridWorld <: AbstractEnv end
 
-#####
-# useful getter and setter methods
-#####
-
 get_world(env::AbstractGridWorld) = env.world
 set_world!(env::AbstractGridWorld, world::GridWorldBase) = env.world = world
 
@@ -18,8 +14,8 @@ get_grid(env::AbstractGridWorld; view_type::Symbol = :full_view) = get_grid(env,
 get_objects(env::AbstractGridWorld) = env |> get_world |> get_objects
 
 get_num_objects(env::AbstractGridWorld) = env |> get_world |> get_num_objects
-get_height(env::AbstractGridWorld) = size(get_world(env), 2)
-get_width(env::AbstractGridWorld) = size(get_world(env), 3)
+get_height(env::AbstractGridWorld) = env |> get_world |> get_height
+get_width(env::AbstractGridWorld) = env |> get_world |> get_width
 
 get_agent(env::AbstractGridWorld, ::Val{:full_view}) = env.agent
 get_agent(env::AbstractGridWorld, ::Val{:agent_view}) = Agent(dir = DOWN, pos = CartesianIndex(1, size(get_grid(env, Val{:agent_view}()), 3) ÷ 2 + 1))
@@ -35,6 +31,13 @@ set_agent_dir!(env::AbstractGridWorld, dir::Direction) = set_dir!(get_agent(env)
 get_inventory_type(env::AbstractGridWorld) = env |> get_agent |> get_inventory_type
 get_inventory(env::AbstractGridWorld) = env |> get_agent |> get_inventory
 set_inventory!(env::AbstractGridWorld, item) = set_inventory!(get_agent(env), item)
+
+set_reward!(env::AbstractGridWorld, reward) = env.reward = reward
+
+get_rng(env::AbstractGridWorld) = env.rng
+
+get_goal_pos(env::AbstractGridWorld) = env.goal_pos
+set_goal_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = env.goal_pos = pos
 
 function get_agent_view(env::AbstractGridWorld, agent_view_size = (7,7))
     world = get_world(env)
@@ -60,8 +63,6 @@ function get_full_view(env::AbstractGridWorld)
     return cat(agent_layer, grid, dims = 1)
 end
 
-set_reward!(env::AbstractGridWorld, reward) = env.reward = reward
-
 function get_world_with_agent(env::AbstractGridWorld; view_type::Symbol = :full_view)
     grid = get_grid(env, view_type = view_type)
     agent_pos = get_agent_pos(env, view_type = view_type)
@@ -73,11 +74,6 @@ function get_world_with_agent(env::AbstractGridWorld; view_type::Symbol = :full_
 
     GridWorldBase(grid_with_agent, objects_with_agent)
 end
-
-get_rng(env::AbstractGridWorld) = env.rng
-
-get_goal_pos(env::AbstractGridWorld) = env.goal_pos
-set_goal_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = env.goal_pos = pos
 
 #####
 # RLBase API defaults
