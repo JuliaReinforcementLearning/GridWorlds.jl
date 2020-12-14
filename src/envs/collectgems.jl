@@ -17,7 +17,7 @@ function CollectGems(; height = 8, width = 8, num_gem_init = floor(Int, sqrt(hei
     room = Room(CartesianIndex(1, 1), height, width)
     place_room!(world, room)
 
-    agent = Agent(pos = CartesianIndex(2, 2), dir = RIGHT)
+    agent = Agent()
     reward = 0.0
     num_gem_current = num_gem_init
     gem_reward = 1.0

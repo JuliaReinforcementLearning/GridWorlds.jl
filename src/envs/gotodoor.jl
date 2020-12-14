@@ -18,7 +18,7 @@ function GoToDoor(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
     room = Room(CartesianIndex(1, 1), height, width)
     place_room!(world, room)
 
-    agent = Agent(pos = CartesianIndex(2, 2), dir = RIGHT)
+    agent = Agent()
     reward = 0.0
     door_pos = Dict(zip(doors, generate_door_pos(rng, height, width)))
     for (door, pos) in door_pos

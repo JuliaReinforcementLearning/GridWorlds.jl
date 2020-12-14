@@ -19,7 +19,7 @@ function DoorKey(; height = 7, width = 7, rng = Random.GLOBAL_RNG)
     room = Room(CartesianIndex(1, 1), height, width)
     place_room!(world, room)
 
-    agent = Agent(pos = CartesianIndex(2, 2), dir = RIGHT)
+    agent = Agent()
     reward = 0.0
     goal_reward = 1.0
     goal_pos = CartesianIndex(height - 1, width - 1)

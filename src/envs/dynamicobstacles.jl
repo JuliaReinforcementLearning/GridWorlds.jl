@@ -22,7 +22,7 @@ function DynamicObstacles(; height = 8, width = 8, num_obstacles = floor(Int, sq
     world[GOAL, goal_pos] = true
     world[EMPTY, goal_pos] = false
 
-    agent = Agent(pos = CartesianIndex(2, 2), dir = RIGHT)
+    agent = Agent()
     reward = 0.0
     goal_reward = 1.0
     obstacle_pos = CartesianIndex{2}[]

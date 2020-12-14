@@ -41,7 +41,7 @@ function GridRooms(; grid_size = (2, 2), room_size = (5, 5), rng = Random.GLOBAL
     world[WALL, :, [1, width]] .= true
     world[EMPTY, :, [1, width]] .= false
 
-    agent = Agent(pos = CartesianIndex(2, 2), dir = RIGHT)
+    agent = Agent()
     reward = 0.0
     goal_reward = 1.0
     goal_pos = CartesianIndex(height - 1, width - 1)

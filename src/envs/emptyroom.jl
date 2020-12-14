@@ -19,7 +19,7 @@ function EmptyRoom(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
     world[GOAL, goal_pos] = true
     world[EMPTY, goal_pos] = false
 
-    agent = Agent(pos = CartesianIndex(2, 2), dir = RIGHT)
+    agent = Agent()
     reward = 0.0
     goal_reward = 1.0
 
