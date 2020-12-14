@@ -5,27 +5,40 @@ mutable struct GoToDoor{W<:GridWorldBase, R} <: AbstractGridWorld
     agent::Agent
     reward::Float64
     rng::R
+    door_pos::Dict{Door, CartesianIndex{2}}
     target::Door
-    target_reward::Float64
-    penalty::Float64
+    terminal_reward::Float64
+    terminal_penalty::Float64
 end
 
-function GoToDoor(; n = 8, agent_start_pos = CartesianIndex(2,2), agent_start_dir = RIGHT, rng = Random.GLOBAL_RNG)
+function GoToDoor(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
     doors = [Door(c) for c in COLORS[1:4]]
     objects = (EMPTY, WALL, doors...)
-    world = GridWorldBase(objects, n, n)
-    agent = Agent(pos = agent_start_pos, dir = agent_start_dir)
+    world = GridWorldBase(objects, height, width)
+    room = Room(CartesianIndex(1, 1), height, width)
+    place_room!(world, room)
+
+    agent = Agent(pos = CartesianIndex(2, 2), dir = RIGHT)
     reward = 0.0
-    target = doors[1]
-    target_reward = 1.0
-    penalty = -1.0
+    door_pos = Dict(zip(doors, generate_door_pos(rng, height, width)))
+    for (door, pos) in door_pos
+        world[door, pos] = true
+        world[WALL, pos] = false
+    end
+    target = rand(rng, doors)
+    terminal_reward = 1.0
+    terminal_penalty = -1.0
 
-    env = GoToDoor(world, agent, reward, rng, target, target_reward, penalty)
+    env = GoToDoor(world, agent, reward, rng, door_pos, target, terminal_reward, terminal_penalty)
 
-    reset!(env, agent_start_pos = agent_start_pos, agent_start_dir = agent_start_dir)
+    reset!(env)
 
     return env
 end
+
+RLBase.get_state(env::GoToDoor) = (get_agent_view(env), env.target)
+
+RLBase.get_terminal(env::GoToDoor) = get_agent_pos(env) in values(env.door_pos)
 
 function (env::GoToDoor)(::MoveForward)
     world = get_world(env)
@@ -39,43 +52,36 @@ function (env::GoToDoor)(::MoveForward)
     set_reward!(env, 0.0)
     if get_terminal(env)
         if world[env.target, get_agent_pos(env)]
-            set_reward!(env, env.target_reward)
+            set_reward!(env, env.terminal_reward)
         else
-            set_reward!(env, env.penalty)
+            set_reward!(env, env.terminal_penalty)
         end
     end
 
     return env
 end
 
-RLBase.get_state(env::GoToDoor) = (get_agent_view(env), env.target)
-
-RLBase.get_terminal(env::GoToDoor) = any([get_world(env)[object, get_agent_pos(env)] for object in get_objects(env)[end-3:end]])
-
-function RLBase.reset!(env::GoToDoor; agent_start_pos = CartesianIndex(2, 2), agent_start_dir = RIGHT)
+function RLBase.reset!(env::GoToDoor)
     world = get_world(env)
-    n = get_width(env)
+    height = get_height(env)
+    width = get_width(env)
     rng = get_rng(env)
 
-    world[:, :, :] .= false
-    world[WALL, [1,n], 1:n] .= true
-    world[WALL, 1:n, [1,n]] .= true
-    world[EMPTY, 2:n-1, 2:n-1] .= true
-    
-    doors = get_objects(env)[end-3:end]
-    env.target = rand(rng, doors)
+    for (door, pos) in env.door_pos
+        world[door, pos] = false
+        world[WALL, pos] = true
+    end
 
-    door_pos = [CartesianIndex(rand(rng, 2:n-1), 1),
-                CartesianIndex(rand(rng, 2:n-1), n),
-                CartesianIndex(1, rand(rng, 2:n-1)),
-                CartesianIndex(n, rand(rng, 2:n-1))]
-
-    rp = randperm(rng, length(door_pos))
-
-    for (door, pos) in zip(doors, door_pos[rp])
+    env.door_pos = Dict(zip(keys(env.door_pos), generate_door_pos(rng, height, width)))
+    for (door, pos) in env.door_pos
         world[door, pos] = true
         world[WALL, pos] = false
     end
+
+    env.target = rand(rng, keys(env.door_pos))
+
+    agent_start_pos = rand(rng, pos -> world[EMPTY, pos], world)
+    agent_start_dir = rand(rng, DIRECTIONS)
 
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)
@@ -83,4 +89,12 @@ function RLBase.reset!(env::GoToDoor; agent_start_pos = CartesianIndex(2, 2), ag
     set_reward!(env, 0.0)
 
     return env
+end
+
+function generate_door_pos(rng::AbstractRNG, height::Int, width::Int)
+    door_pos = [CartesianIndex(rand(rng, 2:height-1), 1),
+                CartesianIndex(rand(rng, 2:height-1), width),
+                CartesianIndex(1, rand(rng, 2:width-1)),
+                CartesianIndex(height, rand(rng, 2:width-1))]
+    return shuffle(rng, door_pos)
 end

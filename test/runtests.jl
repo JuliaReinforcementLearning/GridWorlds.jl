@@ -11,7 +11,7 @@ NUM_RESETS = 3
 get_terminal_rewards(env::Union{EmptyRoom, GridRooms, SequentialRooms, DoorKey}) = (env.goal_reward,)
 get_terminal_rewards(env::DynamicObstacles) = (env.goal_reward, env.obstacle_reward)
 get_terminal_rewards(env::CollectGems) = (env.num_gem_init * env.gem_reward,)
-get_terminal_rewards(env::GoToDoor) = (env.target_reward, env.penalty)
+get_terminal_rewards(env::GoToDoor) = (env.terminal_reward, env.terminal_penalty)
 
 @testset "GridWorlds.jl" begin
     for Env in ENVS
