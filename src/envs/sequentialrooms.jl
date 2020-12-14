@@ -5,7 +5,7 @@ mutable struct SequentialRooms{R} <: AbstractGridWorld
     agent::Agent
     reward::Float64
     rng::R
-    goal_reward::Float64
+    terminal_reward::Float64
     num_rooms::Int
     room_length_range::UnitRange{Int}
     rooms::Array{Room, 1}
@@ -17,9 +17,9 @@ function SequentialRooms(; num_rooms = 3, room_length_range = 4:6, rng = Random.
     world = GridWorldBase(objects, big_n, big_n)
     agent = Agent()
     reward = 0.0
-    goal_reward = 1.0
+    terminal_reward = 1.0
 
-    env = SequentialRooms(world, agent, reward, rng, goal_reward, num_rooms, room_length_range, Room[])
+    env = SequentialRooms(world, agent, reward, rng, terminal_reward, num_rooms, room_length_range, Room[])
 
     reset!(env)
 

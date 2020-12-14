@@ -114,8 +114,8 @@ function (env::AbstractGridWorld)(::MoveForward)
     end
 
     set_reward!(env, 0.0)
-    if world[GOAL, get_agent_pos(env)]
-        set_reward!(env, env.goal_reward)
+    if get_terminal(env)
+        set_reward!(env, env.terminal_reward)
     end
 
     return env

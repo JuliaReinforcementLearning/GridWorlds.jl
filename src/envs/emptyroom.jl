@@ -5,7 +5,7 @@ mutable struct EmptyRoom{R} <: AbstractGridWorld
     agent::Agent
     reward::Float64
     rng::R
-    goal_reward::Float64
+    terminal_reward::Float64
     goal_pos::CartesianIndex{2}
 end
 
@@ -21,9 +21,9 @@ function EmptyRoom(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
 
     agent = Agent()
     reward = 0.0
-    goal_reward = 1.0
+    terminal_reward = 1.0
 
-    env = EmptyRoom(world, agent, reward, rng, goal_reward, goal_pos)
+    env = EmptyRoom(world, agent, reward, rng, terminal_reward, goal_pos)
 
     reset!(env)
 
