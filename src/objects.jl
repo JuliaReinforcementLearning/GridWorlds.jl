@@ -53,15 +53,14 @@ get_color(::Obstacle) = :blue
 # Agent
 #####
 
-mutable struct Agent{I} <: AbstractObject
+mutable struct Agent{I, C} <: AbstractObject
     pos::CartesianIndex
     dir::Direction
     inventory::I
-    color::Symbol
 end
 
 function Agent(; inventory_type = Union{Nothing, AbstractObject}, pos = CartesianIndex(1, 1), dir = RIGHT, inventory = nothing, color = :red)
-    Agent{inventory_type}(pos, dir, inventory, color)
+    Agent{inventory_type, color}(pos, dir, inventory)
 end
 
 function get_char(agent::Agent)
@@ -76,7 +75,7 @@ function get_char(agent::Agent)
     end
 end
 
-get_color(agent::Agent) = agent.color
+get_color(agent::Agent{I, C}) where {I, C} = C
 get_dir(agent::Agent) = agent.dir
 set_dir!(agent::Agent, dir::Direction) = agent.dir = dir
 get_pos(agent::Agent) = agent.pos
