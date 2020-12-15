@@ -31,12 +31,18 @@ set_goal_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = env.goal_pos = p
 # Agent's view
 #####
 
-function get_agent_view(env::AbstractGridWorld, agent_view_size = (7,7))
+function get_agent_view_size(env::AbstractGridWorld)
+    m = 2 * ceil(Int, get_height(env) / 4) + 1
+    n = 2 * ceil(Int, get_width(env) / 4) + 1
+    return (m, n)
+end
+
+get_agent_view_inds(env::AbstractGridWorld; agent_view_size = get_agent_view_size(env)) = get_agent_view_inds(get_agent_pos(env).I, agent_view_size, get_agent_dir(env))
+
+function get_agent_view(env::AbstractGridWorld; agent_view_size = get_agent_view_size(env))
     agent_view = falses(get_num_objects(env), agent_view_size...)
     get_agent_view!(agent_view, env)
 end
-
-get_agent_view_inds(env::AbstractGridWorld, agent_view_size = (7,7)) = get_agent_view_inds(get_agent_pos(env).I, agent_view_size, get_agent_dir(env))
 
 get_agent_view!(grid::BitArray{3}, env::AbstractGridWorld) = get_agent_view!(grid, get_world(env), get_agent_pos(env), get_agent_dir(env))
 
