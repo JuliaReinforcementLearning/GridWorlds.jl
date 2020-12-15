@@ -39,34 +39,6 @@ Base.getindex(world::GridWorldBase, object::AbstractObject, args...) = getindex(
 Base.setindex!(world::GridWorldBase, value::Bool, object::AbstractObject, args...) = setindex!(get_grid(world), value, Base.to_index(world, object), args...)
 
 #####
-# utils
-#####
-
-switch!(world::GridWorldBase, x, src::CartesianIndex{2}, dest::CartesianIndex{2}) = world[x, src], world[x, dest] = world[x, dest], world[x, src]
-
-function switch!(world::GridWorldBase, src::CartesianIndex{2}, dest::CartesianIndex{2})
-    for x in axes(world, 1)
-        switch!(world, x, src, dest)
-    end
-end
-
-function Random.rand(rng::AbstractRNG, f::Function, inds::Union{Vector{CartesianIndex{2}}, CartesianIndices{2}}; max_try::Int = 1000)
-    for _ in 1:max_try
-        pos = rand(rng, inds)
-        if f(pos)
-            return pos
-        end
-    end
-    @warn "number of tries exceeded max_try = $max_try"
-    return nothing
-end
-
-function Random.rand(rng::AbstractRNG, f::Function, world::GridWorldBase; max_try = 1000)
-    inds = CartesianIndices((get_height(world), get_width(world)))
-    rand(rng, f, inds, max_try = max_try)
-end
-
-#####
 # get_agent_view
 #####
 
@@ -91,4 +63,24 @@ function get_agent_view!(agent_view::AbstractArray{Bool,3}, grid::AbstractArray{
         end
     end
     return agent_view
+end
+
+#####
+# utils
+#####
+
+function Random.rand(rng::AbstractRNG, f::Function, inds::Union{Vector{CartesianIndex{2}}, CartesianIndices{2}}; max_try::Int = 1000)
+    for _ in 1:max_try
+        pos = rand(rng, inds)
+        if f(pos)
+            return pos
+        end
+    end
+    @warn "number of tries exceeded max_try = $max_try"
+    return nothing
+end
+
+function Random.rand(rng::AbstractRNG, f::Function, world::GridWorldBase; max_try = 1000)
+    inds = CartesianIndices((get_height(world), get_width(world)))
+    rand(rng, f, inds, max_try = max_try)
 end
