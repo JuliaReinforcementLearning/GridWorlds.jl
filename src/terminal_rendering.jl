@@ -1,24 +1,20 @@
-function get_world_with_agent(env::AbstractGridWorld; view_type::Symbol = :full_view)
-    grid = get_grid(env, view_type = view_type)
-    agent_pos = get_agent_pos(env, view_type = view_type)
-    agent_layer = get_agent_layer(grid, agent_pos)
-    grid_with_agent = cat(agent_layer, grid, dims = 1)
+get_grid(env::AbstractGridWorld, ::Val{:full_view}) = get_grid(env)
+get_grid(env::AbstractGridWorld, ::Val{:agent_view}) = get_agent_view(env)
 
-    agent = get_agent(env, view_type = view_type)
-    objects_with_agent = (agent, get_objects(env)...)
+get_agent_pos(env::AbstractGridWorld, ::Val{:full_view}) = get_agent_pos(env)
+get_agent_pos(env::AbstractGridWorld, ::Val{:agent_view}) = CartesianIndex(1, size(get_grid(env, Val{:agent_view}()), 3) ÷ 2 + 1)
 
-    GridWorldBase(grid_with_agent, objects_with_agent)
-end
+get_agent_dir(env::AbstractGridWorld, ::Val{:full_view}) = get_agent_dir(env)
+get_agent_dir(env::AbstractGridWorld, ::Val{:agent_view}) = DOWN
 
-get_background(env::AbstractGridWorld, pos::CartesianIndex{2}, ::Val{:agent_view}) = :dark_gray
 get_background(env::AbstractGridWorld, pos::CartesianIndex{2}, ::Val{:full_view}) = pos in get_agent_view_inds(env) ? :dark_gray : :black
+get_background(env::AbstractGridWorld, pos::CartesianIndex{2}, ::Val{:agent_view}) = :dark_gray
 
 get_color(::Nothing) = :white
 get_char(::Nothing) = '~'
 
-function get_first_object(world::GridWorldBase, pos::CartesianIndex{2})
-    objects = get_objects(world)
-    idx = findfirst(world[:, pos])
+function get_first_object(grid::BitArray{3}, objects, pos::CartesianIndex{2})
+    idx = findfirst(grid[:, pos])
     if isnothing(idx)
         return nothing
     else
@@ -27,14 +23,24 @@ function get_first_object(world::GridWorldBase, pos::CartesianIndex{2})
 end
 
 function print_grid(io::IO, env::AbstractGridWorld, view_type)
-    world = get_world_with_agent(env, view_type = view_type)
-    objects = get_objects(world)
+    grid = get_grid(env, Val{view_type}())
+    objects = get_objects(env)
 
-    for i in 1:get_height(world)
-        for j in 1:get_width(world)
+    agent = get_agent(env)
+    agent_pos = get_agent_pos(env, Val{view_type}())
+    agent_dir = get_agent_dir(env, Val{view_type}())
+    agent_char = get_char(agent, agent_dir)
+    agent_color = get_color(agent)
+
+    for i in 1:get_height(grid)
+        for j in 1:get_width(grid)
             pos = CartesianIndex(i, j)
-            object = get_first_object(world, pos)
-            print(io, Crayons.Crayon(background = get_background(env, pos, Val{view_type}()), foreground = get_color(object), bold = true, reset = true), get_char(object))
+            if pos == agent_pos
+                print(io, Crayons.Crayon(background = get_background(env, pos, Val{view_type}()), foreground = agent_color, bold = true, reset = true), agent_char)
+            else
+                object = get_first_object(grid, objects, pos)
+                print(io, Crayons.Crayon(background = get_background(env, pos, Val{view_type}()), foreground = get_color(object), bold = true, reset = true), get_char(object))
+            end
         end
         println(io, Crayons.Crayon(reset = true))
     end
