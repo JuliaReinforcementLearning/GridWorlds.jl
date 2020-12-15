@@ -35,12 +35,8 @@ get_width(grid::BitArray{3}) = size(grid, 3)
     :($i)
 end
 
-Base.getindex(world::GridWorldBase, object::AbstractObject, height::Int, width::Int) = getindex(get_grid(world), Base.to_index(world, object), height, width)
-Base.getindex(world::GridWorldBase, object::AbstractObject, pos::CartesianIndex{2}) = getindex(world, object, pos[1], pos[2])
-Base.getindex(world::GridWorldBase, object::AbstractObject, heights::Colon, widths::Colon) = getindex(get_grid(world), Base.to_index(world, object), heights, widths)
-
-Base.setindex!(world::GridWorldBase, ispresent::Bool, object::AbstractObject, height::Int, width::Int) = setindex!(get_grid(world), ispresent, Base.to_index(world, object), height, width)
-Base.setindex!(world::GridWorldBase, ispresent::Bool, object::AbstractObject, pos::CartesianIndex{2}) = setindex!(world, ispresent, object, pos[1], pos[2])
+Base.getindex(world::GridWorldBase, object::AbstractObject, args...) = getindex(get_grid(world), Base.to_index(world, object), args...)
+Base.setindex!(world::GridWorldBase, value::Bool, object::AbstractObject, args...) = setindex!(get_grid(world), value, Base.to_index(world, object), args...)
 
 #####
 # utils
