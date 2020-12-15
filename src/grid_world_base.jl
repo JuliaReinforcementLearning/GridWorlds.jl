@@ -14,8 +14,7 @@ struct GridWorldBase{O} <: AbstractArray{Bool, 3}
 end
 
 function GridWorldBase(objects::Tuple{Vararg{AbstractObject}}, height::Int, width::Int)
-    grid = BitArray{3}(undef, length(objects), height, width)
-    fill!(grid, false)
+    grid = falses(length(objects), height, width)
     GridWorldBase(grid, objects)
 end
 
