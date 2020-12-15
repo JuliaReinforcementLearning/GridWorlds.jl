@@ -1,6 +1,10 @@
 export GridWorldBase
 export get_grid, get_objects, get_num_objects, get_height, get_width, switch!, get_agent_view!
 
+#####
+# GridWorldBase
+#####
+
 """
     GridWorldBase{O} <: AbstractArray{Bool, 3}
 
@@ -26,6 +30,10 @@ get_height(grid::BitArray{3}) = size(grid, 2)
 get_width(grid::BitArray{3}) = size(grid, 3)
 
 @forward GridWorldBase.grid get_num_objects, get_height, get_width
+
+#####
+# Indexing of GridWorldBase objects
+#####
 
 @forward GridWorldBase.grid Base.size, Base.getindex, Base.setindex!
 
