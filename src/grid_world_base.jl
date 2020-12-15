@@ -25,9 +25,9 @@ get_num_objects(grid::BitArray{3}) = size(grid, 1)
 get_height(grid::BitArray{3}) = size(grid, 2)
 get_width(grid::BitArray{3}) = size(grid, 3)
 
-MacroTools.@forward GridWorldBase.grid get_num_objects, get_height, get_width
+@forward GridWorldBase.grid get_num_objects, get_height, get_width
 
-MacroTools.@forward GridWorldBase.grid Base.size, Base.getindex, Base.setindex!
+@forward GridWorldBase.grid Base.size, Base.getindex, Base.setindex!
 
 @generated function Base.to_index(::GridWorldBase{O}, object::X) where {X<:AbstractObject, O}
     i = findfirst(X .=== O.parameters)

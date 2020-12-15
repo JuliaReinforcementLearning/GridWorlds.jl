@@ -4,7 +4,7 @@ export GW
 
 import Requires
 import Crayons
-import MacroTools
+import MacroTools:@forward
 using Random
 using ReinforcementLearningBase
 
