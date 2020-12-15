@@ -1,18 +1,16 @@
 export AbstractGridWorld
-export get_world, get_grid, get_objects, get_num_objects, get_height, get_width, get_agent, get_agent_pos, get_agent_dir, get_agent_view, get_agent_view!, get_full_view
+export get_world, get_agent, get_agent_pos, get_agent_dir, get_agent_view, get_agent_view!, get_full_view
 export set_world!, set_agent!, set_agent_pos!, set_agent_dir!, set_reward!
 
 abstract type AbstractGridWorld <: AbstractEnv end
 
+#####
+# Useful getters and setters
+#####
+
 get_world(env::AbstractGridWorld) = env.world
 set_world!(env::AbstractGridWorld, world::GridWorldBase) = env.world = world
-
-get_grid(env::AbstractGridWorld) = env |> get_world |> get_grid
-get_objects(env::AbstractGridWorld) = env |> get_world |> get_objects
-
-get_num_objects(env::AbstractGridWorld) = env |> get_world |> get_num_objects
-get_height(env::AbstractGridWorld) = env |> get_world |> get_height
-get_width(env::AbstractGridWorld) = env |> get_world |> get_width
+@forward AbstractGridWorld.world get_grid, get_objects, get_num_objects, get_height, get_width
 
 get_agent(env::AbstractGridWorld) = env.agent
 set_agent!(env::AbstractGridWorld, agent::Agent) = env.agent = agent
@@ -20,9 +18,7 @@ get_agent_pos(env::AbstractGridWorld) = env |> get_agent |> get_pos
 set_agent_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = set_pos!(get_agent(env), pos)
 get_agent_dir(env::AbstractGridWorld) = env |> get_agent |> get_dir
 set_agent_dir!(env::AbstractGridWorld, dir::Direction) = set_dir!(get_agent(env), dir)
-get_inventory_type(env::AbstractGridWorld) = env |> get_agent |> get_inventory_type
-get_inventory(env::AbstractGridWorld) = env |> get_agent |> get_inventory
-set_inventory!(env::AbstractGridWorld, item) = set_inventory!(get_agent(env), item)
+@forward AbstractGridWorld.agent get_inventory_type, get_inventory, set_inventory!
 
 set_reward!(env::AbstractGridWorld, reward) = env.reward = reward
 
@@ -31,16 +27,22 @@ get_rng(env::AbstractGridWorld) = env.rng
 get_goal_pos(env::AbstractGridWorld) = env.goal_pos
 set_goal_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = env.goal_pos = pos
 
+#####
+# Agent's view
+#####
+
 function get_agent_view(env::AbstractGridWorld, agent_view_size = (7,7))
-    world = get_world(env)
-    agent_view = BitArray{3}(undef, get_num_objects(env), agent_view_size...)
-    fill!(agent_view, false)
+    agent_view = falses(get_num_objects(env), agent_view_size...)
     get_agent_view!(agent_view, env)
 end
 
 get_agent_view_inds(env::AbstractGridWorld, agent_view_size = (7,7)) = get_agent_view_inds(get_agent_pos(env).I, agent_view_size, get_agent_dir(env))
 
 get_agent_view!(grid::BitArray{3}, env::AbstractGridWorld) = get_agent_view!(grid, get_world(env), get_agent_pos(env), get_agent_dir(env))
+
+#####
+# Full view
+#####
 
 function get_agent_layer(grid::BitArray{3}, agent_pos::CartesianIndex{2})
     dims = size(grid)[2:end]
