@@ -32,9 +32,7 @@ set_goal_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = env.goal_pos = p
 #####
 
 function get_agent_view(env::AbstractGridWorld, agent_view_size = (7,7))
-    world = get_world(env)
-    agent_view = BitArray{3}(undef, get_num_objects(env), agent_view_size...)
-    fill!(agent_view, false)
+    agent_view = falses(get_num_objects(env), agent_view_size...)
     get_agent_view!(agent_view, env)
 end
 
