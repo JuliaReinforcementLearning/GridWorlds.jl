@@ -26,9 +26,7 @@ get_num_objects(grid::BitArray{3}) = size(grid, 1)
 get_height(grid::BitArray{3}) = size(grid, 2)
 get_width(grid::BitArray{3}) = size(grid, 3)
 
-get_num_objects(world::GridWorldBase) = world |> get_grid |> get_num_objects
-get_height(world::GridWorldBase) = world |> get_grid |> get_height
-get_width(world::GridWorldBase) = world |> get_grid |> get_width
+MacroTools.@forward GridWorldBase.grid get_num_objects, get_height, get_width
 
 MacroTools.@forward GridWorldBase.grid Base.size, Base.getindex, Base.setindex!
 
