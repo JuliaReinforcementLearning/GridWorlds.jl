@@ -6,13 +6,7 @@ abstract type AbstractGridWorld <: AbstractEnv end
 
 get_world(env::AbstractGridWorld) = env.world
 set_world!(env::AbstractGridWorld, world::GridWorldBase) = env.world = world
-
-get_grid(env::AbstractGridWorld) = env |> get_world |> get_grid
-get_objects(env::AbstractGridWorld) = env |> get_world |> get_objects
-
-get_num_objects(env::AbstractGridWorld) = env |> get_world |> get_num_objects
-get_height(env::AbstractGridWorld) = env |> get_world |> get_height
-get_width(env::AbstractGridWorld) = env |> get_world |> get_width
+@forward AbstractGridWorld.world get_grid, get_objects, get_num_objects, get_height, get_width
 
 get_agent(env::AbstractGridWorld) = env.agent
 set_agent!(env::AbstractGridWorld, agent::Agent) = env.agent = agent
@@ -20,9 +14,7 @@ get_agent_pos(env::AbstractGridWorld) = env |> get_agent |> get_pos
 set_agent_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = set_pos!(get_agent(env), pos)
 get_agent_dir(env::AbstractGridWorld) = env |> get_agent |> get_dir
 set_agent_dir!(env::AbstractGridWorld, dir::Direction) = set_dir!(get_agent(env), dir)
-get_inventory_type(env::AbstractGridWorld) = env |> get_agent |> get_inventory_type
-get_inventory(env::AbstractGridWorld) = env |> get_agent |> get_inventory
-set_inventory!(env::AbstractGridWorld, item) = set_inventory!(get_agent(env), item)
+@forward AbstractGridWorld.agent get_inventory_type, get_inventory, set_inventory!
 
 set_reward!(env::AbstractGridWorld, reward) = env.reward = reward
 
