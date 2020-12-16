@@ -105,7 +105,7 @@ function RLBase.reset!(env::DynamicObstacles)
     env[GOAL, old_goal_pos] = false
     env[EMPTY, old_goal_pos] = true
 
-    new_goal_pos = rand(rng, pos -> !env[WALL, pos], env)
+    new_goal_pos = rand(rng, pos -> env[EMPTY, pos], env)
 
     set_goal_pos!(env, new_goal_pos)
     env[GOAL, new_goal_pos] = true
