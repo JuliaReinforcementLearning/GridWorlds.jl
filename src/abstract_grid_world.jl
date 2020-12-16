@@ -10,7 +10,7 @@ abstract type AbstractGridWorld <: AbstractEnv end
 
 get_world(env::AbstractGridWorld) = env.world
 set_world!(env::AbstractGridWorld, world::GridWorldBase) = env.world = world
-@forward AbstractGridWorld.world get_grid, get_objects, get_num_objects, get_height, get_width
+@forward AbstractGridWorld.world get_grid, get_objects, get_num_objects, get_height, get_width, Base.size, Base.getindex, Base.setindex!
 
 get_agent(env::AbstractGridWorld) = env.agent
 set_agent!(env::AbstractGridWorld, agent::Agent) = env.agent = agent
@@ -26,6 +26,8 @@ get_rng(env::AbstractGridWorld) = env.rng
 
 get_goal_pos(env::AbstractGridWorld) = env.goal_pos
 set_goal_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = env.goal_pos = pos
+
+Random.rand(rng::AbstractRNG, f::Function, env::AbstractGridWorld; max_try = 1000) = rand(rng, f, get_world(env), max_try = max_try)
 
 #####
 # Agent's view

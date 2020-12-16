@@ -41,17 +41,15 @@ RLBase.get_state(env::GoToDoor) = (get_agent_view(env), env.target)
 RLBase.get_terminal(env::GoToDoor) = get_agent_pos(env) in values(env.door_pos)
 
 function (env::GoToDoor)(::MoveForward)
-    world = get_world(env)
-
     dir = get_agent_dir(env)
     dest = dir(get_agent_pos(env))
-    if dest ∈ CartesianIndices((get_height(env), get_width(env))) && !world[WALL, dest]
+    if dest ∈ CartesianIndices((get_height(env), get_width(env))) && !env[WALL, dest]
         set_agent_pos!(env, dest)
     end
 
     set_reward!(env, 0.0)
     if get_terminal(env)
-        if world[env.target, get_agent_pos(env)]
+        if env[env.target, get_agent_pos(env)]
             set_reward!(env, env.terminal_reward)
         else
             set_reward!(env, env.terminal_penalty)
@@ -62,25 +60,24 @@ function (env::GoToDoor)(::MoveForward)
 end
 
 function RLBase.reset!(env::GoToDoor)
-    world = get_world(env)
     height = get_height(env)
     width = get_width(env)
     rng = get_rng(env)
 
     for (door, pos) in env.door_pos
-        world[door, pos] = false
-        world[WALL, pos] = true
+        env[door, pos] = false
+        env[WALL, pos] = true
     end
 
     env.door_pos = Dict(zip(keys(env.door_pos), generate_door_pos(rng, height, width)))
     for (door, pos) in env.door_pos
-        world[door, pos] = true
-        world[WALL, pos] = false
+        env[door, pos] = true
+        env[WALL, pos] = false
     end
 
     env.target = rand(rng, keys(env.door_pos))
 
-    agent_start_pos = rand(rng, pos -> world[EMPTY, pos], world)
+    agent_start_pos = rand(rng, pos -> env[EMPTY, pos], env)
     agent_start_dir = rand(rng, DIRECTIONS)
 
     set_agent_pos!(env, agent_start_pos)
