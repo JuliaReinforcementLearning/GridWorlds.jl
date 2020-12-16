@@ -70,16 +70,16 @@ function RLBase.reset!(env::GridRooms)
     rng = get_rng(env)
 
     old_goal_pos = get_goal_pos(env)
-    world[GOAL, old_goal_pos] = false
-    world[EMPTY, old_goal_pos] = true
+    env[GOAL, old_goal_pos] = false
+    env[EMPTY, old_goal_pos] = true
 
-    new_goal_pos = rand(rng, pos -> world[EMPTY, pos], world)
+    new_goal_pos = rand(rng, pos -> env[EMPTY, pos], env)
 
     set_goal_pos!(env, new_goal_pos)
-    world[GOAL, new_goal_pos] = true
-    world[EMPTY, new_goal_pos] = false
+    env[GOAL, new_goal_pos] = true
+    env[EMPTY, new_goal_pos] = false
 
-    agent_start_pos = rand(rng, pos -> world[EMPTY, pos], world)
+    agent_start_pos = rand(rng, pos -> env[EMPTY, pos], env)
     agent_start_dir = rand(rng, DIRECTIONS)
 
     set_agent_pos!(env, agent_start_pos)

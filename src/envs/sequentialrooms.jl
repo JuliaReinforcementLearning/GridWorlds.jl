@@ -54,8 +54,8 @@ function RLBase.reset!(env::AbstractGridWorld)
             push!(env.rooms, room)
 
             door_pos = rand(rng, intersect(env.rooms[end - 1].region, room.region)[2:end-1])
-            world[WALL, door_pos] = false
-            world[EMPTY, door_pos] = true
+            env[WALL, door_pos] = false
+            env[EMPTY, door_pos] = true
         end
 
         tries += 1
@@ -67,13 +67,12 @@ function RLBase.reset!(env::AbstractGridWorld)
     set_world!(env, centered_world)
 
     # add the GOAL randomly in the last room
-    world = get_world(env)
     goal_pos = rand(rng, get_interior(env.rooms[end]))
     while goal_pos == get_agent_pos(env)
         goal_pos = rand(rng, get_interior(env.rooms[end]))
     end
-    world[GOAL, goal_pos] = true
-    world[EMPTY, goal_pos] = false
+    env[GOAL, goal_pos] = true
+    env[EMPTY, goal_pos] = false
 
     # add the agent randomly in the first room
     agent_start_pos = get_interior(env.rooms[1])
