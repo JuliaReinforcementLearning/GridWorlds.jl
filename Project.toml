@@ -13,8 +13,8 @@ Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 [compat]
 Crayons = "4.0"
 MacroTools = "0.5"
+ReinforcementLearningBase = "0.8.5, 0.9"
 Requires = "1.1"
-ReinforcementLearningBase = "0.8.5"
 julia = "1"
 
 [extras]
