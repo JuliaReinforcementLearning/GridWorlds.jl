@@ -79,7 +79,6 @@ RLBase.action_space(env::AbstractGridWorld, ::DefaultPlayer) = (MOVE_FORWARD, TU
 const get_reward = RLBase.reward
 RLBase.reward(env::AbstractGridWorld, ::DefaultPlayer) = env.reward
 
-const get_terminal = RLBase.is_terminated
 RLBase.is_terminated(env::AbstractGridWorld) = get_world(env)[GOAL, get_agent_pos(env)]
 
 function (env::AbstractGridWorld)(action::Union{TurnRight, TurnLeft})
@@ -101,7 +100,7 @@ function (env::AbstractGridWorld)(::MoveForward)
     end
 
     set_reward!(env, 0.0)
-    if get_terminal(env)
+    if is_terminated(env)
         set_reward!(env, env.terminal_reward)
     end
 

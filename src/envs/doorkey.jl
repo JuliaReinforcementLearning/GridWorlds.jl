@@ -54,7 +54,7 @@ function (env::DoorKey)(::MoveForward)
     end
 
     set_reward!(env, 0.0)
-    if get_terminal(env)
+    if is_terminated(env)
         set_reward!(env, env.terminal_reward)
     end
 

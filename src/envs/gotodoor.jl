@@ -48,7 +48,7 @@ function (env::GoToDoor)(::MoveForward)
     end
 
     set_reward!(env, 0.0)
-    if get_terminal(env)
+    if is_terminated(env)
         if env[env.target, get_agent_pos(env)]
             set_reward!(env, env.terminal_reward)
         else
