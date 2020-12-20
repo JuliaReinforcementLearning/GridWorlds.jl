@@ -19,25 +19,25 @@ get_terminal_rewards(env::GoToDoor) = (env.terminal_reward, env.terminal_penalty
             env = Env()
             for _ in 1:NUM_RESETS
                 reset!(env)
-                @test get_reward(env) == 0.0
-                @test get_terminal(env) == false
+                @test reward(env) == 0.0
+                @test is_terminated(env) == false
                 if Env == GoToDoor
-                    @test get_state(env) == (get_agent_view(env), env.target)
+                    @test state(env) == (get_agent_view(env), env.target)
                 else
-                    @test get_state(env) == get_agent_view(env)
+                    @test state(env) == get_agent_view(env)
                 end
 
                 total_reward = 0.0
                 for i in 1:MAX_STEPS
-                    action = rand(get_actions(env))
+                    action = rand(action_space(env))
                     env(action)
-                    total_reward += get_reward(env)
+                    total_reward += reward(env)
 
                     @test 1 ≤ get_agent_pos(env)[1] ≤ get_height(env)
                     @test 1 ≤ get_agent_pos(env)[2] ≤ get_width(env)
                     @test get_world(env)[WALL, get_agent_pos(env)] == false
 
-                    if get_terminal(env)
+                    if is_terminated(env)
                         @test total_reward in get_terminal_rewards(env)
                         break
                     end
