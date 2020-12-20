@@ -36,9 +36,9 @@ function GoToDoor(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
     return env
 end
 
-RLBase.get_state(env::GoToDoor) = (get_agent_view(env), env.target)
+RLBase.state(env::GoToDoor) = (get_agent_view(env), env.target)
 
-RLBase.get_terminal(env::GoToDoor) = get_agent_pos(env) in values(env.door_pos)
+RLBase.is_terminated(env::GoToDoor) = get_agent_pos(env) in values(env.door_pos)
 
 function (env::GoToDoor)(::MoveForward)
     dir = get_agent_dir(env)
