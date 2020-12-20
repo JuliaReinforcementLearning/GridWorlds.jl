@@ -91,7 +91,7 @@ function update_obstacles!(env::DynamicObstacles)
     return env
 end
 
-RLBase.get_terminal(env::DynamicObstacles) = iscollision(env) || env[GOAL, get_agent_pos(env)]
+RLBase.is_terminated(env::DynamicObstacles) = iscollision(env) || env[GOAL, get_agent_pos(env)]
 
 function RLBase.reset!(env::DynamicObstacles)
     rng = get_rng(env)

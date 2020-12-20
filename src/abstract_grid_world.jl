@@ -69,17 +69,17 @@ end
 # RLBase API defaults
 #####
 
-RLBase.DefaultStateStyle(env::AbstractGridWorld) = RLBase.PartialObservation{Array}()
+const get_state = RLBase.state
+RLBase.state(env::AbstractGridWorld, ::RLBase.Observation, ::DefaultPlayer) = get_agent_view(env)
+RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::DefaultPlayer) = (get_full_view(env), get_agent_dir(env))
 
-RLBase.get_state(env::AbstractGridWorld, ::RLBase.PartialObservation{Array}, args...) = get_agent_view(env)
+const get_action_space = RLBase.action_space
+RLBase.action_space(env::AbstractGridWorld, ::DefaultPlayer) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT)
 
-RLBase.get_state(env::AbstractGridWorld, ::RLBase.Observation{Array}, args...) = (get_full_view(env), get_agent_dir(env))
+const get_reward = RLBase.reward
+RLBase.reward(env::AbstractGridWorld, ::DefaultPlayer) = env.reward
 
-RLBase.get_actions(env::AbstractGridWorld) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT)
-
-RLBase.get_reward(env::AbstractGridWorld) = env.reward
-
-RLBase.get_terminal(env::AbstractGridWorld) = get_world(env)[GOAL, get_agent_pos(env)]
+RLBase.is_terminated(env::AbstractGridWorld) = get_world(env)[GOAL, get_agent_pos(env)]
 
 function (env::AbstractGridWorld)(action::Union{TurnRight, TurnLeft})
     dir = get_agent_dir(env)
@@ -100,7 +100,7 @@ function (env::AbstractGridWorld)(::MoveForward)
     end
 
     set_reward!(env, 0.0)
-    if get_terminal(env)
+    if is_terminated(env)
         set_reward!(env, env.terminal_reward)
     end
 

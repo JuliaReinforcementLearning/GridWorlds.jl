@@ -30,7 +30,7 @@ function CollectGems(; height = 8, width = 8, num_gem_init = floor(Int, sqrt(hei
     return env
 end
 
-RLBase.get_terminal(env::CollectGems) = env.num_gem_current <= 0
+RLBase.is_terminated(env::CollectGems) = env.num_gem_current <= 0
 
 function (env::CollectGems)(::MoveForward)
     dir = get_agent_dir(env)
