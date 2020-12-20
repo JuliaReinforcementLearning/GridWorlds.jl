@@ -76,7 +76,8 @@ RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::DefaultPlayer) = 
 const get_actions = RLBase.action_space
 RLBase.action_space(env::AbstractGridWorld, ::DefaultPlayer) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT)
 
-RLBase.get_reward(env::AbstractGridWorld) = env.reward
+const get_reward = RLBase.reward
+RLBase.reward(env::AbstractGridWorld, ::DefaultPlayer) = env.reward
 
 RLBase.get_terminal(env::AbstractGridWorld) = get_world(env)[GOAL, get_agent_pos(env)]
 
