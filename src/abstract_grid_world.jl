@@ -80,7 +80,7 @@ const get_reward = RLBase.reward
 RLBase.reward(env::AbstractGridWorld, ::DefaultPlayer) = env.reward
 
 const get_terminal = RLBase.is_terminated
-RLBase.is_terminated(env::AbstractGridWorld, ::DefaultPlayer) = get_world(env)[GOAL, get_agent_pos(env)]
+RLBase.is_terminated(env::AbstractGridWorld) = get_world(env)[GOAL, get_agent_pos(env)]
 
 function (env::AbstractGridWorld)(action::Union{TurnRight, TurnLeft})
     dir = get_agent_dir(env)
