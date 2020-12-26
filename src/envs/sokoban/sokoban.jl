@@ -34,6 +34,8 @@ mutable struct SimpleSokoban{R} <: AbstractGridWorld
     reward::Float64
     rng::R
     dataset::LevelDataset
+    box_pos::Vector{CartesianIndex{2}}
+    target_pos::Vector{CartesianIndex{2}}
 end
 
 function SimpleSokoban(; file = joinpath(dirname(pathof(@__MODULE__)), "envs/sokoban/000.txt"), rng = Random.GLOBAL_RNG)
@@ -48,7 +50,10 @@ function SimpleSokoban(; file = joinpath(dirname(pathof(@__MODULE__)), "envs/sok
     agent = Agent()
     reward = 0.0
 
-    env = SimpleSokoban(world, agent, reward, rng, dataset)
+    box_pos = CartesianIndex{2}[]
+    target_pos = CartesianIndex{2}[]
+
+    env = SimpleSokoban(world, agent, reward, rng, dataset, box_pos, target_pos)
 
     reset!(env)
 
@@ -60,26 +65,40 @@ RLBase.state(env::SimpleSokoban, ::RLBase.InternalState, ::DefaultPlayer) = get_
 
 RLBase.action_space(env::SimpleSokoban, ::DefaultPlayer) = (MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT)
 
-function RLBase.reset!(env::SimpleSokoban, level::Vector{String})
-    env[:, :, :] .= false
+RLBase.is_terminated(env::SimpleSokoban) = all(pos -> env[TARGET, pos], env.box_pos)
 
+function set_level!(env::SimpleSokoban, level::Vector{String})
     for i in 1:length(level)
         for j in 1:length(level[1])
+            pos = CartesianIndex(i, j)
             object = CHAR_TO_OBJECT[level[i][j]]
-            if object == DIRECTION_LESS_AGENT
-                set_agent_pos!(env, CartesianIndex(i, j))
+            env[object, pos] = true
+
+            if object === DIRECTION_LESS_AGENT
+                set_agent_pos!(env, pos)
+            elseif object === BOX
+                push!(env.box_pos, pos)
+            elseif object === TARGET
+                push!(env.target_pos, pos)
             end
-            env[object, i, j] = true
         end
     end
+
+    return env
 end
 
 function RLBase.reset!(env::SimpleSokoban)
     rng = get_rng(env)
+    world = get_world(env)
+
+    world[:, :, :] .= false
+    env.box_pos = CartesianIndex{2}[]
+    env.target_pos = CartesianIndex{2}[]
 
     level_num = rand(rng, 0:999)
     level = get_level(env.dataset, level_num)
-    reset!(env, level)
+
+    set_level!(env, level)
 
     set_reward!(env, 0.0)
 
