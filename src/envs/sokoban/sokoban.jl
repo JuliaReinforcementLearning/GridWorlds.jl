@@ -67,6 +67,45 @@ RLBase.action_space(env::SimpleSokoban, ::DefaultPlayer) = (MOVE_UP, MOVE_DOWN, 
 
 RLBase.is_terminated(env::SimpleSokoban) = all(pos -> env[TARGET, pos], env.box_pos)
 
+function (env::AbstractGridWorld)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
+    world = get_world(env)
+
+    agent_pos = get_agent_pos(env)
+    dest = action(agent_pos)
+    if !world[WALL, dest]
+        beyond_dest = action(dest)
+        if !world[BOX, dest]
+            world[DIRECTION_LESS_AGENT, agent_pos] = false
+            world[DIRECTION_LESS_AGENT, dest] = true
+            if world[EMPTY, dest]
+                world[EMPTY, dest] = false
+            end
+            if !world[TARGET, agent_pos]
+                world[EMPTY, agent_pos] = true
+            end
+            set_agent_pos!(env, dest)
+        else
+            if world[EMPTY, beyond_dest] || world[TARGET, beyond_dest]
+                world[DIRECTION_LESS_AGENT, agent_pos] = false
+                world[DIRECTION_LESS_AGENT, dest] = true
+                world[BOX, dest] = false
+                world[BOX, beyond_dest] = true
+                if world[EMPTY, beyond_dest]
+                    world[EMPTY, beyond_dest] = false
+                end
+                if !world[TARGET, agent_pos]
+                    world[EMPTY, agent_pos] = true
+                end
+                set_agent_pos!(env, dest)
+            end
+        end
+    end
+
+    set_reward!(env, 0.0)
+
+    return env
+end
+
 function set_level!(env::SimpleSokoban, level::Vector{String})
     for i in 1:length(level)
         for j in 1:length(level[1])
