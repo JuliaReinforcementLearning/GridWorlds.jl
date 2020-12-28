@@ -1,4 +1,4 @@
-export SimpleSokoban
+export Sokoban
 
 const CHAR_TO_OBJECT = Dict(
                             '@' => DIRECTION_LESS_AGENT,
@@ -30,7 +30,7 @@ howpublished= {https://github.com/deepmind/boxoban-levels/},
 year = "2018",
 }
 """
-mutable struct SimpleSokoban{R} <: AbstractGridWorld
+mutable struct Sokoban{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{DirectionLessAgent, Empty, Wall, Box, Target}}
     agent::Agent
     reward::Float64
@@ -40,7 +40,7 @@ mutable struct SimpleSokoban{R} <: AbstractGridWorld
     target_pos::Vector{CartesianIndex{2}}
 end
 
-function SimpleSokoban(; file = joinpath(dirname(pathof(@__MODULE__)), "envs/sokoban/000.txt"), rng = Random.GLOBAL_RNG)
+function Sokoban(; file = joinpath(dirname(pathof(@__MODULE__)), "envs/sokoban/000.txt"), rng = Random.GLOBAL_RNG)
     dataset = LevelDataset(readlines(file))
     level = get_level(dataset, 0)
     height = length(level)
@@ -55,20 +55,20 @@ function SimpleSokoban(; file = joinpath(dirname(pathof(@__MODULE__)), "envs/sok
     box_pos = CartesianIndex{2}[]
     target_pos = CartesianIndex{2}[]
 
-    env = SimpleSokoban(world, agent, reward, rng, dataset, box_pos, target_pos)
+    env = Sokoban(world, agent, reward, rng, dataset, box_pos, target_pos)
 
     reset!(env)
 
     return env
 end
 
-get_full_view(env::SimpleSokoban) = get_grid(env)
-RLBase.StateStyle(env::SimpleSokoban) = RLBase.InternalState{Any}()
-RLBase.state(env::SimpleSokoban, ::RLBase.InternalState, ::DefaultPlayer) = get_full_view(env)
+get_full_view(env::Sokoban) = get_grid(env)
+RLBase.StateStyle(env::Sokoban) = RLBase.InternalState{Any}()
+RLBase.state(env::Sokoban, ::RLBase.InternalState, ::DefaultPlayer) = get_full_view(env)
 
-RLBase.action_space(env::SimpleSokoban, ::DefaultPlayer) = (MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT)
+RLBase.action_space(env::Sokoban, ::DefaultPlayer) = (MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT)
 
-RLBase.is_terminated(env::SimpleSokoban) = all(pos -> env[TARGET, pos], env.box_pos)
+RLBase.is_terminated(env::Sokoban) = all(pos -> env[TARGET, pos], env.box_pos)
 
 function (env::AbstractGridWorld)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
     world = get_world(env)
@@ -109,7 +109,7 @@ function (env::AbstractGridWorld)(action::Union{MoveUp, MoveDown, MoveLeft, Move
     return env
 end
 
-function set_level!(env::SimpleSokoban, level::Vector{String})
+function set_level!(env::Sokoban, level::Vector{String})
     for i in 1:length(level)
         for j in 1:length(level[1])
             pos = CartesianIndex(i, j)
@@ -129,7 +129,7 @@ function set_level!(env::SimpleSokoban, level::Vector{String})
     return env
 end
 
-function RLBase.reset!(env::SimpleSokoban)
+function RLBase.reset!(env::Sokoban)
     rng = get_rng(env)
     world = get_world(env)
 

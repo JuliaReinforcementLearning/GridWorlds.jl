@@ -68,4 +68,4 @@ function Base.show(io::IO, ::MIME"text/markdown", env::AbstractGridWorld)
     print_grid(io, env, :agent_view)
 end
 
-Base.show(io::IO, mime::MIME"text/plain", env::SimpleSokoban) = show(io, mime, get_world(env))
+Base.show(io::IO, mime::MIME"text/plain", env::Sokoban) = show(io, mime, get_world(env))

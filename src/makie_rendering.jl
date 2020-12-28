@@ -43,8 +43,7 @@ function init_screen(env_node::Observable{<:AbstractGridWorld}; resolution = (72
     scene
 end
 
-function init_screen(env_node::Observable{<:SimpleSokoban}; resolution = (720, 720))
-    @info "Yo!"
+function init_screen(env_node::Observable{<:Sokoban}; resolution = (720, 720))
     scene = Scene(resolution = resolution, raw = true, camera = campixel!)
 
     height = get_height(env_node[])

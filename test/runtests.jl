@@ -3,7 +3,7 @@ using Test
 using Random
 using ReinforcementLearningBase
 
-ENVS = [EmptyRoom, GridRooms, SequentialRooms, GoToDoor, DoorKey, CollectGems, DynamicObstacles, SimpleSokoban]
+ENVS = [EmptyRoom, GridRooms, SequentialRooms, GoToDoor, DoorKey, CollectGems, DynamicObstacles, Sokoban]
 
 MAX_STEPS = 3000
 NUM_RESETS = 3
@@ -26,7 +26,7 @@ get_terminal_rewards(env::DynamicObstacles) = (env.terminal_reward, env.terminal
                 @test is_terminated(env) == false
                 if Env == GoToDoor
                     @test state(env) == (get_agent_view(env), env.target)
-                elseif Env == SimpleSokoban
+                elseif Env == Sokoban
                     @test state(env) == get_full_view(env)
                 else
                     @test state(env) == get_agent_view(env)
