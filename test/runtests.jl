@@ -15,6 +15,7 @@ get_terminal_rewards(env::GoToDoor) = (env.terminal_reward, env.terminal_penalty
 get_terminal_rewards(env::DoorKey) = (env.terminal_reward,)
 get_terminal_rewards(env::CollectGems) = (env.num_gem_init * env.gem_reward,)
 get_terminal_rewards(env::DynamicObstacles) = (env.terminal_reward, env.terminal_penalty)
+get_terminal_rewards(env::Sokoban) = (1.0,)
 
 @testset "GridWorlds.jl" begin
     for Env in ENVS
