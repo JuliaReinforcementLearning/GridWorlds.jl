@@ -60,8 +60,9 @@ function SimpleSokoban(; file = joinpath(dirname(pathof(@__MODULE__)), "envs/sok
     return env
 end
 
+get_full_view(env::SimpleSokoban) = get_grid(env)
 RLBase.StateStyle(env::SimpleSokoban) = RLBase.InternalState{Any}()
-RLBase.state(env::SimpleSokoban, ::RLBase.InternalState, ::DefaultPlayer) = get_grid(env)
+RLBase.state(env::SimpleSokoban, ::RLBase.InternalState, ::DefaultPlayer) = get_full_view(env)
 
 RLBase.action_space(env::SimpleSokoban, ::DefaultPlayer) = (MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT)
 
@@ -85,7 +86,7 @@ function (env::AbstractGridWorld)(action::Union{MoveUp, MoveDown, MoveLeft, Move
             end
             set_agent_pos!(env, dest)
         else
-            if world[EMPTY, beyond_dest] || world[TARGET, beyond_dest]
+            if !world[BOX, beyond_dest] && (world[EMPTY, beyond_dest] || world[TARGET, beyond_dest])
                 world[DIRECTION_LESS_AGENT, agent_pos] = false
                 world[DIRECTION_LESS_AGENT, dest] = true
                 world[BOX, dest] = false
