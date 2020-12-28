@@ -73,6 +73,7 @@ RLBase.is_terminated(env::Sokoban) = all(pos -> env[TARGET, pos], env.box_pos)
 function (env::AbstractGridWorld)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
     world = get_world(env)
 
+    r1 = sum(pos -> env[TARGET, pos], env.box_pos)
     agent_pos = get_agent_pos(env)
     dest = action(agent_pos)
     if !world[WALL, dest]
@@ -93,6 +94,8 @@ function (env::AbstractGridWorld)(action::Union{MoveUp, MoveDown, MoveLeft, Move
                 world[DIRECTION_LESS_AGENT, dest] = true
                 world[BOX, dest] = false
                 world[BOX, beyond_dest] = true
+                idx = findfirst(pos -> pos == dest, env.box_pos)
+                env.box_pos[idx] = beyond_dest
                 if world[EMPTY, beyond_dest]
                     world[EMPTY, beyond_dest] = false
                 end
@@ -104,7 +107,8 @@ function (env::AbstractGridWorld)(action::Union{MoveUp, MoveDown, MoveLeft, Move
         end
     end
 
-    set_reward!(env, 0.0)
+    r2 = sum(pos -> env[TARGET, pos], env.box_pos)
+    set_reward!(env, r2 - r1)
 
     return env
 end
