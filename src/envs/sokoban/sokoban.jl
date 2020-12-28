@@ -29,6 +29,8 @@ title = {An investigation of Model-free planning: boxoban levels},
 howpublished= {https://github.com/deepmind/boxoban-levels/},
 year = "2018",
 }
+
+The dataset file can be updated by creating suitable [hook](https://github.com/JuliaReinforcementLearning/ReinforcementLearningCore.jl/blob/master/src/core/hooks.jl)
 """
 mutable struct Sokoban{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{DirectionLessAgent, Empty, Wall, Box, Target}}
