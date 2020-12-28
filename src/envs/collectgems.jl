@@ -33,17 +33,19 @@ end
 RLBase.is_terminated(env::CollectGems) = env.num_gem_current <= 0
 
 function (env::CollectGems)(::MoveForward)
+    world = get_world(env)
+
     dir = get_agent_dir(env)
     dest = dir(get_agent_pos(env))
-    if !env[WALL, dest]
+    if !world[WALL, dest]
         set_agent_pos!(env, dest)
     end
 
     set_reward!(env, 0.0)
     agent_pos = get_agent_pos(env)
-    if env[GEM, agent_pos]
-        env[GEM, agent_pos] = false
-        env[EMPTY, agent_pos] = true
+    if world[GEM, agent_pos]
+        world[GEM, agent_pos] = false
+        world[EMPTY, agent_pos] = true
         env.num_gem_current = env.num_gem_current - 1
         set_reward!(env, env.gem_reward)
     end
@@ -52,23 +54,24 @@ function (env::CollectGems)(::MoveForward)
 end
 
 function RLBase.reset!(env::CollectGems)
+    world = get_world(env)
     rng = get_rng(env)
 
     for pos in env.gem_pos
-        env[GEM, pos] = false
-        env[EMPTY, pos] = true
+        world[GEM, pos] = false
+        world[EMPTY, pos] = true
     end
 
     env.gem_pos = CartesianIndex{2}[]
     for i in 1:env.num_gem_init
-        pos = rand(rng, pos -> env[EMPTY, pos], env)
-        env[GEM, pos] = true
-        env[EMPTY, pos] = false
+        pos = rand(rng, pos -> world[EMPTY, pos], env)
+        world[GEM, pos] = true
+        world[EMPTY, pos] = false
         push!(env.gem_pos, pos)
     end
     env.num_gem_current = env.num_gem_init
 
-    agent_start_pos = rand(rng, pos -> env[EMPTY, pos], env)
+    agent_start_pos = rand(rng, pos -> world[EMPTY, pos], env)
     agent_start_dir = rand(rng, DIRECTIONS)
 
     set_agent_pos!(env, agent_start_pos)

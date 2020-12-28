@@ -70,12 +70,12 @@ RLBase.state(env::Sokoban, ::RLBase.InternalState, ::DefaultPlayer) = get_full_v
 
 RLBase.action_space(env::Sokoban, ::DefaultPlayer) = (MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT)
 
-RLBase.is_terminated(env::Sokoban) = all(pos -> env[TARGET, pos], env.box_pos)
+RLBase.is_terminated(env::Sokoban) = all(pos -> get_world(env)[TARGET, pos], env.box_pos)
 
 function (env::AbstractGridWorld)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
     world = get_world(env)
 
-    r1 = sum(pos -> env[TARGET, pos], env.box_pos)
+    r1 = sum(pos -> world[TARGET, pos], env.box_pos)
     agent_pos = get_agent_pos(env)
     dest = action(agent_pos)
     if !world[WALL, dest]
@@ -109,18 +109,19 @@ function (env::AbstractGridWorld)(action::Union{MoveUp, MoveDown, MoveLeft, Move
         end
     end
 
-    r2 = sum(pos -> env[TARGET, pos], env.box_pos)
+    r2 = sum(pos -> world[TARGET, pos], env.box_pos)
     set_reward!(env, r2 - r1)
 
     return env
 end
 
 function set_level!(env::Sokoban, level::Vector{String})
+    world = get_world(env)
     for i in 1:length(level)
         for j in 1:length(level[1])
             pos = CartesianIndex(i, j)
             object = CHAR_TO_OBJECT[level[i][j]]
-            env[object, pos] = true
+            world[object, pos] = true
 
             if object === DIRECTION_LESS_AGENT
                 set_agent_pos!(env, pos)

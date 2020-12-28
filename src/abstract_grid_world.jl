@@ -10,7 +10,7 @@ abstract type AbstractGridWorld <: AbstractEnv end
 
 get_world(env::AbstractGridWorld) = env.world
 set_world!(env::AbstractGridWorld, world::GridWorldBase) = env.world = world
-@forward AbstractGridWorld.world get_grid, get_objects, get_num_objects, get_height, get_width, Base.size, Base.getindex, Base.setindex!
+@forward AbstractGridWorld.world get_grid, get_objects, get_num_objects, get_height, get_width
 
 get_agent(env::AbstractGridWorld) = env.agent
 set_agent!(env::AbstractGridWorld, agent::Agent) = env.agent = agent

@@ -31,19 +31,20 @@ function EmptyRoom(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
 end
 
 function RLBase.reset!(env::EmptyRoom)
+    world = get_world(env)
     rng = get_rng(env)
 
     old_goal_pos = get_goal_pos(env)
-    env[GOAL, old_goal_pos] = false
-    env[EMPTY, old_goal_pos] = true
+    world[GOAL, old_goal_pos] = false
+    world[EMPTY, old_goal_pos] = true
 
-    new_goal_pos = rand(rng, pos -> env[EMPTY, pos], env)
+    new_goal_pos = rand(rng, pos -> world[EMPTY, pos], env)
 
     set_goal_pos!(env, new_goal_pos)
-    env[GOAL, new_goal_pos] = true
-    env[EMPTY, new_goal_pos] = false
+    world[GOAL, new_goal_pos] = true
+    world[EMPTY, new_goal_pos] = false
 
-    agent_start_pos = rand(rng, pos -> env[EMPTY, pos], env)
+    agent_start_pos = rand(rng, pos -> world[EMPTY, pos], env)
     agent_start_dir = rand(rng, DIRECTIONS)
 
     set_agent_pos!(env, agent_start_pos)
