@@ -1,5 +1,5 @@
-export AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Obstacle, Agent
-export COLORS, EMPTY, WALL, GOAL, GEM, OBSTACLE
+export AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Obstacle, Box, Target, Agent
+export COLORS, EMPTY, WALL, GOAL, GEM, OBSTACLE, BOX, TARGET
 export get_char, get_color, get_dir, set_dir!, get_pos, set_pos!, get_inventory_type, get_inventory, set_inventory!
 
 const COLORS = (:red, :green, :blue, :magenta, :yellow, :white)
@@ -46,6 +46,21 @@ struct Obstacle <: AbstractObject end
 const OBSTACLE = Obstacle()
 get_char(::Obstacle) = '⊗'
 get_color(::Obstacle) = :blue    
+
+struct Box <: AbstractObject end
+const BOX = Box()
+get_char(::Box) = '▒'
+get_color(::Box) = :yellow
+
+struct Target <: AbstractObject end
+const TARGET = Target()
+get_char(::Target) = '✖'
+get_color(::Target) = :red
+
+struct DirectionLessAgent <: AbstractObject end
+const DIRECTION_LESS_AGENT = DirectionLessAgent()
+get_char(::DirectionLessAgent) = '☻'
+get_color(::DirectionLessAgent) = :green
 
 #####
 # Agent

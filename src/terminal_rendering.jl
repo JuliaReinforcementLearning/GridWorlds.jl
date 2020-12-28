@@ -46,6 +46,20 @@ function print_grid(io::IO, env::AbstractGridWorld, view_type)
     end
 end
 
+function Base.show(io::IO, ::MIME"text/plain", world::GridWorldBase)
+    grid = get_grid(world)
+    objects = get_objects(world)
+
+    for i in 1:get_height(grid)
+        for j in 1:get_width(grid)
+            pos = CartesianIndex(i, j)
+            object = get_first_object(grid, objects, pos)
+            print(io, Crayons.Crayon(background = :black, foreground = get_color(object), bold = true, reset = true), get_char(object))
+        end
+        println(io, Crayons.Crayon(reset = true))
+    end
+end
+
 function Base.show(io::IO, ::MIME"text/markdown", env::AbstractGridWorld)
     println(io, "Full View:")
     print_grid(io, env, :full_view)
@@ -53,3 +67,5 @@ function Base.show(io::IO, ::MIME"text/markdown", env::AbstractGridWorld)
     println(io, "Agent's View:")
     print_grid(io, env, :agent_view)
 end
+
+Base.show(io::IO, mime::MIME"text/plain", env::Sokoban) = show(io, mime, get_world(env))
