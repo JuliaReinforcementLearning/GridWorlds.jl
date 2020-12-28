@@ -110,7 +110,7 @@ function generate_candidate_rooms(env::SequentialRooms)
     return rooms
 end
 
-function generate_candidate_rooms(env::SequentialRooms, height::Int, width::Int, dir::Direction)
+function generate_candidate_rooms(env::SequentialRooms, height::Int, width::Int, dir::AbstractDirection)
     origins = generate_candidate_origins(env.rooms[end], height, width, dir)
     rooms = map(x -> Room(x, height, width), origins)
     valid_rooms = filter(x -> is_valid_room(env, x), rooms)

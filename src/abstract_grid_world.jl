@@ -17,7 +17,7 @@ set_agent!(env::AbstractGridWorld, agent::Agent) = env.agent = agent
 get_agent_pos(env::AbstractGridWorld) = env |> get_agent |> get_pos
 set_agent_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = set_pos!(get_agent(env), pos)
 get_agent_dir(env::AbstractGridWorld) = env |> get_agent |> get_dir
-set_agent_dir!(env::AbstractGridWorld, dir::Direction) = set_dir!(get_agent(env), dir)
+set_agent_dir!(env::AbstractGridWorld, dir::AbstractDirection) = set_dir!(get_agent(env), dir)
 @forward AbstractGridWorld.agent get_inventory_type, get_inventory, set_inventory!
 
 set_reward!(env::AbstractGridWorld, reward) = env.reward = reward

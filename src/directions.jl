@@ -1,4 +1,4 @@
-export AbstractDirection, Up, Down, Left, Right, Direction
+export AbstractDirection, Up, Down, Left, Right
 export UP, DOWN, LEFT, RIGHT, DIRECTIONS
 
 abstract type AbstractDirection end
@@ -19,5 +19,4 @@ struct Right <: AbstractDirection end
 const RIGHT = Right()
 (x::Right)(p::CartesianIndex{2}) = p + CartesianIndex(0, 1)
 
-const Direction = Union{Up, Down, Left, Right}
 const DIRECTIONS = (UP, DOWN, LEFT, RIGHT)
