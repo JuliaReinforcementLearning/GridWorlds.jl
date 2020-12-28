@@ -43,12 +43,42 @@ function init_screen(env_node::Observable{<:AbstractGridWorld}; resolution = (72
     scene
 end
 
+function init_screen(env_node::Observable{<:SimpleSokoban}; resolution = (720, 720))
+    @info "Yo!"
+    scene = Scene(resolution = resolution, raw = true, camera = campixel!)
+
+    height = get_height(env_node[])
+    width = get_width(env_node[])
+    tile_inds = CartesianIndices((height, width))
+
+    transform = get_transform(height)
+
+    area = scene.px_area
+    tile_size = @lift((widths($area)[2] / height, widths($area)[1] / width))
+
+    # 1. paint background
+    poly!(scene, area)
+    scatter!(scene, @lift(map(x -> get_center(x, $tile_size, transform), filter(pos -> !any(get_world($env_node)[:, pos]), $tile_inds))), color = :white, marker = '~', markersize = @lift((reverse($tile_size) ./ 2)))
+
+    # 2. paint each kind of object
+    for object in get_objects(env_node[])
+        scatter!(scene, @lift(broadcast(x -> get_center(x, $tile_size, transform), findall(get_world($env_node)[object, :, :]))), color = get_color(object), marker = get_char(object), markersize = @lift(get_markersize(object, $tile_size)))
+    end
+
+    display(scene)
+    scene
+end
+
 function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
     print("""
     Key bindings:
     ←: TurnLeft
     →: TurnRight
     ↑: MoveForward
+    w: MoveUp
+    s: MoveDown
+    a: MoveLeft
+    d: MoveRight
     p: PickUp
     r: reset!
     q: Quit
@@ -71,6 +101,18 @@ function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
             env_node[] = env
         elseif ispressed(b, Keyboard.up)
             env(MOVE_FORWARD)
+            env_node[] = env
+        elseif ispressed(b, Keyboard.w)
+            env(MOVE_UP)
+            env_node[] = env
+        elseif ispressed(b, Keyboard.s)
+            env(MOVE_DOWN)
+            env_node[] = env
+        elseif ispressed(b, Keyboard.a)
+            env(MOVE_LEFT)
+            env_node[] = env
+        elseif ispressed(b, Keyboard.d)
+            env(MOVE_RIGHT)
             env_node[] = env
         elseif ispressed(b, Keyboard.p)
             env(PICK_UP)
