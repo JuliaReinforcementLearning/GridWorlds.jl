@@ -8,16 +8,6 @@ const CHAR_TO_OBJECT = Dict(
                             '.' => TARGET,
 )
 
-"""
-The dataset (000.txt) used is [boxoban-levels](https://github.com/deepmind/boxoban-levels/blob/master/medium/train/000.txt)
-The following is the citation of the dataset:
-@misc{boxobanlevels,
-author = {Arthur Guez, Mehdi Mirza, Karol Gregor, Rishabh Kabra, Sebastien Racaniere, Theophane Weber, David Raposo, Adam Santoro, Laurent Orseau, Tom Eccles, Greg Wayne, David Silver, Timothy Lillicrap, Victor Valdes},
-title = {An investigation of Model-free planning: boxoban levels},
-howpublished= {https://github.com/deepmind/boxoban-levels/},
-year = "2018",
-}
-"""
 struct LevelDataset
     contents::Vector{String}
 end
@@ -28,6 +18,18 @@ function get_level(dataset::LevelDataset, n::Int)
     return dataset.contents[start:finish]
 end
 
+"""
+The dataset (000.txt) used is [boxoban-levels](https://github.com/deepmind/boxoban-levels/blob/master/medium/train/000.txt) (LICENSE file included along with 000.txt)
+
+The following is the citation of the dataset:
+
+@misc{boxobanlevels,
+author = {Arthur Guez, Mehdi Mirza, Karol Gregor, Rishabh Kabra, Sebastien Racaniere, Theophane Weber, David Raposo, Adam Santoro, Laurent Orseau, Tom Eccles, Greg Wayne, David Silver, Timothy Lillicrap, Victor Valdes},
+title = {An investigation of Model-free planning: boxoban levels},
+howpublished= {https://github.com/deepmind/boxoban-levels/},
+year = "2018",
+}
+"""
 mutable struct SimpleSokoban{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{DirectionLessAgent, Empty, Wall, Box, Target}}
     agent::Agent
