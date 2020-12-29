@@ -1,6 +1,5 @@
 export AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Obstacle, Box, Target, Agent
 export COLORS, EMPTY, WALL, GOAL, GEM, OBSTACLE, BOX, TARGET
-export get_char, get_color, get_dir, set_dir!, get_pos, set_pos!, get_inventory_type, get_inventory, set_inventory!
 
 const COLORS = (:red, :green, :blue, :magenta, :yellow, :white)
 

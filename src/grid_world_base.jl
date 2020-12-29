@@ -1,5 +1,4 @@
 export GridWorldBase
-export get_grid, get_objects, get_num_objects, get_height, get_width, get_agent_view!
 
 #####
 # GridWorldBase
