@@ -91,10 +91,10 @@ function RLBase.reset!(env::GoToDoor)
     return env
 end
 
-function generate_door_pos(rng::AbstractRNG, height::Int, width::Int)
+function generate_door_pos(rng::Random.AbstractRNG, height::Int, width::Int)
     door_pos = [CartesianIndex(rand(rng, 2:height-1), 1),
                 CartesianIndex(rand(rng, 2:height-1), width),
                 CartesianIndex(1, rand(rng, 2:width-1)),
                 CartesianIndex(height, rand(rng, 2:width-1))]
-    return shuffle(rng, door_pos)
+    return Random.shuffle(rng, door_pos)
 end

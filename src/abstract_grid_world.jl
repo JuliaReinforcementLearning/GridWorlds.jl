@@ -25,7 +25,7 @@ get_rng(env::AbstractGridWorld) = env.rng
 get_goal_pos(env::AbstractGridWorld) = env.goal_pos
 set_goal_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = env.goal_pos = pos
 
-Random.rand(rng::AbstractRNG, f::Function, env::AbstractGridWorld; max_try = 1000) = rand(rng, f, get_world(env), max_try = max_try)
+Random.rand(rng::Random.AbstractRNG, f::Function, env::AbstractGridWorld; max_try = 1000) = rand(rng, f, get_world(env), max_try = max_try)
 
 #####
 # Agent's view
