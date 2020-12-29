@@ -8,19 +8,17 @@ const MOVE_FORWARD = MoveForward()
 
 struct TurnLeft <: AbstractGridWorldAction end
 const TURN_LEFT = TurnLeft()
-
-(x::TurnLeft)(::Up) = LEFT
-(x::TurnLeft)(::Down) = RIGHT
-(x::TurnLeft)(::Left) = DOWN
-(x::TurnLeft)(::Right) = UP
+turn(::TurnLeft, ::Up) = LEFT
+turn(::TurnLeft, ::Down) = RIGHT
+turn(::TurnLeft, ::Left) = DOWN
+turn(::TurnLeft, ::Right) = UP
 
 struct TurnRight <: AbstractGridWorldAction end
 const TURN_RIGHT = TurnRight()
-
-(x::TurnRight)(::Up) = RIGHT
-(x::TurnRight)(::Down) = LEFT
-(x::TurnRight)(::Left) = UP
-(x::TurnRight)(::Right) = DOWN
+turn(::TurnRight, ::Up) = RIGHT
+turn(::TurnRight, ::Down) = LEFT
+turn(::TurnRight, ::Left) = UP
+turn(::TurnRight, ::Right) = DOWN
 
 struct MoveUp <: AbstractGridWorldAction end
 const MOVE_UP = MoveUp()

@@ -83,7 +83,8 @@ RLBase.is_terminated(env::AbstractGridWorld) = get_world(env)[GOAL, get_agent_po
 
 function (env::AbstractGridWorld)(action::Union{TurnRight, TurnLeft})
     dir = get_agent_dir(env)
-    set_agent_dir!(env, action(dir))
+    new_dir = turn(action, dir)
+    set_agent_dir!(env, new_dir)
 
     set_reward!(env, 0.0)
 

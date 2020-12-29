@@ -61,7 +61,9 @@ function (env::DynamicObstacles)(action::Union{TurnRight, TurnLeft})
     world = get_world(env)
     update_obstacles!(env)
 
-    set_agent_dir!(env, action(get_agent_dir(env)))
+    dir = get_agent_dir(env)
+    new_dir = turn(action, dir)
+    set_agent_dir!(env, new_dir)
 
     set_reward!(env, 0.0)
     if world[GOAL, get_agent_pos(env)]
