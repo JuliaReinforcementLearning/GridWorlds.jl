@@ -44,7 +44,7 @@ function (env::DoorKey)(::MoveForward)
     key = objects[end]
 
     dir = get_agent_dir(env)
-    dest = dir(get_agent_pos(env))
+    dest = move(dir, get_agent_pos(env))
 
     if world[door, dest]
         if get_inventory(env) === key

@@ -44,7 +44,7 @@ function (env::GoToDoor)(::MoveForward)
     world = get_world(env)
 
     dir = get_agent_dir(env)
-    dest = dir(get_agent_pos(env))
+    dest = move(dir, get_agent_pos(env))
     if dest ∈ CartesianIndices((get_height(env), get_width(env))) && !world[WALL, dest]
         set_agent_pos!(env, dest)
     end
