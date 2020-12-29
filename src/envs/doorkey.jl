@@ -33,7 +33,7 @@ function DoorKey(; height = 7, width = 7, rng = Random.GLOBAL_RNG)
     return env
 end
 
-RLBase.action_space(env::DoorKey) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, PICK_UP)
+RLBase.action_space(env::DoorKey, ::RLBase.DefaultPlayer) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, PICK_UP)
 
 function (env::DoorKey)(::MoveForward)
     world = get_world(env)
