@@ -77,9 +77,9 @@ function (env::AbstractGridWorld)(action::Union{MoveUp, MoveDown, MoveLeft, Move
 
     r1 = sum(pos -> world[TARGET, pos], env.box_pos)
     agent_pos = get_agent_pos(env)
-    dest = action(agent_pos)
+    dest = move(action, agent_pos)
     if !world[WALL, dest]
-        beyond_dest = action(dest)
+        beyond_dest = move(action, dest)
         if !world[BOX, dest]
             world[DIRECTION_LESS_AGENT, agent_pos] = false
             world[DIRECTION_LESS_AGENT, dest] = true
