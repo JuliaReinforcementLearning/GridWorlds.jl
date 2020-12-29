@@ -31,7 +31,7 @@ function GoToDoor(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
 
     env = GoToDoor(world, agent, reward, rng, door_pos, target, terminal_reward, terminal_penalty)
 
-    reset!(env)
+    RLBase.reset!(env)
 
     return env
 end
@@ -50,7 +50,7 @@ function (env::GoToDoor)(::MoveForward)
     end
 
     set_reward!(env, 0.0)
-    if is_terminated(env)
+    if RLBase.is_terminated(env)
         if world[env.target, get_agent_pos(env)]
             set_reward!(env, env.terminal_reward)
         else

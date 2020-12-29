@@ -25,7 +25,7 @@ function CollectGems(; height = 8, width = 8, num_gem_init = floor(Int, sqrt(hei
 
     env = CollectGems(world, agent, reward, rng, num_gem_init, num_gem_current, gem_reward, gem_pos)
 
-    reset!(env)
+    RLBase.reset!(env)
 
     return env
 end

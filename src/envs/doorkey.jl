@@ -28,7 +28,7 @@ function DoorKey(; height = 7, width = 7, rng = Random.GLOBAL_RNG)
 
     env = DoorKey(world, agent, reward, rng, terminal_reward, goal_pos, door_pos, key_pos)
 
-    reset!(env)
+    RLBase.reset!(env)
 
     return env
 end
@@ -55,7 +55,7 @@ function (env::DoorKey)(::MoveForward)
     end
 
     set_reward!(env, 0.0)
-    if is_terminated(env)
+    if RLBase.is_terminated(env)
         set_reward!(env, env.terminal_reward)
     end
 

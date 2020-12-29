@@ -59,16 +59,16 @@ function Sokoban(; file = joinpath(dirname(pathof(@__MODULE__)), "envs/sokoban/0
 
     env = Sokoban(world, agent, reward, rng, dataset, box_pos, target_pos)
 
-    reset!(env)
+    RLBase.reset!(env)
 
     return env
 end
 
 get_full_view(env::Sokoban) = get_grid(env)
 RLBase.StateStyle(env::Sokoban) = RLBase.InternalState{Any}()
-RLBase.state(env::Sokoban, ::RLBase.InternalState, ::DefaultPlayer) = get_full_view(env)
+RLBase.state(env::Sokoban, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = get_full_view(env)
 
-RLBase.action_space(env::Sokoban, ::DefaultPlayer) = (MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT)
+RLBase.action_space(env::Sokoban, ::RLBase.DefaultPlayer) = (MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT)
 
 RLBase.is_terminated(env::Sokoban) = all(pos -> get_world(env)[TARGET, pos], env.box_pos)
 

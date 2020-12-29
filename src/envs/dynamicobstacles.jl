@@ -30,7 +30,7 @@ function DynamicObstacles(; height = 8, width = 8, num_obstacles = floor(Int, sq
 
     env = DynamicObstacles(world, agent, reward, rng, terminal_reward, goal_pos, num_obstacles, obstacle_pos, terminal_penalty)
 
-    reset!(env)
+    RLBase.reset!(env)
 
     return env
 end

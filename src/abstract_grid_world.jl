@@ -1,6 +1,6 @@
 export AbstractGridWorld
 
-abstract type AbstractGridWorld <: AbstractEnv end
+abstract type AbstractGridWorld <: RLBase.AbstractEnv end
 
 #####
 # Useful getters and setters
@@ -68,14 +68,14 @@ end
 #####
 
 const get_state = RLBase.state
-RLBase.state(env::AbstractGridWorld, ::RLBase.Observation, ::DefaultPlayer) = get_agent_view(env)
-RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::DefaultPlayer) = (get_full_view(env), get_agent_dir(env))
+RLBase.state(env::AbstractGridWorld, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_agent_view(env)
+RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (get_full_view(env), get_agent_dir(env))
 
 const get_action_space = RLBase.action_space
-RLBase.action_space(env::AbstractGridWorld, ::DefaultPlayer) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT)
+RLBase.action_space(env::AbstractGridWorld, ::RLBase.DefaultPlayer) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT)
 
 const get_reward = RLBase.reward
-RLBase.reward(env::AbstractGridWorld, ::DefaultPlayer) = env.reward
+RLBase.reward(env::AbstractGridWorld, ::RLBase.DefaultPlayer) = env.reward
 
 RLBase.is_terminated(env::AbstractGridWorld) = get_world(env)[GOAL, get_agent_pos(env)]
 
@@ -99,7 +99,7 @@ function (env::AbstractGridWorld)(::MoveForward)
     end
 
     set_reward!(env, 0.0)
-    if is_terminated(env)
+    if RLBase.is_terminated(env)
         set_reward!(env, env.terminal_reward)
     end
 

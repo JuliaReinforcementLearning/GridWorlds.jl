@@ -48,7 +48,7 @@ function GridRooms(; grid_size = (2, 2), room_size = (5, 5), rng = Random.GLOBAL
 
     env = GridRooms(world, agent, reward, rng, terminal_reward, goal_pos)
 
-    reset!(env)
+    RLBase.reset!(env)
 
     return env
 end
