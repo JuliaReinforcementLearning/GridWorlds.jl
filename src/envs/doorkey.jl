@@ -28,12 +28,12 @@ function DoorKey(; height = 7, width = 7, rng = Random.GLOBAL_RNG)
 
     env = DoorKey(world, agent, reward, rng, terminal_reward, goal_pos, door_pos, key_pos)
 
-    reset!(env)
+    RLBase.reset!(env)
 
     return env
 end
 
-RLBase.action_space(env::DoorKey) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, PICK_UP)
+RLBase.action_space(env::DoorKey, ::RLBase.DefaultPlayer) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, PICK_UP)
 
 function (env::DoorKey)(::MoveForward)
     world = get_world(env)
@@ -44,7 +44,7 @@ function (env::DoorKey)(::MoveForward)
     key = objects[end]
 
     dir = get_agent_dir(env)
-    dest = dir(get_agent_pos(env))
+    dest = move(dir, get_agent_pos(env))
 
     if world[door, dest]
         if get_inventory(env) === key
@@ -55,7 +55,7 @@ function (env::DoorKey)(::MoveForward)
     end
 
     set_reward!(env, 0.0)
-    if is_terminated(env)
+    if RLBase.is_terminated(env)
         set_reward!(env, env.terminal_reward)
     end
 

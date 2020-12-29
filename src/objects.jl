@@ -1,7 +1,3 @@
-export AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Obstacle, Box, Target, Agent
-export COLORS, EMPTY, WALL, GOAL, GEM, OBSTACLE, BOX, TARGET
-export get_char, get_color, get_dir, set_dir!, get_pos, set_pos!, get_inventory_type, get_inventory, set_inventory!
-
 const COLORS = (:red, :green, :blue, :magenta, :yellow, :white)
 
 #####
@@ -68,7 +64,7 @@ get_color(::DirectionLessAgent) = :green
 
 mutable struct Agent{I, C} <: AbstractObject
     pos::CartesianIndex{2}
-    dir::Direction
+    dir::AbstractDirection
     inventory::I
 end
 
@@ -84,7 +80,7 @@ get_char(agent::Agent) = get_char(agent, get_dir(agent))
 
 get_color(agent::Agent{I, C}) where {I, C} = C
 get_dir(agent::Agent) = agent.dir
-set_dir!(agent::Agent, dir::Direction) = agent.dir = dir
+set_dir!(agent::Agent, dir::AbstractDirection) = agent.dir = dir
 get_pos(agent::Agent) = agent.pos
 set_pos!(agent::Agent, pos::CartesianIndex{2}) = agent.pos = pos
 

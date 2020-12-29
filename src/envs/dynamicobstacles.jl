@@ -30,7 +30,7 @@ function DynamicObstacles(; height = 8, width = 8, num_obstacles = floor(Int, sq
 
     env = DynamicObstacles(world, agent, reward, rng, terminal_reward, goal_pos, num_obstacles, obstacle_pos, terminal_penalty)
 
-    reset!(env)
+    RLBase.reset!(env)
 
     return env
 end
@@ -42,7 +42,7 @@ function (env::DynamicObstacles)(::MoveForward)
     update_obstacles!(env)
 
     dir = get_agent_dir(env)
-    dest = dir(get_agent_pos(env))
+    dest = move(dir, get_agent_pos(env))
     if !world[WALL, dest]
         set_agent_pos!(env, dest)
     end
@@ -61,7 +61,9 @@ function (env::DynamicObstacles)(action::Union{TurnRight, TurnLeft})
     world = get_world(env)
     update_obstacles!(env)
 
-    set_agent_dir!(env, action(get_agent_dir(env)))
+    dir = get_agent_dir(env)
+    new_dir = turn(action, dir)
+    set_agent_dir!(env, new_dir)
 
     set_reward!(env, 0.0)
     if world[GOAL, get_agent_pos(env)]

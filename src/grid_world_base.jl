@@ -1,10 +1,3 @@
-export GridWorldBase
-export get_grid, get_objects, get_num_objects, get_height, get_width, get_agent_view!
-
-#####
-# GridWorldBase
-#####
-
 """
     GridWorldBase{O} <: AbstractArray{Bool, 3}
 
@@ -60,7 +53,7 @@ ind_map((i,j), (m, n), ::Down) = (i,j)
 ind_map((i,j), (m, n), ::Left) = (m-j+1, i)
 ind_map((i,j), (m, n), ::Right) = (j, n-i+1)
 
-function get_agent_view!(agent_view::AbstractArray{Bool,3}, grid::AbstractArray{Bool,3}, agent_pos::CartesianIndex{2}, dir::Direction)
+function get_agent_view!(agent_view::AbstractArray{Bool,3}, grid::AbstractArray{Bool,3}, agent_pos::CartesianIndex{2}, dir::AbstractDirection)
     view_size = (get_height(agent_view), get_width(agent_view))
     grid_size = (get_height(grid), get_width(grid))
     inds = get_agent_view_inds(agent_pos.I, view_size, dir)
@@ -79,7 +72,7 @@ end
 # utils
 #####
 
-function Random.rand(rng::AbstractRNG, f::Function, inds::Union{Vector{CartesianIndex{2}}, CartesianIndices{2}}; max_try::Int = 1000)
+function Random.rand(rng::Random.AbstractRNG, f::Function, inds::Union{Vector{CartesianIndex{2}}, CartesianIndices{2}}; max_try::Int = 1000)
     for _ in 1:max_try
         pos = rand(rng, inds)
         if f(pos)
@@ -90,7 +83,7 @@ function Random.rand(rng::AbstractRNG, f::Function, inds::Union{Vector{Cartesian
     return nothing
 end
 
-function Random.rand(rng::AbstractRNG, f::Function, world::GridWorldBase; max_try = 1000)
+function Random.rand(rng::Random.AbstractRNG, f::Function, world::GridWorldBase; max_try = 1000)
     inds = CartesianIndices((get_height(world), get_width(world)))
     rand(rng, f, inds, max_try = max_try)
 end

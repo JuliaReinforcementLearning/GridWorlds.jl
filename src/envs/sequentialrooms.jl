@@ -21,7 +21,7 @@ function SequentialRooms(; num_rooms = 3, room_length_range = 4:6, rng = Random.
 
     env = SequentialRooms(world, agent, reward, rng, terminal_reward, num_rooms, room_length_range, Room[])
 
-    reset!(env)
+    RLBase.reset!(env)
 
     return env
 end
@@ -111,7 +111,7 @@ function generate_candidate_rooms(env::SequentialRooms)
     return rooms
 end
 
-function generate_candidate_rooms(env::SequentialRooms, height::Int, width::Int, dir::Direction)
+function generate_candidate_rooms(env::SequentialRooms, height::Int, width::Int, dir::AbstractDirection)
     origins = generate_candidate_origins(env.rooms[end], height, width, dir)
     rooms = map(x -> Room(x, height, width), origins)
     valid_rooms = filter(x -> is_valid_room(env, x), rooms)

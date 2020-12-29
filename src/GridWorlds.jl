@@ -5,8 +5,9 @@ export GW
 import Requires
 import Crayons
 import MacroTools:@forward
-using Random
-using ReinforcementLearningBase
+import Random
+import ReinforcementLearningBase
+import ReinforcementLearningBase:RLBase
 
 const GW = GridWorlds
 

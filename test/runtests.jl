@@ -26,11 +26,11 @@ get_terminal_rewards(env::Sokoban) = (1.0,)
                 @test reward(env) == 0.0
                 @test is_terminated(env) == false
                 if Env == GoToDoor
-                    @test state(env) == (get_agent_view(env), env.target)
+                    @test state(env) == (GW.get_agent_view(env), env.target)
                 elseif Env == Sokoban
-                    @test state(env) == get_full_view(env)
+                    @test state(env) == GW.get_full_view(env)
                 else
-                    @test state(env) == get_agent_view(env)
+                    @test state(env) == GW.get_agent_view(env)
                 end
 
                 total_reward = 0.0
@@ -39,9 +39,9 @@ get_terminal_rewards(env::Sokoban) = (1.0,)
                     env(action)
                     total_reward += reward(env)
 
-                    @test 1 ≤ get_agent_pos(env)[1] ≤ get_height(env)
-                    @test 1 ≤ get_agent_pos(env)[2] ≤ get_width(env)
-                    @test get_world(env)[WALL, get_agent_pos(env)] == false
+                    @test 1 ≤ GW.get_agent_pos(env)[1] ≤ GW.get_height(env)
+                    @test 1 ≤ GW.get_agent_pos(env)[2] ≤ GW.get_width(env)
+                    @test GW.get_world(env)[GW.WALL, GW.get_agent_pos(env)] == false
 
                     if is_terminated(env)
                         @test total_reward in get_terminal_rewards(env)

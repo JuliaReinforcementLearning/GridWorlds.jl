@@ -1,8 +1,6 @@
 export AbstractGridWorld
-export get_world, get_agent, get_agent_pos, get_agent_dir, get_agent_view, get_agent_view!, get_full_view
-export set_world!, set_agent!, set_agent_pos!, set_agent_dir!, set_reward!
 
-abstract type AbstractGridWorld <: AbstractEnv end
+abstract type AbstractGridWorld <: RLBase.AbstractEnv end
 
 #####
 # Useful getters and setters
@@ -17,7 +15,7 @@ set_agent!(env::AbstractGridWorld, agent::Agent) = env.agent = agent
 get_agent_pos(env::AbstractGridWorld) = env |> get_agent |> get_pos
 set_agent_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = set_pos!(get_agent(env), pos)
 get_agent_dir(env::AbstractGridWorld) = env |> get_agent |> get_dir
-set_agent_dir!(env::AbstractGridWorld, dir::Direction) = set_dir!(get_agent(env), dir)
+set_agent_dir!(env::AbstractGridWorld, dir::AbstractDirection) = set_dir!(get_agent(env), dir)
 @forward AbstractGridWorld.agent get_inventory_type, get_inventory, set_inventory!
 
 set_reward!(env::AbstractGridWorld, reward) = env.reward = reward
@@ -27,7 +25,7 @@ get_rng(env::AbstractGridWorld) = env.rng
 get_goal_pos(env::AbstractGridWorld) = env.goal_pos
 set_goal_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = env.goal_pos = pos
 
-Random.rand(rng::AbstractRNG, f::Function, env::AbstractGridWorld; max_try = 1000) = rand(rng, f, get_world(env), max_try = max_try)
+Random.rand(rng::Random.AbstractRNG, f::Function, env::AbstractGridWorld; max_try = 1000) = rand(rng, f, get_world(env), max_try = max_try)
 
 #####
 # Agent's view
@@ -70,20 +68,21 @@ end
 #####
 
 const get_state = RLBase.state
-RLBase.state(env::AbstractGridWorld, ::RLBase.Observation, ::DefaultPlayer) = get_agent_view(env)
-RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::DefaultPlayer) = (get_full_view(env), get_agent_dir(env))
+RLBase.state(env::AbstractGridWorld, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_agent_view(env)
+RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (get_full_view(env), get_agent_dir(env))
 
 const get_action_space = RLBase.action_space
-RLBase.action_space(env::AbstractGridWorld, ::DefaultPlayer) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT)
+RLBase.action_space(env::AbstractGridWorld, ::RLBase.DefaultPlayer) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT)
 
 const get_reward = RLBase.reward
-RLBase.reward(env::AbstractGridWorld, ::DefaultPlayer) = env.reward
+RLBase.reward(env::AbstractGridWorld, ::RLBase.DefaultPlayer) = env.reward
 
 RLBase.is_terminated(env::AbstractGridWorld) = get_world(env)[GOAL, get_agent_pos(env)]
 
 function (env::AbstractGridWorld)(action::Union{TurnRight, TurnLeft})
     dir = get_agent_dir(env)
-    set_agent_dir!(env, action(dir))
+    new_dir = turn(action, dir)
+    set_agent_dir!(env, new_dir)
 
     set_reward!(env, 0.0)
 
@@ -94,13 +93,13 @@ function (env::AbstractGridWorld)(::MoveForward)
     world = get_world(env)
 
     dir = get_agent_dir(env)
-    dest = dir(get_agent_pos(env))
+    dest = move(dir, get_agent_pos(env))
     if !world[WALL, dest]
         set_agent_pos!(env, dest)
     end
 
     set_reward!(env, 0.0)
-    if is_terminated(env)
+    if RLBase.is_terminated(env)
         set_reward!(env, env.terminal_reward)
     end
 

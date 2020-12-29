@@ -25,7 +25,7 @@ function CollectGems(; height = 8, width = 8, num_gem_init = floor(Int, sqrt(hei
 
     env = CollectGems(world, agent, reward, rng, num_gem_init, num_gem_current, gem_reward, gem_pos)
 
-    reset!(env)
+    RLBase.reset!(env)
 
     return env
 end
@@ -36,7 +36,7 @@ function (env::CollectGems)(::MoveForward)
     world = get_world(env)
 
     dir = get_agent_dir(env)
-    dest = dir(get_agent_pos(env))
+    dest = move(dir, get_agent_pos(env))
     if !world[WALL, dest]
         set_agent_pos!(env, dest)
     end

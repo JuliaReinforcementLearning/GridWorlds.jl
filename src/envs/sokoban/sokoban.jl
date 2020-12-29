@@ -59,16 +59,16 @@ function Sokoban(; file = joinpath(dirname(pathof(@__MODULE__)), "envs/sokoban/0
 
     env = Sokoban(world, agent, reward, rng, dataset, box_pos, target_pos)
 
-    reset!(env)
+    RLBase.reset!(env)
 
     return env
 end
 
 get_full_view(env::Sokoban) = get_grid(env)
 RLBase.StateStyle(env::Sokoban) = RLBase.InternalState{Any}()
-RLBase.state(env::Sokoban, ::RLBase.InternalState, ::DefaultPlayer) = get_full_view(env)
+RLBase.state(env::Sokoban, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = get_full_view(env)
 
-RLBase.action_space(env::Sokoban, ::DefaultPlayer) = (MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT)
+RLBase.action_space(env::Sokoban, ::RLBase.DefaultPlayer) = (MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT)
 
 RLBase.is_terminated(env::Sokoban) = all(pos -> get_world(env)[TARGET, pos], env.box_pos)
 
@@ -77,9 +77,9 @@ function (env::AbstractGridWorld)(action::Union{MoveUp, MoveDown, MoveLeft, Move
 
     r1 = sum(pos -> world[TARGET, pos], env.box_pos)
     agent_pos = get_agent_pos(env)
-    dest = action(agent_pos)
+    dest = move(action, agent_pos)
     if !world[WALL, dest]
-        beyond_dest = action(dest)
+        beyond_dest = move(action, dest)
         if !world[BOX, dest]
             world[DIRECTION_LESS_AGENT, agent_pos] = false
             world[DIRECTION_LESS_AGENT, dest] = true

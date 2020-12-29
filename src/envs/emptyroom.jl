@@ -25,7 +25,7 @@ function EmptyRoom(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
 
     env = EmptyRoom(world, agent, reward, rng, terminal_reward, goal_pos)
 
-    reset!(env)
+    RLBase.reset!(env)
 
     return env
 end

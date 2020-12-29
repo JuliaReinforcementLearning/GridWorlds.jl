@@ -31,7 +31,7 @@ function GoToDoor(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
 
     env = GoToDoor(world, agent, reward, rng, door_pos, target, terminal_reward, terminal_penalty)
 
-    reset!(env)
+    RLBase.reset!(env)
 
     return env
 end
@@ -44,13 +44,13 @@ function (env::GoToDoor)(::MoveForward)
     world = get_world(env)
 
     dir = get_agent_dir(env)
-    dest = dir(get_agent_pos(env))
+    dest = move(dir, get_agent_pos(env))
     if dest ∈ CartesianIndices((get_height(env), get_width(env))) && !world[WALL, dest]
         set_agent_pos!(env, dest)
     end
 
     set_reward!(env, 0.0)
-    if is_terminated(env)
+    if RLBase.is_terminated(env)
         if world[env.target, get_agent_pos(env)]
             set_reward!(env, env.terminal_reward)
         else
@@ -91,10 +91,10 @@ function RLBase.reset!(env::GoToDoor)
     return env
 end
 
-function generate_door_pos(rng::AbstractRNG, height::Int, width::Int)
+function generate_door_pos(rng::Random.AbstractRNG, height::Int, width::Int)
     door_pos = [CartesianIndex(rand(rng, 2:height-1), 1),
                 CartesianIndex(rand(rng, 2:height-1), width),
                 CartesianIndex(1, rand(rng, 2:width-1)),
                 CartesianIndex(height, rand(rng, 2:width-1))]
-    return shuffle(rng, door_pos)
+    return Random.shuffle(rng, door_pos)
 end
