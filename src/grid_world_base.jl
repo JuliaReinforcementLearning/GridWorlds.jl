@@ -1,9 +1,3 @@
-export GridWorldBase
-
-#####
-# GridWorldBase
-#####
-
 """
     GridWorldBase{O} <: AbstractArray{Bool, 3}
 
