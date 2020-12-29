@@ -1,6 +1,3 @@
-export AbstractObject, Empty, Wall, Goal, Door, Key, Gem, Obstacle, Box, Target, Agent
-export COLORS, EMPTY, WALL, GOAL, GEM, OBSTACLE, BOX, TARGET
-
 const COLORS = (:red, :green, :blue, :magenta, :yellow, :white)
 
 #####

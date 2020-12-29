@@ -1,6 +1,3 @@
-export AbstractDirection, Up, Down, Left, Right
-export UP, DOWN, LEFT, RIGHT, DIRECTIONS
-
 abstract type AbstractDirection end
 
 struct Up <: AbstractDirection end
