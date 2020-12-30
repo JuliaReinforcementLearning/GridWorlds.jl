@@ -2,23 +2,27 @@
 
 This package aims to provide grid world environments (like [gym-minigrid](https://github.com/maximecb/gym-minigrid)) for reinforcement learning research in Julia. The focus of this package is on being **lightweight** and **efficient**.
 
-- Table of contents
-  * [Getting Started](#getting-started)
-  * [Design](#design)
-    + [API for using environments](#api-for-using-environments)
-    + [Implementation of the grid-world](#implementation-of-the-grid-world)
-    + [Rendering](#rendering)
-  * [List of Environments](#list-of-environments)
-    + [EmptyRoom](#emptyroom)
-    + [GridRooms](#gridrooms)
-    + [SequentialRooms](#sequentialrooms)
-    + [GoToDoor](#gotodoor)
-    + [DoorKey](#doorkey)
-    + [CollectGems](#collectgems)
-    + [DynamicObstacles](#dynamicobstacles)
-    + [Sokoban](#sokoban)
+### Table of contents:
 
-## Getting Started
+* [Getting Started](#getting-started)
+* [Design](#design)
+  - [Reinforcement Learing API for the environments](#reinforcement-learing-api-for-the-environments)
+  - [Representation of a grid-world](#representation-of-a-grid-world)
+  - [Customizing an existing environment](#customizing-an-existing-environment)
+  - [Rendering](#rendering)
+    1. [Terminal Rendering](#terminal-rendering)
+    1.  [Makie Rendering](#makie-rendering)
+* [List of Environments](#list-of-environments)
+  1. [EmptyRoom](#emptyroom)
+  1. [GridRooms](#gridrooms)
+  1. [SequentialRooms](#sequentialrooms)
+  1. [GoToDoor](#gotodoor)
+  1. [DoorKey](#doorkey)
+  1. [CollectGems](#collectgems)
+  1. [DynamicObstacles](#dynamicobstacles)
+  1. [Sokoban](#sokoban)
+
+### Getting Started
 
 ```julia
 using GridWorlds
