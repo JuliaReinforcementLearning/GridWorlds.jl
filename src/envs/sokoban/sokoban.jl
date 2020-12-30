@@ -64,9 +64,8 @@ function Sokoban(; file = joinpath(dirname(pathof(@__MODULE__)), "envs/sokoban/0
     return env
 end
 
-get_full_view(env::Sokoban) = get_grid(env)
 RLBase.StateStyle(env::Sokoban) = RLBase.InternalState{Any}()
-RLBase.state(env::Sokoban, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = get_full_view(env)
+get_direction_style(env::Sokoban) = UNDIRECTED
 
 RLBase.action_space(env::Sokoban, ::RLBase.DefaultPlayer) = (MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT)
 
