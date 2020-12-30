@@ -64,12 +64,28 @@ function get_full_view(env::AbstractGridWorld)
 end
 
 #####
+# Agent direction style trait
+#####
+
+abstract type AbstractDirectionStyle end
+
+struct Directed <: AbstractDirectionStyle end
+const DIRECTED = Directed()
+
+struct UnDirected <: AbstractDirectionStyle end
+const UNDIRECTED = UnDirected()
+
+get_direction_style(env::AbstractGridWorld) = DIRECTED
+
+#####
 # RLBase API defaults
 #####
 
 const get_state = RLBase.state
-RLBase.state(env::AbstractGridWorld, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_agent_view(env)
-RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (get_full_view(env), get_agent_dir(env))
+RLBase.state(env::AbstractGridWorld, ss::RLBase.AbstractStateStyle, player::RLBase.DefaultPlayer) = RLBase.state(env, ss, player, get_direction_style(env))
+RLBase.state(env::AbstractGridWorld, ::RLBase.Observation, ::RLBase.DefaultPlayer, ::Directed) = get_agent_view(env)
+RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer, ::Directed) = (get_full_view(env), get_agent_dir(env))
+RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer, ::UnDirected) = get_grid(env)
 
 const get_action_space = RLBase.action_space
 RLBase.action_space(env::AbstractGridWorld, ::RLBase.DefaultPlayer) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT)
