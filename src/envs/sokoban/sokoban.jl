@@ -71,7 +71,7 @@ RLBase.action_space(env::Sokoban, ::RLBase.DefaultPlayer) = (MOVE_UP, MOVE_DOWN,
 
 RLBase.is_terminated(env::Sokoban) = all(pos -> get_world(env)[TARGET, pos], env.box_pos)
 
-function (env::AbstractGridWorld)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
+function (env::Sokoban)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
     world = get_world(env)
 
     r1 = sum(pos -> world[TARGET, pos], env.box_pos)
