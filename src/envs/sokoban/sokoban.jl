@@ -67,8 +67,6 @@ end
 RLBase.StateStyle(env::Sokoban) = RLBase.InternalState{Any}()
 get_direction_style(env::Sokoban) = UNDIRECTED
 
-RLBase.action_space(env::Sokoban, ::RLBase.DefaultPlayer) = (MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT)
-
 RLBase.is_terminated(env::Sokoban) = all(pos -> get_world(env)[TARGET, pos], env.box_pos)
 
 function (env::Sokoban)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})

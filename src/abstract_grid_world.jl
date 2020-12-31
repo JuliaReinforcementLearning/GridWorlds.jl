@@ -90,7 +90,9 @@ RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPla
 RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer, ::UnDirected) = get_grid(env)
 
 const get_action_space = RLBase.action_space
-RLBase.action_space(env::AbstractGridWorld, ::RLBase.DefaultPlayer) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT)
+RLBase.action_space(env::AbstractGridWorld, player::RLBase.DefaultPlayer) = RLBase.action_space(env, player, get_direction_style(env))
+RLBase.action_space(env::AbstractGridWorld, player::RLBase.DefaultPlayer, ::Directed) = DIRECTED_NAVIGATION_ACTIONS
+RLBase.action_space(env::AbstractGridWorld, player::RLBase.DefaultPlayer, ::UnDirected) = UNDIRECTED_NAVIGATION_ACTIONS
 
 const get_reward = RLBase.reward
 RLBase.reward(env::AbstractGridWorld, ::RLBase.DefaultPlayer) = env.reward

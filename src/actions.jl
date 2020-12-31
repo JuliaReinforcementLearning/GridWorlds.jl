@@ -41,3 +41,6 @@ const PICK_UP = PickUp()
 
 struct Drop <: AbstractGridWorldAction end
 const DROP = Drop()
+
+const DIRECTED_NAVIGATION_ACTIONS = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT)
+const UNDIRECTED_NAVIGATION_ACTIONS = (MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT)
