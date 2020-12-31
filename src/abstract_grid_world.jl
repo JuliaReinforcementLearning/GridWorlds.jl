@@ -28,6 +28,20 @@ set_goal_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = env.goal_pos = p
 Random.rand(rng::Random.AbstractRNG, f::Function, env::AbstractGridWorld; max_try = 1000) = rand(rng, f, get_world(env), max_try = max_try)
 
 #####
+# Agent direction style trait
+#####
+
+abstract type AbstractDirectionStyle end
+
+struct Directed <: AbstractDirectionStyle end
+const DIRECTED = Directed()
+
+struct UnDirected <: AbstractDirectionStyle end
+const UNDIRECTED = UnDirected()
+
+get_direction_style(env::AbstractGridWorld) = DIRECTED
+
+#####
 # Agent's view
 #####
 
@@ -37,14 +51,17 @@ function get_agent_view_size(env::AbstractGridWorld)
     return (m, n)
 end
 
-get_agent_view_inds(env::AbstractGridWorld; agent_view_size = get_agent_view_size(env)) = get_agent_view_inds(get_agent_pos(env).I, agent_view_size, get_agent_dir(env))
+get_agent_view_inds(env::AbstractGridWorld; direction_style = get_direction_style(env), agent_view_size = get_agent_view_size(env)) = get_agent_view_inds(env, direction_style, agent_view_size)
+get_agent_view_inds(env::AbstractGridWorld, ::Directed, agent_view_size) = get_agent_view_inds(get_agent_pos(env).I, agent_view_size, get_agent_dir(env))
+get_agent_view_inds(env::AbstractGridWorld, ::UnDirected, agent_view_size) = get_agent_view_inds(get_agent_pos(env).I, agent_view_size)
 
-function get_agent_view(env::AbstractGridWorld; agent_view_size = get_agent_view_size(env))
-    agent_view = falses(get_num_objects(env), agent_view_size...)
-    get_agent_view!(agent_view, env)
-end
+get_agent_view(env::AbstractGridWorld; direction_style = get_direction_style(env), agent_view_size = get_agent_view_size(env)) = get_agent_view(env, direction_style, agent_view_size)
+get_agent_view(env::AbstractGridWorld, ::Directed, agent_view_size) = get_agent_view(get_world(env), agent_view_size, get_agent_pos(env), get_agent_dir(env))
+get_agent_view(env::AbstractGridWorld, ::UnDirected, agent_view_size) = get_agent_view(get_world(env), agent_view_size, get_agent_pos(env))
 
-get_agent_view!(grid::BitArray{3}, env::AbstractGridWorld) = get_agent_view!(grid, get_world(env), get_agent_pos(env), get_agent_dir(env))
+get_agent_view!(agent_view::AbstractArray{Bool, 3}, env::AbstractGridWorld; direction_style = get_direction_style(env), agent_view_size = get_agent_view_size(env)) = get_agent_view!(agent_view, env, direction_style, agent_view_size)
+get_agent_view!(agent_view::AbstractArray{Bool, 3}, env::AbstractGridWorld, ::Directed, agent_view_size) = get_agent_view!(agent_view, get_world(env), agent_view_size, get_agent_pos(env), get_agent_dir(env))
+get_agent_view!(agent_view::AbstractArray{Bool, 3}, env::AbstractGridWorld, ::UnDirected, agent_view_size) = get_agent_view!(agent_view, get_world(env), agent_view_size, get_agent_pos(env))
 
 #####
 # Full view
@@ -64,26 +81,12 @@ function get_full_view(env::AbstractGridWorld)
 end
 
 #####
-# Agent direction style trait
-#####
-
-abstract type AbstractDirectionStyle end
-
-struct Directed <: AbstractDirectionStyle end
-const DIRECTED = Directed()
-
-struct UnDirected <: AbstractDirectionStyle end
-const UNDIRECTED = UnDirected()
-
-get_direction_style(env::AbstractGridWorld) = DIRECTED
-
-#####
 # RLBase API defaults
 #####
 
 const get_state = RLBase.state
 RLBase.state(env::AbstractGridWorld, ss::RLBase.AbstractStateStyle, player::RLBase.DefaultPlayer) = RLBase.state(env, ss, player, get_direction_style(env))
-RLBase.state(env::AbstractGridWorld, ::RLBase.Observation, ::RLBase.DefaultPlayer, ::Directed) = get_agent_view(env)
+RLBase.state(env::AbstractGridWorld, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_agent_view(env)
 RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer, ::Directed) = (get_full_view(env), get_agent_dir(env))
 RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer, ::UnDirected) = get_grid(env)
 
