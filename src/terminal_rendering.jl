@@ -2,10 +2,19 @@ get_grid(env::AbstractGridWorld, ::Val{:full_view}) = get_grid(env)
 get_grid(env::AbstractGridWorld, ::Val{:agent_view}) = get_agent_view(env)
 
 get_agent_pos(env::AbstractGridWorld, ::Val{:full_view}) = get_agent_pos(env)
-get_agent_pos(env::AbstractGridWorld, ::Val{:agent_view}) = CartesianIndex(1, size(get_grid(env, Val{:agent_view}()), 3) ÷ 2 + 1)
+get_agent_pos(env::AbstractGridWorld, ::Val{:agent_view}) = get_agent_pos(env, Val{:agent_view}(), get_direction_style(env))
+get_agent_pos(env::AbstractGridWorld, ::Val{:agent_view}, ::Directed) = CartesianIndex(1, size(get_grid(env, Val{:agent_view}()), 3) ÷ 2 + 1)
+function get_agent_pos(env::AbstractGridWorld, ::Val{:agent_view}, ::UnDirected)
+    grid = get_grid(env, Val{:agent_view}())
+    CartesianIndex(get_height(grid) ÷ 2 + 1, get_width(grid) ÷ 2 + 1)
+end
 
-get_agent_dir(env::AbstractGridWorld, ::Val{:full_view}) = get_agent_dir(env)
-get_agent_dir(env::AbstractGridWorld, ::Val{:agent_view}) = DOWN
+get_agent_dir(env::AbstractGridWorld, ::Val{:full_view}) = get_agent_dir(env, Val{:full_view}(), get_direction_style(env))
+get_agent_dir(env::AbstractGridWorld, ::Val{:full_view}, ::Directed) = get_agent_dir(env)
+get_agent_dir(env::AbstractGridWorld, ::Val{:full_view}, ::UnDirected) = CENTER
+get_agent_dir(env::AbstractGridWorld, ::Val{:agent_view}) = get_agent_dir(env, Val{:agent_view}(), get_direction_style(env))
+get_agent_dir(env::AbstractGridWorld, ::Val{:agent_view}, ::Directed) = DOWN
+get_agent_dir(env::AbstractGridWorld, ::Val{:agent_view}, ::UnDirected) = CENTER
 
 get_background(env::AbstractGridWorld, pos::CartesianIndex{2}, ::Val{:full_view}) = pos in get_agent_view_inds(env) ? :dark_gray : :black
 get_background(env::AbstractGridWorld, pos::CartesianIndex{2}, ::Val{:agent_view}) = :dark_gray
