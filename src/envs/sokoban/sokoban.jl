@@ -1,7 +1,7 @@
 export Sokoban
 
 const CHAR_TO_OBJECT = Dict(
-                            '@' => DIRECTION_LESS_AGENT,
+                            '@' => :agent,
                             ' ' => EMPTY,
                             '#' => WALL,
                             '$' => BOX,
@@ -33,7 +33,7 @@ year = "2018",
 The dataset file can be updated by creating suitable [hook](https://github.com/JuliaReinforcementLearning/ReinforcementLearningCore.jl/blob/master/src/core/hooks.jl)
 """
 mutable struct Sokoban{R} <: AbstractGridWorld
-    world::GridWorldBase{Tuple{DirectionLessAgent, Empty, Wall, Box, Target}}
+    world::GridWorldBase{Tuple{Empty, Wall, Box, Target}}
     agent::Agent
     reward::Float64
     rng::R
@@ -42,13 +42,13 @@ mutable struct Sokoban{R} <: AbstractGridWorld
     target_pos::Vector{CartesianIndex{2}}
 end
 
-function Sokoban(; file = joinpath(dirname(pathof(@__MODULE__)), "envs/sokoban/000.txt"), rng = Random.GLOBAL_RNG)
+function Sokoban(; file = joinpath(dirname(pathof(@__MODULE__)), "envs/sokoban/boxoban-levels/medium/train/000.txt"), rng = Random.GLOBAL_RNG)
     dataset = LevelDataset(readlines(file))
     level = get_level(dataset, 0)
     height = length(level)
     width = length(level[1])
 
-    objects = (DIRECTION_LESS_AGENT, EMPTY, WALL, BOX, TARGET)
+    objects = (EMPTY, WALL, BOX, TARGET)
     world = GridWorldBase(objects, height, width)
 
     agent = Agent()
@@ -80,29 +80,21 @@ function (env::Sokoban)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
     if !world[WALL, dest]
         beyond_dest = move(action, dest)
         if !world[BOX, dest]
-            world[DIRECTION_LESS_AGENT, agent_pos] = false
-            world[DIRECTION_LESS_AGENT, dest] = true
-            if world[EMPTY, dest]
-                world[EMPTY, dest] = false
-            end
-            if !world[TARGET, agent_pos]
-                world[EMPTY, agent_pos] = true
-            end
             set_agent_pos!(env, dest)
         else
-            if !world[BOX, beyond_dest] && (world[EMPTY, beyond_dest] || world[TARGET, beyond_dest])
-                world[DIRECTION_LESS_AGENT, agent_pos] = false
-                world[DIRECTION_LESS_AGENT, dest] = true
+            if !world[BOX, beyond_dest] && !world[WALL, beyond_dest]
                 world[BOX, dest] = false
+                if world[TARGET, dest]
+                    world[EMPTY, dest] = true
+                end
+
                 world[BOX, beyond_dest] = true
-                idx = findfirst(pos -> pos == dest, env.box_pos)
-                env.box_pos[idx] = beyond_dest
                 if world[EMPTY, beyond_dest]
                     world[EMPTY, beyond_dest] = false
                 end
-                if !world[TARGET, agent_pos]
-                    world[EMPTY, agent_pos] = true
-                end
+
+                idx = findfirst(pos -> pos == dest, env.box_pos)
+                env.box_pos[idx] = beyond_dest
                 set_agent_pos!(env, dest)
             end
         end
@@ -114,20 +106,29 @@ function (env::Sokoban)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
     return env
 end
 
+get_agent_start_dir(env::Sokoban, ::Directed) = RIGHT
+
 function set_level!(env::Sokoban, level::Vector{String})
     world = get_world(env)
     for i in 1:length(level)
         for j in 1:length(level[1])
             pos = CartesianIndex(i, j)
             object = CHAR_TO_OBJECT[level[i][j]]
-            world[object, pos] = true
 
-            if object === DIRECTION_LESS_AGENT
+            if object === :agent
                 set_agent_pos!(env, pos)
+                set_agent_dir!(env, get_agent_start_dir(env))
+                world[EMPTY, pos] = true
+            elseif object === EMPTY
+                world[object, pos] = true
+            elseif object === WALL
+                world[object, pos] = true
             elseif object === BOX
                 push!(env.box_pos, pos)
+                world[object, pos] = true
             elseif object === TARGET
                 push!(env.target_pos, pos)
+                world[object, pos] = true
             end
         end
     end
