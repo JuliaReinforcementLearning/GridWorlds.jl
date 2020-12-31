@@ -92,7 +92,7 @@ function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
             env(PICK_UP)
             env_node[] = env
         elseif Makie.ispressed(b, Makie.Keyboard.r)
-            reset!(env)
+            RLBase.reset!(env)
             env_node[] = env
         elseif Makie.ispressed(b, Makie.Keyboard.q)
             is_quit[] = true
