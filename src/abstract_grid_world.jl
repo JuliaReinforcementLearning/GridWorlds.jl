@@ -39,7 +39,8 @@ const DIRECTED = Directed()
 struct UnDirected <: AbstractDirectionStyle end
 const UNDIRECTED = UnDirected()
 
-get_direction_style(env::AbstractGridWorld) = DIRECTED
+get_direction_style(env::AbstractGridWorld) = get_direction_style(typeof(env))
+get_direction_style(::Type{<:AbstractGridWorld}) = DIRECTED
 
 #####
 # Agent's view
@@ -51,17 +52,11 @@ function get_agent_view_size(env::AbstractGridWorld)
     return (m, n)
 end
 
-get_agent_view_inds(env::AbstractGridWorld; direction_style = get_direction_style(env), agent_view_size = get_agent_view_size(env)) = get_agent_view_inds(env, direction_style, agent_view_size)
-get_agent_view_inds(env::AbstractGridWorld, ::Directed, agent_view_size) = get_agent_view_inds(get_agent_pos(env).I, agent_view_size, get_agent_dir(env))
-get_agent_view_inds(env::AbstractGridWorld, ::UnDirected, agent_view_size) = get_agent_view_inds(get_agent_pos(env).I, agent_view_size)
+get_agent_view_inds(env::AbstractGridWorld) = get_agent_view_inds(get_agent_pos(env).I, get_agent_view_size(env), get_agent_dir(env))
 
-get_agent_view(env::AbstractGridWorld; direction_style = get_direction_style(env), agent_view_size = get_agent_view_size(env)) = get_agent_view(env, direction_style, agent_view_size)
-get_agent_view(env::AbstractGridWorld, ::Directed, agent_view_size) = get_agent_view(get_world(env), agent_view_size, get_agent_pos(env), get_agent_dir(env))
-get_agent_view(env::AbstractGridWorld, ::UnDirected, agent_view_size) = get_agent_view(get_world(env), agent_view_size, get_agent_pos(env))
+get_agent_view(env::AbstractGridWorld) = get_agent_view(get_world(env), get_agent_view_size(env), get_agent_pos(env), get_agent_dir(env))
 
-get_agent_view!(agent_view::AbstractArray{Bool, 3}, env::AbstractGridWorld; direction_style = get_direction_style(env), agent_view_size = get_agent_view_size(env)) = get_agent_view!(agent_view, env, direction_style, agent_view_size)
-get_agent_view!(agent_view::AbstractArray{Bool, 3}, env::AbstractGridWorld, ::Directed, agent_view_size) = get_agent_view!(agent_view, get_world(env), agent_view_size, get_agent_pos(env), get_agent_dir(env))
-get_agent_view!(agent_view::AbstractArray{Bool, 3}, env::AbstractGridWorld, ::UnDirected, agent_view_size) = get_agent_view!(agent_view, get_world(env), agent_view_size, get_agent_pos(env))
+get_agent_view!(agent_view::AbstractArray{Bool, 3}, env::AbstractGridWorld) = get_agent_view!(agent_view, get_world(env), get_agent_pos(env), get_agent_dir(env))
 
 #####
 # Full view
@@ -113,6 +108,22 @@ function (env::AbstractGridWorld)(::MoveForward)
 
     dir = get_agent_dir(env)
     dest = move(dir, get_agent_pos(env))
+    if !world[WALL, dest]
+        set_agent_pos!(env, dest)
+    end
+
+    set_reward!(env, 0.0)
+    if RLBase.is_terminated(env)
+        set_reward!(env, env.terminal_reward)
+    end
+
+    return env
+end
+
+function (env::AbstractGridWorld)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
+    world = get_world(env)
+
+    dest = move(action, get_agent_pos(env))
     if !world[WALL, dest]
         set_agent_pos!(env, dest)
     end
