@@ -43,39 +43,17 @@ Base.setindex!(world::GridWorldBase, value::Bool, object::AbstractObject, args..
 # get_agent_view
 #####
 
-get_agent_view_inds((i, j), (m, n)) = CartesianIndices((i-m÷2:i-m÷2+m-1, j-n÷2:j-n÷2+n-1))
+get_agent_view_inds((i, j), (m, n), ::Center) = CartesianIndices((i-m÷2:i-m÷2+m-1, j-n÷2:j-n÷2+n-1))
 get_agent_view_inds((i, j), (m, n), ::Up) = CartesianIndices((i-m+1:i, j-(n-1)÷2:j+(n-(n-1)÷2)-1))
 get_agent_view_inds((i, j), (m, n), ::Down) = CartesianIndices((i:i+m-1, j-(n-1)÷2:j+(n-(n-1)÷2)-1))
 get_agent_view_inds((i, j), (m, n), ::Left) = CartesianIndices((i-(n-1)÷2:i+(n-(n-1)÷2)-1, j-m+1:j))
 get_agent_view_inds((i, j), (m, n), ::Right) = CartesianIndices((i-(n-1)÷2:i+(n-(n-1)÷2)-1, j:j+m-1))
 
+ind_map((i,j), (m, n), ::Center) = (i,j)
 ind_map((i,j), (m, n), ::Up) = (m-i+1, n-j+1)
 ind_map((i,j), (m, n), ::Down) = (i,j)
 ind_map((i,j), (m, n), ::Left) = (m-j+1, i)
 ind_map((i,j), (m, n), ::Right) = (j, n-i+1)
-
-function get_agent_view(grid::AbstractArray{Bool, 3}, agent_view_size, agent_pos::CartesianIndex{2})
-    agent_view = falses(get_num_objects(grid), agent_view_size...)
-    get_agent_view!(agent_view, grid, agent_pos)
-    return agent_view
-end
-
-function get_agent_view!(agent_view::AbstractArray{Bool, 3}, grid::AbstractArray{Bool, 3}, agent_pos::CartesianIndex{2})
-    agent_view_inds_size = (get_height(agent_view), get_width(agent_view))
-    agent_view_inds = get_agent_view_inds(agent_pos.I, agent_view_inds_size)
-
-    valid_inds_size = (get_height(grid), get_width(grid))
-    valid_inds = CartesianIndices(valid_inds_size)
-
-    for ind in CartesianIndices(agent_view_inds_size)
-        pos = agent_view_inds[ind]
-        if pos ∈ valid_inds
-            agent_view[:, ind] .= grid[:, pos]
-        end
-    end
-
-    return agent_view
-end
 
 function get_agent_view(grid::AbstractArray{Bool, 3}, agent_view_size, agent_pos::CartesianIndex{2}, dir::AbstractDirection)
     agent_view = falses(get_num_objects(grid), agent_view_size...)
