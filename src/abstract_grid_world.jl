@@ -42,6 +42,10 @@ const UNDIRECTED = UnDirected()
 get_direction_style(env::AbstractGridWorld) = get_direction_style(typeof(env))
 get_direction_style(::Type{<:AbstractGridWorld}) = DIRECTED
 
+get_agent_start_dir(env::AbstractGridWorld) = get_agent_start_dir(env, get_direction_style(env))
+get_agent_start_dir(env::AbstractGridWorld, ::Directed) = rand(get_rng(env), DIRECTIONS)
+get_agent_start_dir(env::AbstractGridWorld, ::UnDirected) = CENTER
+
 #####
 # Agent's view
 #####
