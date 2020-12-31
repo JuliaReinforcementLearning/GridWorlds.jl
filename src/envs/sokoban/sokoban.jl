@@ -82,7 +82,7 @@ function (env::Sokoban)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
         else
             if !world[BOX, beyond_dest] && !world[WALL, beyond_dest]
                 world[BOX, dest] = false
-                if world[TARGET, dest]
+                if !world[TARGET, dest]
                     world[EMPTY, dest] = true
                 end
 
