@@ -97,6 +97,9 @@ function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
         elseif Makie.ispressed(b, Makie.Keyboard.q)
             is_quit[] = true
         end
+        @show b
+        @show RLBase.reward(env)
+        @show RLBase.is_terminated(env)
         isnothing(file_name) || Makie.recordframe!(vs)
     end
 
