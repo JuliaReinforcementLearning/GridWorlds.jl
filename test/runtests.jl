@@ -28,7 +28,7 @@ get_terminal_rewards(env::Sokoban) = (1.0,)
                 if Env == GoToDoor
                     @test state(env) == (GW.get_agent_view(env), env.target)
                 elseif Env == Sokoban
-                    @test state(env) == GW.get_grid(env)
+                    @test state(env) == GW.get_full_view(env)
                 else
                     @test state(env) == GW.get_agent_view(env)
                 end
