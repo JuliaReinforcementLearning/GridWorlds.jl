@@ -31,20 +31,20 @@ Random.rand(rng::Random.AbstractRNG, f::Function, env::AbstractGridWorld; max_tr
 # Agent direction style trait
 #####
 
-abstract type AbstractDirectionStyle end
+abstract type AbstractNavigationStyle end
 
-struct Directed <: AbstractDirectionStyle end
-const DIRECTED = Directed()
+struct DirectedNavigation <: AbstractNavigationStyle end
+const DIRECTED_NAVIGATION = DirectedNavigation()
 
-struct UnDirected <: AbstractDirectionStyle end
-const UNDIRECTED = UnDirected()
+struct UndirectedNavigation <: AbstractNavigationStyle end
+const UNDIRECTED_NAVIGATION = UndirectedNavigation()
 
-get_direction_style(env::AbstractGridWorld) = get_direction_style(typeof(env))
-get_direction_style(::Type{<:AbstractGridWorld}) = DIRECTED
+get_navigation_style(env::AbstractGridWorld) = get_navigation_style(typeof(env))
+get_navigation_style(::Type{<:AbstractGridWorld}) = DIRECTED_NAVIGATION
 
-get_agent_start_dir(env::AbstractGridWorld) = get_agent_start_dir(env, get_direction_style(env))
-get_agent_start_dir(env::AbstractGridWorld, ::Directed) = rand(get_rng(env), DIRECTIONS)
-get_agent_start_dir(env::AbstractGridWorld, ::UnDirected) = CENTER
+get_agent_start_dir(env::AbstractGridWorld) = get_agent_start_dir(env, get_navigation_style(env))
+get_agent_start_dir(env::AbstractGridWorld, ::DirectedNavigation) = rand(get_rng(env), DIRECTIONS)
+get_agent_start_dir(env::AbstractGridWorld, ::UndirectedNavigation) = CENTER
 
 #####
 # Agent's view
@@ -84,15 +84,15 @@ end
 #####
 
 const get_state = RLBase.state
-RLBase.state(env::AbstractGridWorld, ss::RLBase.AbstractStateStyle, player::RLBase.DefaultPlayer) = RLBase.state(env, ss, player, get_direction_style(env))
+RLBase.state(env::AbstractGridWorld, ss::RLBase.AbstractStateStyle, player::RLBase.DefaultPlayer) = RLBase.state(env, ss, player, get_navigation_style(env))
 RLBase.state(env::AbstractGridWorld, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_agent_view(env)
-RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer, ::Directed) = (get_full_view(env), get_agent_dir(env))
-RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer, ::UnDirected) = get_grid(env)
+RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer, ::DirectedNavigation) = (get_full_view(env), get_agent_dir(env))
+RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer, ::UndirectedNavigation) = get_grid(env)
 
 const get_action_space = RLBase.action_space
-RLBase.action_space(env::AbstractGridWorld, player::RLBase.DefaultPlayer) = RLBase.action_space(env, player, get_direction_style(env))
-RLBase.action_space(env::AbstractGridWorld, player::RLBase.DefaultPlayer, ::Directed) = DIRECTED_NAVIGATION_ACTIONS
-RLBase.action_space(env::AbstractGridWorld, player::RLBase.DefaultPlayer, ::UnDirected) = UNDIRECTED_NAVIGATION_ACTIONS
+RLBase.action_space(env::AbstractGridWorld, player::RLBase.DefaultPlayer) = RLBase.action_space(env, player, get_navigation_style(env))
+RLBase.action_space(env::AbstractGridWorld, player::RLBase.DefaultPlayer, ::DirectedNavigation) = DIRECTED_NAVIGATION_ACTIONS
+RLBase.action_space(env::AbstractGridWorld, player::RLBase.DefaultPlayer, ::UndirectedNavigation) = UNDIRECTED_NAVIGATION_ACTIONS
 
 const get_reward = RLBase.reward
 RLBase.reward(env::AbstractGridWorld, ::RLBase.DefaultPlayer) = env.reward

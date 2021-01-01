@@ -65,7 +65,7 @@ function Sokoban(; file = joinpath(dirname(pathof(@__MODULE__)), "envs/sokoban/b
 end
 
 RLBase.StateStyle(env::Sokoban) = RLBase.InternalState{Any}()
-get_direction_style(env::Sokoban) = UNDIRECTED
+get_navigation_style(env::Sokoban) = UNDIRECTED_NAVIGATION
 
 RLBase.is_terminated(env::Sokoban) = all(pos -> get_world(env)[TARGET, pos], env.box_pos)
 
@@ -104,7 +104,7 @@ function (env::Sokoban)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
     return env
 end
 
-get_agent_start_dir(env::Sokoban, ::Directed) = RIGHT
+get_agent_start_dir(env::Sokoban, ::DirectedNavigation) = RIGHT
 
 function set_level!(env::Sokoban, level::Vector{String})
     world = get_world(env)
