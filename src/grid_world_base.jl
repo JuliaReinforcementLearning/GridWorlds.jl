@@ -18,11 +18,9 @@ end
 get_grid(world::GridWorldBase) = world.grid
 get_objects(world::GridWorldBase) = world.objects
 
-get_num_objects(grid::BitArray{3}) = size(grid, 1)
-get_height(grid::BitArray{3}) = size(grid, 2)
-get_width(grid::BitArray{3}) = size(grid, 3)
-
-@forward GridWorldBase.grid get_num_objects, get_height, get_width
+get_num_objects(grid::T) where {T <: AbstractArray{Bool, 3}} = size(grid, 1)
+get_height(grid::T) where {T <: AbstractArray{Bool, 3}} = size(grid, 2)
+get_width(grid::T) where {T <: AbstractArray{Bool, 3}} = size(grid, 3)
 
 #####
 # Indexing of GridWorldBase objects
@@ -43,25 +41,35 @@ Base.setindex!(world::GridWorldBase, value::Bool, object::AbstractObject, args..
 # get_agent_view
 #####
 
+get_agent_view_inds((i, j), (m, n), ::Center) = CartesianIndices((i-m÷2:i-m÷2+m-1, j-n÷2:j-n÷2+n-1))
 get_agent_view_inds((i, j), (m, n), ::Up) = CartesianIndices((i-m+1:i, j-(n-1)÷2:j+(n-(n-1)÷2)-1))
 get_agent_view_inds((i, j), (m, n), ::Down) = CartesianIndices((i:i+m-1, j-(n-1)÷2:j+(n-(n-1)÷2)-1))
 get_agent_view_inds((i, j), (m, n), ::Left) = CartesianIndices((i-(n-1)÷2:i+(n-(n-1)÷2)-1, j-m+1:j))
 get_agent_view_inds((i, j), (m, n), ::Right) = CartesianIndices((i-(n-1)÷2:i+(n-(n-1)÷2)-1, j:j+m-1))
 
+ind_map((i,j), (m, n), ::Center) = (i,j)
 ind_map((i,j), (m, n), ::Up) = (m-i+1, n-j+1)
 ind_map((i,j), (m, n), ::Down) = (i,j)
 ind_map((i,j), (m, n), ::Left) = (m-j+1, i)
 ind_map((i,j), (m, n), ::Right) = (j, n-i+1)
 
-function get_agent_view!(agent_view::AbstractArray{Bool,3}, grid::AbstractArray{Bool,3}, agent_pos::CartesianIndex{2}, dir::AbstractDirection)
-    view_size = (get_height(agent_view), get_width(agent_view))
-    grid_size = (get_height(grid), get_width(grid))
-    inds = get_agent_view_inds(agent_pos.I, view_size, dir)
-    valid_inds = CartesianIndices(grid_size)
+function get_agent_view(grid::AbstractArray{Bool, 3}, agent_view_size, agent_pos::CartesianIndex{2}, dir::AbstractDirection)
+    agent_view = falses(get_num_objects(grid), agent_view_size...)
+    get_agent_view!(agent_view, grid, agent_pos, dir)
+    return agent_view
+end
 
-    for ind in CartesianIndices(inds)
-        if inds[ind] ∈ valid_inds
-            agent_view[:, ind_map(ind.I, view_size, dir)...] .= grid[:, inds[ind]]
+function get_agent_view!(agent_view::AbstractArray{Bool,3}, grid::AbstractArray{Bool,3}, agent_pos::CartesianIndex{2}, dir::AbstractDirection)
+    agent_view_inds_size = (get_height(agent_view), get_width(agent_view))
+    agent_view_inds = get_agent_view_inds(agent_pos.I, agent_view_inds_size, dir)
+
+    valid_inds_size = (get_height(grid), get_width(grid))
+    valid_inds = CartesianIndices(valid_inds_size)
+
+    for ind in CartesianIndices(agent_view_inds_size)
+        pos = agent_view_inds[ind]
+        if pos ∈ valid_inds
+            agent_view[:, ind_map(ind.I, agent_view_inds_size, dir)...] .= grid[:, pos]
         end
     end
 

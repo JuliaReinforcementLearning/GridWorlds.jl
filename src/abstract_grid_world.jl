@@ -28,6 +28,25 @@ set_goal_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = env.goal_pos = p
 Random.rand(rng::Random.AbstractRNG, f::Function, env::AbstractGridWorld; max_try = 1000) = rand(rng, f, get_world(env), max_try = max_try)
 
 #####
+# Agent direction style trait
+#####
+
+abstract type AbstractNavigationStyle end
+
+struct DirectedNavigation <: AbstractNavigationStyle end
+const DIRECTED_NAVIGATION = DirectedNavigation()
+
+struct UndirectedNavigation <: AbstractNavigationStyle end
+const UNDIRECTED_NAVIGATION = UndirectedNavigation()
+
+get_navigation_style(env::AbstractGridWorld) = get_navigation_style(typeof(env))
+get_navigation_style(::Type{<:AbstractGridWorld}) = DIRECTED_NAVIGATION
+
+get_agent_start_dir(env::AbstractGridWorld) = get_agent_start_dir(env, get_navigation_style(env))
+get_agent_start_dir(env::AbstractGridWorld, ::DirectedNavigation) = rand(get_rng(env), DIRECTIONS)
+get_agent_start_dir(env::AbstractGridWorld, ::UndirectedNavigation) = CENTER
+
+#####
 # Agent's view
 #####
 
@@ -37,14 +56,11 @@ function get_agent_view_size(env::AbstractGridWorld)
     return (m, n)
 end
 
-get_agent_view_inds(env::AbstractGridWorld; agent_view_size = get_agent_view_size(env)) = get_agent_view_inds(get_agent_pos(env).I, agent_view_size, get_agent_dir(env))
+get_agent_view_inds(env::AbstractGridWorld) = get_agent_view_inds(get_agent_pos(env).I, get_agent_view_size(env), get_agent_dir(env))
 
-function get_agent_view(env::AbstractGridWorld; agent_view_size = get_agent_view_size(env))
-    agent_view = falses(get_num_objects(env), agent_view_size...)
-    get_agent_view!(agent_view, env)
-end
+get_agent_view(env::AbstractGridWorld) = get_agent_view(get_world(env), get_agent_view_size(env), get_agent_pos(env), get_agent_dir(env))
 
-get_agent_view!(grid::BitArray{3}, env::AbstractGridWorld) = get_agent_view!(grid, get_world(env), get_agent_pos(env), get_agent_dir(env))
+get_agent_view!(agent_view::AbstractArray{Bool, 3}, env::AbstractGridWorld) = get_agent_view!(agent_view, get_world(env), get_agent_pos(env), get_agent_dir(env))
 
 #####
 # Full view
@@ -68,11 +84,15 @@ end
 #####
 
 const get_state = RLBase.state
+RLBase.state(env::AbstractGridWorld, ss::RLBase.AbstractStateStyle, player::RLBase.DefaultPlayer) = RLBase.state(env, ss, player, get_navigation_style(env))
 RLBase.state(env::AbstractGridWorld, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_agent_view(env)
-RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (get_full_view(env), get_agent_dir(env))
+RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer, ::DirectedNavigation) = (get_full_view(env), get_agent_dir(env))
+RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer, ::UndirectedNavigation) = get_full_view(env)
 
 const get_action_space = RLBase.action_space
-RLBase.action_space(env::AbstractGridWorld, ::RLBase.DefaultPlayer) = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT)
+RLBase.action_space(env::AbstractGridWorld, player::RLBase.DefaultPlayer) = RLBase.action_space(env, player, get_navigation_style(env))
+RLBase.action_space(env::AbstractGridWorld, player::RLBase.DefaultPlayer, ::DirectedNavigation) = DIRECTED_NAVIGATION_ACTIONS
+RLBase.action_space(env::AbstractGridWorld, player::RLBase.DefaultPlayer, ::UndirectedNavigation) = UNDIRECTED_NAVIGATION_ACTIONS
 
 const get_reward = RLBase.reward
 RLBase.reward(env::AbstractGridWorld, ::RLBase.DefaultPlayer) = env.reward
@@ -94,6 +114,22 @@ function (env::AbstractGridWorld)(::MoveForward)
 
     dir = get_agent_dir(env)
     dest = move(dir, get_agent_pos(env))
+    if !world[WALL, dest]
+        set_agent_pos!(env, dest)
+    end
+
+    set_reward!(env, 0.0)
+    if RLBase.is_terminated(env)
+        set_reward!(env, env.terminal_reward)
+    end
+
+    return env
+end
+
+function (env::AbstractGridWorld)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
+    world = get_world(env)
+
+    dest = move(action, get_agent_pos(env))
     if !world[WALL, dest]
         set_agent_pos!(env, dest)
     end

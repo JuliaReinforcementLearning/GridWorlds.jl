@@ -43,31 +43,6 @@ function init_screen(env_node::Makie.Observable{<:AbstractGridWorld}; resolution
     scene
 end
 
-function init_screen(env_node::Makie.Observable{<:Sokoban}; resolution = (720, 720))
-    scene = Makie.Scene(resolution = resolution, raw = true, camera = Makie.campixel!)
-
-    height = get_height(env_node[])
-    width = get_width(env_node[])
-    tile_inds = CartesianIndices((height, width))
-
-    transform = get_transform(height)
-
-    area = scene.px_area
-    tile_size = Makie.@lift((Makie.widths($area)[2] / height, Makie.widths($area)[1] / width))
-
-    # 1. paint background
-    Makie.poly!(scene, area)
-    Makie.scatter!(scene, Makie.@lift(map(x -> get_center(x, $tile_size, transform), filter(pos -> !any(get_world($env_node)[:, pos]), $tile_inds))), color = :white, marker = '~', markersize = Makie.@lift((reverse($tile_size) ./ 2)))
-
-    # 2. paint each kind of object
-    for object in get_objects(env_node[])
-        Makie.scatter!(scene, Makie.@lift(broadcast(x -> get_center(x, $tile_size, transform), findall(get_world($env_node)[object, :, :]))), color = get_color(object), marker = get_char(object), markersize = Makie.@lift(get_markersize(object, $tile_size)))
-    end
-
-    Makie.display(scene)
-    scene
-end
-
 function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
     print("""
     Key bindings:
@@ -117,7 +92,7 @@ function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
             env(PICK_UP)
             env_node[] = env
         elseif Makie.ispressed(b, Makie.Keyboard.r)
-            reset!(env)
+            RLBase.reset!(env)
             env_node[] = env
         elseif Makie.ispressed(b, Makie.Keyboard.q)
             is_quit[] = true

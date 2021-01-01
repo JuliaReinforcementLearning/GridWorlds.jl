@@ -53,11 +53,6 @@ const TARGET = Target()
 get_char(::Target) = '✖'
 get_color(::Target) = :red
 
-struct DirectionLessAgent <: AbstractObject end
-const DIRECTION_LESS_AGENT = DirectionLessAgent()
-get_char(::DirectionLessAgent) = '☻'
-get_color(::DirectionLessAgent) = :green
-
 #####
 # Agent
 #####
@@ -68,10 +63,11 @@ mutable struct Agent{I, C} <: AbstractObject
     inventory::I
 end
 
-function Agent(; inventory_type = Union{Nothing, AbstractObject}, color = :red, pos = CartesianIndex(2, 2), dir = RIGHT, inventory = nothing)
+function Agent(; inventory_type = Union{Nothing, AbstractObject}, color = :green, pos = CartesianIndex(2, 2), dir = RIGHT, inventory = nothing)
     Agent{inventory_type, color}(pos, dir, inventory)
 end
 
+get_char(agent::Agent, ::Center) = '☻'
 get_char(agent::Agent, ::Up) = '↑'
 get_char(agent::Agent, ::Down) = '↓'
 get_char(agent::Agent, ::Left) = '←'

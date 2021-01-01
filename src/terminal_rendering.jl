@@ -2,10 +2,19 @@ get_grid(env::AbstractGridWorld, ::Val{:full_view}) = get_grid(env)
 get_grid(env::AbstractGridWorld, ::Val{:agent_view}) = get_agent_view(env)
 
 get_agent_pos(env::AbstractGridWorld, ::Val{:full_view}) = get_agent_pos(env)
-get_agent_pos(env::AbstractGridWorld, ::Val{:agent_view}) = CartesianIndex(1, size(get_grid(env, Val{:agent_view}()), 3) ÷ 2 + 1)
+get_agent_pos(env::AbstractGridWorld, view_type_val::Val{:agent_view}) = get_agent_pos(env, view_type_val, get_navigation_style(env))
+get_agent_pos(env::AbstractGridWorld, view_type_val::Val{:agent_view}, ::DirectedNavigation) = CartesianIndex(1, size(get_grid(env, view_type_val), 3) ÷ 2 + 1)
+function get_agent_pos(env::AbstractGridWorld, view_type_val::Val{:agent_view}, ::UndirectedNavigation)
+    grid = get_grid(env, view_type_val)
+    CartesianIndex(get_height(grid) ÷ 2 + 1, get_width(grid) ÷ 2 + 1)
+end
 
-get_agent_dir(env::AbstractGridWorld, ::Val{:full_view}) = get_agent_dir(env)
-get_agent_dir(env::AbstractGridWorld, ::Val{:agent_view}) = DOWN
+get_agent_dir(env::AbstractGridWorld, view_type_val::Val{:full_view}) = get_agent_dir(env, view_type_val, get_navigation_style(env))
+get_agent_dir(env::AbstractGridWorld, ::Val{:full_view}, ::DirectedNavigation) = get_agent_dir(env)
+get_agent_dir(env::AbstractGridWorld, ::Val{:full_view}, ::UndirectedNavigation) = CENTER
+get_agent_dir(env::AbstractGridWorld, view_type_val::Val{:agent_view}) = get_agent_dir(env, view_type_val, get_navigation_style(env))
+get_agent_dir(env::AbstractGridWorld, ::Val{:agent_view}, ::DirectedNavigation) = DOWN
+get_agent_dir(env::AbstractGridWorld, ::Val{:agent_view}, ::UndirectedNavigation) = CENTER
 
 get_background(env::AbstractGridWorld, pos::CartesianIndex{2}, ::Val{:full_view}) = pos in get_agent_view_inds(env) ? :dark_gray : :black
 get_background(env::AbstractGridWorld, pos::CartesianIndex{2}, ::Val{:agent_view}) = :dark_gray
@@ -13,7 +22,7 @@ get_background(env::AbstractGridWorld, pos::CartesianIndex{2}, ::Val{:agent_view
 get_color(::Nothing) = :white
 get_char(::Nothing) = '~'
 
-function get_first_object(grid::BitArray{3}, objects, pos::CartesianIndex{2})
+function get_first_object(grid::AbstractArray{Bool, 3}, objects, pos::CartesianIndex{2})
     idx = findfirst(grid[:, pos])
     if isnothing(idx)
         return nothing
@@ -60,12 +69,12 @@ function Base.show(io::IO, ::MIME"text/plain", world::GridWorldBase)
     end
 end
 
-function Base.show(io::IO, ::MIME"text/markdown", env::AbstractGridWorld)
+function Base.show(io::IO, ::MIME"text/plain", env::AbstractGridWorld)
     println(io, "Full View:")
     print_grid(io, env, :full_view)
     println(io)
     println(io, "Agent's View:")
     print_grid(io, env, :agent_view)
+    println(io, "reward: $(RLBase.reward(env))")
+    println(io, "is_terminated: $(RLBase.is_terminated(env))")
 end
-
-Base.show(io::IO, mime::MIME"text/plain", env::Sokoban) = show(io, mime, get_world(env))
