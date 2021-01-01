@@ -53,11 +53,6 @@ const TARGET = Target()
 get_char(::Target) = '✖'
 get_color(::Target) = :red
 
-struct DirectionLessAgent <: AbstractObject end
-const DIRECTION_LESS_AGENT = DirectionLessAgent()
-get_char(::DirectionLessAgent) = '☻'
-get_color(::DirectionLessAgent) = :green
-
 #####
 # Agent
 #####
