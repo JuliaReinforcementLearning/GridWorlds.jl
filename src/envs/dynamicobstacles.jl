@@ -37,12 +37,11 @@ end
 
 iscollision(env::DynamicObstacles) = get_world(env)[OBSTACLE, get_agent_pos(env)]
 
-function (env::DynamicObstacles)(::MoveForward)
+function (env::DynamicObstacles)(action::AbstractMoveAction)
     world = get_world(env)
     update_obstacles!(env)
 
-    dir = get_agent_dir(env)
-    dest = move(dir, get_agent_pos(env))
+    dest = move(action, get_agent_dir(env), get_agent_pos(env))
     if !world[WALL, dest]
         set_agent_pos!(env, dest)
     end
@@ -57,12 +56,12 @@ function (env::DynamicObstacles)(::MoveForward)
     return env
 end
 
-function (env::DynamicObstacles)(action::Union{TurnRight, TurnLeft})
+function (env::DynamicObstacles)(action::AbstractTurnAction)
     world = get_world(env)
     update_obstacles!(env)
 
-    dir = get_agent_dir(env)
-    new_dir = turn(action, dir)
+    old_dir = get_agent_dir(env)
+    new_dir = turn(action, old_dir)
     set_agent_dir!(env, new_dir)
 
     set_reward!(env, 0.0)
@@ -128,7 +127,7 @@ function RLBase.reset!(env::DynamicObstacles)
     end
 
     agent_start_pos = rand(rng, pos -> world[EMPTY, pos], env)
-    agent_start_dir = rand(rng, DIRECTIONS)
+    agent_start_dir = get_agent_start_dir(env)
 
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)

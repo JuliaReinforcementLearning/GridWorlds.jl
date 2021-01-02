@@ -32,11 +32,10 @@ end
 
 RLBase.is_terminated(env::CollectGems) = env.num_gem_current <= 0
 
-function (env::CollectGems)(::MoveForward)
+function (env::CollectGems)(action::AbstractMoveAction)
     world = get_world(env)
 
-    dir = get_agent_dir(env)
-    dest = move(dir, get_agent_pos(env))
+    dest = move(action, get_agent_dir(env), get_agent_pos(env))
     if !world[WALL, dest]
         set_agent_pos!(env, dest)
     end
@@ -72,7 +71,7 @@ function RLBase.reset!(env::CollectGems)
     env.num_gem_current = env.num_gem_init
 
     agent_start_pos = rand(rng, pos -> world[EMPTY, pos], env)
-    agent_start_dir = rand(rng, DIRECTIONS)
+    agent_start_dir = get_agent_start_dir(env)
 
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)

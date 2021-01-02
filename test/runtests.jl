@@ -15,41 +15,37 @@ get_terminal_rewards(env::GoToDoor) = (env.terminal_reward, env.terminal_penalty
 get_terminal_rewards(env::DoorKey) = (env.terminal_reward,)
 get_terminal_rewards(env::CollectGems) = (env.num_gem_init * env.gem_reward,)
 get_terminal_rewards(env::DynamicObstacles) = (env.terminal_reward, env.terminal_penalty)
-get_terminal_rewards(env::Sokoban) = (1.0,)
+get_terminal_rewards(env::Sokoban) = (Float64(length(env.box_pos)),)
 
 @testset "GridWorlds.jl" begin
     for Env in ENVS
-        @testset "$(Env)" begin
-            env = Env()
-            for _ in 1:NUM_RESETS
-                reset!(env)
-                @test reward(env) == 0.0
-                @test is_terminated(env) == false
-                if Env == GoToDoor
-                    @test state(env) == (GW.get_agent_view(env), env.target)
-                elseif Env == Sokoban
-                    @test state(env) == GW.get_full_view(env)
-                else
-                    @test state(env) == GW.get_agent_view(env)
-                end
+        for NAVIGATION in (GridWorlds.DIRECTED_NAVIGATION, GridWorlds.UNDIRECTED_NAVIGATION)
+            GridWorlds.get_navigation_style(::Env) = NAVIGATION
+            @testset "$(NAVIGATION) $(Env)" begin
+                env = Env()
+                for _ in 1:NUM_RESETS
+                    reset!(env)
+                    @test reward(env) == 0.0
+                    @test is_terminated(env) == false
 
-                total_reward = 0.0
-                for i in 1:MAX_STEPS
-                    action = rand(action_space(env))
-                    env(action)
-                    total_reward += reward(env)
+                    total_reward = 0.0
+                    for i in 1:MAX_STEPS
+                        action = rand(action_space(env))
+                        env(action)
+                        total_reward += reward(env)
 
-                    @test 1 ≤ GW.get_agent_pos(env)[1] ≤ GW.get_height(env)
-                    @test 1 ≤ GW.get_agent_pos(env)[2] ≤ GW.get_width(env)
-                    @test GW.get_world(env)[GW.WALL, GW.get_agent_pos(env)] == false
+                        @test 1 ≤ GW.get_agent_pos(env)[1] ≤ GW.get_height(env)
+                        @test 1 ≤ GW.get_agent_pos(env)[2] ≤ GW.get_width(env)
+                        @test GW.get_world(env)[GW.WALL, GW.get_agent_pos(env)] == false
 
-                    if is_terminated(env)
-                        @test total_reward in get_terminal_rewards(env)
-                        break
-                    end
+                        if is_terminated(env)
+                            @test total_reward in get_terminal_rewards(env)
+                            break
+                        end
 
-                    if i == MAX_STEPS
-                        @info "$Env not terminated after MAX_STEPS = $MAX_STEPS"
+                        if i == MAX_STEPS
+                            @info "$Env not terminated after MAX_STEPS = $MAX_STEPS"
+                        end
                     end
                 end
             end

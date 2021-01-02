@@ -36,7 +36,7 @@ end
 RLBase.action_space(env::DoorKey, ::RLBase.DefaultPlayer, ::DirectedNavigation) = (DIRECTED_NAVIGATION_ACTIONS..., PICK_UP)
 RLBase.action_space(env::DoorKey, ::RLBase.DefaultPlayer, ::UndirectedNavigation) = (UNDIRECTED_NAVIGATION_ACTIONS..., PICK_UP)
 
-function (env::DoorKey)(::MoveForward)
+function (env::DoorKey)(action::AbstractMoveAction)
     world = get_world(env)
     objects = get_objects(env)
     agent = get_agent(env)
@@ -44,9 +44,7 @@ function (env::DoorKey)(::MoveForward)
     door = objects[end - 1]
     key = objects[end]
 
-    dir = get_agent_dir(env)
-    dest = move(dir, get_agent_pos(env))
-
+    dest = move(action, get_agent_dir(env), get_agent_pos(env))
     if world[door, dest]
         if get_inventory(env) === key
             set_agent_pos!(env, dest)
@@ -122,7 +120,7 @@ function RLBase.reset!(env::DoorKey)
     world[EMPTY, new_key_pos] = false
 
     agent_start_pos = rand(rng, pos -> world[EMPTY, pos], left_region)
-    agent_start_dir = rand(rng, DIRECTIONS)
+    agent_start_dir = get_agent_start_dir(env)
 
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)

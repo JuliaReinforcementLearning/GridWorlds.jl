@@ -69,14 +69,15 @@ get_navigation_style(env::Sokoban) = UNDIRECTED_NAVIGATION
 
 RLBase.is_terminated(env::Sokoban) = all(pos -> get_world(env)[TARGET, pos], env.box_pos)
 
-function (env::Sokoban)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
+function (env::Sokoban)(action::AbstractMoveAction)
     world = get_world(env)
 
     r1 = sum(pos -> world[TARGET, pos], env.box_pos)
     agent_pos = get_agent_pos(env)
-    dest = move(action, agent_pos)
+    dir = get_agent_dir(env)
+    dest = move(action, dir, agent_pos)
     if !world[WALL, dest]
-        beyond_dest = move(action, dest)
+        beyond_dest = move(action, dir, dest)
         if !world[BOX, dest]
             set_agent_pos!(env, dest)
         else
@@ -146,6 +147,9 @@ function RLBase.reset!(env::Sokoban)
     level = get_level(env.dataset, level_num)
 
     set_level!(env, level)
+
+    agent_start_dir = get_agent_start_dir(env)
+    set_agent_dir!(env, agent_start_dir)
 
     set_reward!(env, 0.0)
 
