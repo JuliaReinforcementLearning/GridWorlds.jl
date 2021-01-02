@@ -18,9 +18,9 @@ end
 get_grid(world::GridWorldBase) = world.grid
 get_objects(world::GridWorldBase) = world.objects
 
-get_num_objects(grid::T) where {T <: AbstractArray{Bool, 3}} = size(grid, 1)
-get_height(grid::T) where {T <: AbstractArray{Bool, 3}} = size(grid, 2)
-get_width(grid::T) where {T <: AbstractArray{Bool, 3}} = size(grid, 3)
+get_num_objects(grid::AbstractArray{Bool, 3}) = size(grid, 1)
+get_height(grid::AbstractArray{Bool, 3}) = size(grid, 2)
+get_width(grid::AbstractArray{Bool, 3}) = size(grid, 3)
 
 #####
 # Indexing of GridWorldBase objects
