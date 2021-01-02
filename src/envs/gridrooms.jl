@@ -80,7 +80,7 @@ function RLBase.reset!(env::GridRooms)
     world[EMPTY, new_goal_pos] = false
 
     agent_start_pos = rand(rng, pos -> world[EMPTY, pos], env)
-    agent_start_dir = rand(rng, DIRECTIONS)
+    agent_start_dir = get_agent_start_dir(env)
 
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)

@@ -11,7 +11,7 @@ mutable struct DoorKey{W<:GridWorldBase, R} <: AbstractGridWorld
     key_pos::CartesianIndex{2}
 end
 
-function DoorKey(; height = 7, width = 7, rng = Random.GLOBAL_RNG)
+function DoorKey(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
     door = Door(:yellow)
     key = Key(:yellow)
     objects = (EMPTY, WALL, GOAL, door, key)
