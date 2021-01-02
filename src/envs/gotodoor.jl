@@ -61,6 +61,26 @@ function (env::GoToDoor)(::MoveForward)
     return env
 end
 
+function (env::GoToDoor)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
+    world = get_world(env)
+
+    dest = move(action, get_agent_pos(env))
+    if dest ∈ CartesianIndices((get_height(env), get_width(env))) && !world[WALL, dest]
+        set_agent_pos!(env, dest)
+    end
+
+    set_reward!(env, 0.0)
+    if RLBase.is_terminated(env)
+        if world[env.target, get_agent_pos(env)]
+            set_reward!(env, env.terminal_reward)
+        else
+            set_reward!(env, env.terminal_penalty)
+        end
+    end
+
+    return env
+end
+
 function RLBase.reset!(env::GoToDoor)
     world = get_world(env)
     height = get_height(env)
@@ -81,7 +101,7 @@ function RLBase.reset!(env::GoToDoor)
     env.target = rand(rng, keys(env.door_pos))
 
     agent_start_pos = rand(rng, pos -> world[EMPTY, pos], env)
-    agent_start_dir = rand(rng, DIRECTIONS)
+    agent_start_dir = get_agent_start_dir(env)
 
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)
