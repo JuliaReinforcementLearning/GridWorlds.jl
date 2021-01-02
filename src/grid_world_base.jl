@@ -76,6 +76,41 @@ function get_agent_view!(agent_view::AbstractArray{Bool,3}, grid::AbstractArray{
     return agent_view
 end
 
+get_grid_inds((i, j), (m, n), ::Center) = CartesianIndices((i-m÷2:i-m÷2+m-1, j-n÷2:j-n÷2+n-1))
+get_grid_inds((i, j), (m, n), ::Up) = CartesianIndices((i-m+1:i, j-(n-1)÷2:j+(n-(n-1)÷2)-1))
+get_grid_inds((i, j), (m, n), ::Down) = CartesianIndices((i:i+m-1, j-(n-1)÷2:j+(n-(n-1)÷2)-1))
+get_grid_inds((i, j), (m, n), ::Left) = CartesianIndices((i-(n-1)÷2:i+(n-(n-1)÷2)-1, j-m+1:j))
+get_grid_inds((i, j), (m, n), ::Right) = CartesianIndices((i-(n-1)÷2:i+(n-(n-1)÷2)-1, j:j+m-1))
+
+map_ind((i,j), (m, n), ::Center) = (i,j)
+map_ind((i,j), (m, n), ::Up) = (m-i+1, n-j+1)
+map_ind((i,j), (m, n), ::Down) = (i,j)
+map_ind((i,j), (m, n), ::Left) = (m-j+1, i)
+map_ind((i,j), (m, n), ::Right) = (j, n-i+1)
+
+function get_grid(src_grid::AbstractArray{Bool, 3}, window_size, pos::CartesianIndex{2}, dir::AbstractDirection)
+    dest_grid = falses(get_num_objects(src_grid), window_size...)
+    get_grid!(dest_grid, src_grid, pos, dir)
+    return dest_grid
+end
+
+function get_grid!(dest_grid::AbstractArray{Bool, 3}, src_grid::AbstractArray{Bool, 3}, pos::CartesianIndex{2}, dir::AbstractDirection)
+    window_inds_size = (get_height(dest_grid), get_width(dest_grid))
+    window_inds = get_grid_inds(pos.I, window_size, dir)
+
+    valid_inds_size = (get_height(src_grid), get_width(src_grid))
+    valid_inds = CartesianIndices(valid_inds_size)
+
+    for ind in CartesianIndices(window_inds_size)
+        pos = window_inds[ind]
+        if pos ∈ valid_inds
+            dest_grid[:, map_ind(ind.I, window_inds_size, dir)...] .= src_grid[:, pos]
+        end
+    end
+
+    return dest_grid
+end
+
 #####
 # utils
 #####

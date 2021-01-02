@@ -51,12 +51,13 @@ get_agent_start_dir(env::AbstractGridWorld, ::UndirectedNavigation) = CENTER
 #####
 
 get_agent_view_size(env::AbstractGridWorld) = (2 * (get_height(env) ÷ 4) + 1, 2 * (get_width(env) ÷ 4) + 1)
+get_window_size(env::AbstractGridWorld) = (2 * (get_height(env) ÷ 4) + 1, 2 * (get_width(env) ÷ 4) + 1)
 
-get_agent_view_inds(env::AbstractGridWorld) = get_agent_view_inds(get_agent_pos(env).I, get_agent_view_size(env), get_agent_dir(env))
+get_agent_view_inds(env::AbstractGridWorld) = get_grid_inds(get_agent_pos(env).I, get_agent_view_size(env), get_agent_dir(env))
 
-get_agent_view(env::AbstractGridWorld) = get_agent_view(get_world(env), get_agent_view_size(env), get_agent_pos(env), get_agent_dir(env))
+get_agent_view(env::AbstractGridWorld) = get_grid(get_world(env), get_agent_view_size(env), get_agent_pos(env), get_agent_dir(env))
 
-get_agent_view!(agent_view::AbstractArray{Bool, 3}, env::AbstractGridWorld) = get_agent_view!(agent_view, get_world(env), get_agent_pos(env), get_agent_dir(env))
+get_agent_view!(agent_view::AbstractArray{Bool, 3}, env::AbstractGridWorld) = get_grid!(agent_view, get_world(env), get_agent_pos(env), get_agent_dir(env))
 
 #####
 # Full view
@@ -75,15 +76,22 @@ function get_full_view(env::AbstractGridWorld)
     return cat(agent_layer, grid, dims = 1)
 end
 
+function get_grid_with_agent_layer(env::AbstractGridWorld)
+    grid = get_grid(env)
+    agent_layer = falses(1, get_height(env), get_width(env))
+    agent_layer[1, get_agent_pos(env)] = true
+    return cat(agent_layer, grid, dims = 1)
+end
+
 #####
 # RLBase API defaults
 #####
 
 const get_state = RLBase.state
 RLBase.state(env::AbstractGridWorld, ss::RLBase.AbstractStateStyle, player::RLBase.DefaultPlayer) = RLBase.state(env, ss, player, get_navigation_style(env))
-RLBase.state(env::AbstractGridWorld, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_agent_view(env)
-RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer, ::DirectedNavigation) = (get_full_view(env), get_agent_dir(env))
-RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer, ::UndirectedNavigation) = get_full_view(env)
+RLBase.state(env::AbstractGridWorld, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_window_size(env), get_agent_pos(env), get_agent_dir(env))
+RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer, ::DirectedNavigation) = (get_grid_with_agent_layer(env), get_agent_dir(env))
+RLBase.state(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer, ::UndirectedNavigation) = get_grid_with_agent_layer(env)
 
 const get_action_space = RLBase.action_space
 RLBase.action_space(env::AbstractGridWorld, player::RLBase.DefaultPlayer) = RLBase.action_space(env, player, get_navigation_style(env))
