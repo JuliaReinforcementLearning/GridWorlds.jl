@@ -50,11 +50,7 @@ get_agent_start_dir(env::AbstractGridWorld, ::UndirectedNavigation) = CENTER
 # Agent's view
 #####
 
-function get_agent_view_size(env::AbstractGridWorld)
-    m = 2 * ceil(Int, get_height(env) / 4) + 1
-    n = 2 * ceil(Int, get_width(env) / 4) + 1
-    return (m, n)
-end
+get_agent_view_size(env::AbstractGridWorld) = (2 * (get_height(env) ÷ 4) + 1, 2 * (get_width(env) ÷ 4) + 1)
 
 get_agent_view_inds(env::AbstractGridWorld) = get_agent_view_inds(get_agent_pos(env).I, get_agent_view_size(env), get_agent_dir(env))
 
