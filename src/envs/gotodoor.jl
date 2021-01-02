@@ -40,31 +40,10 @@ RLBase.state(env::GoToDoor) = (get_agent_view(env), env.target)
 
 RLBase.is_terminated(env::GoToDoor) = get_agent_pos(env) in values(env.door_pos)
 
-function (env::GoToDoor)(::MoveForward)
+function (env::GoToDoor)(action::AbstractMoveAction)
     world = get_world(env)
 
-    dir = get_agent_dir(env)
-    dest = move(dir, get_agent_pos(env))
-    if dest ∈ CartesianIndices((get_height(env), get_width(env))) && !world[WALL, dest]
-        set_agent_pos!(env, dest)
-    end
-
-    set_reward!(env, 0.0)
-    if RLBase.is_terminated(env)
-        if world[env.target, get_agent_pos(env)]
-            set_reward!(env, env.terminal_reward)
-        else
-            set_reward!(env, env.terminal_penalty)
-        end
-    end
-
-    return env
-end
-
-function (env::GoToDoor)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
-    world = get_world(env)
-
-    dest = move(action, get_agent_pos(env))
+    dest = move(action, get_agent_dir(env), get_agent_pos(env))
     if dest ∈ CartesianIndices((get_height(env), get_width(env))) && !world[WALL, dest]
         set_agent_pos!(env, dest)
     end

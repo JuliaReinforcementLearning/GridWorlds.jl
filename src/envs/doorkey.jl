@@ -36,7 +36,7 @@ end
 RLBase.action_space(env::DoorKey, ::RLBase.DefaultPlayer, ::DirectedNavigation) = (DIRECTED_NAVIGATION_ACTIONS..., PICK_UP)
 RLBase.action_space(env::DoorKey, ::RLBase.DefaultPlayer, ::UndirectedNavigation) = (UNDIRECTED_NAVIGATION_ACTIONS..., PICK_UP)
 
-function (env::DoorKey)(::MoveForward)
+function (env::DoorKey)(action::AbstractMoveAction)
     world = get_world(env)
     objects = get_objects(env)
     agent = get_agent(env)
@@ -44,35 +44,7 @@ function (env::DoorKey)(::MoveForward)
     door = objects[end - 1]
     key = objects[end]
 
-    dir = get_agent_dir(env)
-    dest = move(dir, get_agent_pos(env))
-
-    if world[door, dest]
-        if get_inventory(env) === key
-            set_agent_pos!(env, dest)
-        end
-    elseif !world[WALL, dest]
-        set_agent_pos!(env, dest)
-    end
-
-    set_reward!(env, 0.0)
-    if RLBase.is_terminated(env)
-        set_reward!(env, env.terminal_reward)
-    end
-
-    return env
-end
-
-function (env::DoorKey)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
-    world = get_world(env)
-    objects = get_objects(env)
-    agent = get_agent(env)
-
-    door = objects[end - 1]
-    key = objects[end]
-
-    dest = move(action, get_agent_pos(env))
-
+    dest = move(action, get_agent_dir(env), get_agent_pos(env))
     if world[door, dest]
         if get_inventory(env) === key
             set_agent_pos!(env, dest)

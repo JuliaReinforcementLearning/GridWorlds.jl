@@ -69,50 +69,51 @@ get_navigation_style(env::Sokoban) = UNDIRECTED_NAVIGATION
 
 RLBase.is_terminated(env::Sokoban) = all(pos -> get_world(env)[TARGET, pos], env.box_pos)
 
-function (env::Sokoban)(::MoveForward)
+# function (env::Sokoban)(::MoveForward)
+    # world = get_world(env)
+
+    # r1 = sum(pos -> world[TARGET, pos], env.box_pos)
+    # agent_pos = get_agent_pos(env)
+    # dir = get_agent_dir(env)
+    # dest = move(dir, agent_pos)
+    # if !world[WALL, dest]
+        # beyond_dest = move(dir, dest)
+        # if !world[BOX, dest]
+            # set_agent_pos!(env, dest)
+        # else
+            # if !world[BOX, beyond_dest] && !world[WALL, beyond_dest]
+                # world[BOX, dest] = false
+                # if !world[TARGET, dest]
+                    # world[EMPTY, dest] = true
+                # end
+
+                # world[BOX, beyond_dest] = true
+                # if world[EMPTY, beyond_dest]
+                    # world[EMPTY, beyond_dest] = false
+                # end
+
+                # idx = findfirst(pos -> pos == dest, env.box_pos)
+                # env.box_pos[idx] = beyond_dest
+                # set_agent_pos!(env, dest)
+            # end
+        # end
+    # end
+
+    # r2 = sum(pos -> world[TARGET, pos], env.box_pos)
+    # set_reward!(env, r2 - r1)
+
+    # return env
+# end
+
+function (env::Sokoban)(action::AbstractMoveAction)
     world = get_world(env)
 
     r1 = sum(pos -> world[TARGET, pos], env.box_pos)
     agent_pos = get_agent_pos(env)
     dir = get_agent_dir(env)
-    dest = move(dir, agent_pos)
+    dest = move(action, dir, agent_pos)
     if !world[WALL, dest]
-        beyond_dest = move(dir, dest)
-        if !world[BOX, dest]
-            set_agent_pos!(env, dest)
-        else
-            if !world[BOX, beyond_dest] && !world[WALL, beyond_dest]
-                world[BOX, dest] = false
-                if !world[TARGET, dest]
-                    world[EMPTY, dest] = true
-                end
-
-                world[BOX, beyond_dest] = true
-                if world[EMPTY, beyond_dest]
-                    world[EMPTY, beyond_dest] = false
-                end
-
-                idx = findfirst(pos -> pos == dest, env.box_pos)
-                env.box_pos[idx] = beyond_dest
-                set_agent_pos!(env, dest)
-            end
-        end
-    end
-
-    r2 = sum(pos -> world[TARGET, pos], env.box_pos)
-    set_reward!(env, r2 - r1)
-
-    return env
-end
-
-function (env::Sokoban)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
-    world = get_world(env)
-
-    r1 = sum(pos -> world[TARGET, pos], env.box_pos)
-    agent_pos = get_agent_pos(env)
-    dest = move(action, agent_pos)
-    if !world[WALL, dest]
-        beyond_dest = move(action, dest)
+        beyond_dest = move(action, dir, dest)
         if !world[BOX, dest]
             set_agent_pos!(env, dest)
         else

@@ -99,7 +99,7 @@ RLBase.reward(env::AbstractGridWorld, ::RLBase.DefaultPlayer) = env.reward
 
 RLBase.is_terminated(env::AbstractGridWorld) = get_world(env)[GOAL, get_agent_pos(env)]
 
-function (env::AbstractGridWorld)(action::Union{TurnRight, TurnLeft})
+function (env::AbstractGridWorld)(action::AbstractTurnAction)
     dir = get_agent_dir(env)
     new_dir = turn(action, dir)
     set_agent_dir!(env, new_dir)
@@ -109,27 +109,10 @@ function (env::AbstractGridWorld)(action::Union{TurnRight, TurnLeft})
     return env
 end
 
-function (env::AbstractGridWorld)(::MoveForward)
+function (env::AbstractGridWorld)(action::AbstractMoveAction)
     world = get_world(env)
 
-    dir = get_agent_dir(env)
-    dest = move(dir, get_agent_pos(env))
-    if !world[WALL, dest]
-        set_agent_pos!(env, dest)
-    end
-
-    set_reward!(env, 0.0)
-    if RLBase.is_terminated(env)
-        set_reward!(env, env.terminal_reward)
-    end
-
-    return env
-end
-
-function (env::AbstractGridWorld)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
-    world = get_world(env)
-
-    dest = move(action, get_agent_pos(env))
+    dest = move(action, get_agent_dir(env), get_agent_pos(env))
     if !world[WALL, dest]
         set_agent_pos!(env, dest)
     end

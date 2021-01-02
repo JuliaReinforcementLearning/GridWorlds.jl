@@ -37,12 +37,11 @@ end
 
 iscollision(env::DynamicObstacles) = get_world(env)[OBSTACLE, get_agent_pos(env)]
 
-function (env::DynamicObstacles)(::MoveForward)
+function (env::DynamicObstacles)(action::AbstractMoveAction)
     world = get_world(env)
     update_obstacles!(env)
 
-    dir = get_agent_dir(env)
-    dest = move(dir, get_agent_pos(env))
+    dest = move(action, get_agent_dir(env), get_agent_pos(env))
     if !world[WALL, dest]
         set_agent_pos!(env, dest)
     end
@@ -57,31 +56,12 @@ function (env::DynamicObstacles)(::MoveForward)
     return env
 end
 
-function (env::DynamicObstacles)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
+function (env::DynamicObstacles)(action::AbstractTurnAction)
     world = get_world(env)
     update_obstacles!(env)
 
-    dest = move(action, get_agent_pos(env))
-    if !world[WALL, dest]
-        set_agent_pos!(env, dest)
-    end
-
-    set_reward!(env, 0.0)
-    if world[GOAL, get_agent_pos(env)]
-        set_reward!(env, env.terminal_reward)
-    elseif iscollision(env)
-        set_reward!(env, env.terminal_penalty)
-    end
-
-    return env
-end
-
-function (env::DynamicObstacles)(action::Union{TurnRight, TurnLeft})
-    world = get_world(env)
-    update_obstacles!(env)
-
-    dir = get_agent_dir(env)
-    new_dir = turn(action, dir)
+    old_dir = get_agent_dir(env)
+    new_dir = turn(action, old_dir)
     set_agent_dir!(env, new_dir)
 
     set_reward!(env, 0.0)
