@@ -77,7 +77,7 @@ function RLBase.reset!(env::AbstractGridWorld)
 
     # add the agent randomly in the first room
     agent_start_pos = get_interior(env.rooms[1])
-    agent_start_dir = rand(rng, DIRECTIONS)
+    agent_start_dir = get_agent_start_dir(env)
 
     set_agent_pos!(env, rand(rng, agent_start_pos))
     set_agent_dir!(env, agent_start_dir)
