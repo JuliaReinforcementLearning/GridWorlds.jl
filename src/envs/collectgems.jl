@@ -53,6 +53,26 @@ function (env::CollectGems)(::MoveForward)
     return env
 end
 
+function (env::CollectGems)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
+    world = get_world(env)
+
+    dest = move(action, get_agent_pos(env))
+    if !world[WALL, dest]
+        set_agent_pos!(env, dest)
+    end
+
+    set_reward!(env, 0.0)
+    agent_pos = get_agent_pos(env)
+    if world[GEM, agent_pos]
+        world[GEM, agent_pos] = false
+        world[EMPTY, agent_pos] = true
+        env.num_gem_current = env.num_gem_current - 1
+        set_reward!(env, env.gem_reward)
+    end
+
+    return env
+end
+
 function RLBase.reset!(env::CollectGems)
     world = get_world(env)
     rng = get_rng(env)
@@ -72,7 +92,7 @@ function RLBase.reset!(env::CollectGems)
     env.num_gem_current = env.num_gem_init
 
     agent_start_pos = rand(rng, pos -> world[EMPTY, pos], env)
-    agent_start_dir = rand(rng, DIRECTIONS)
+    agent_start_dir = get_agent_start_dir(env)
 
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)
