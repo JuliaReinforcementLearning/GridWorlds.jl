@@ -63,6 +63,32 @@ function (env::DoorKey)(::MoveForward)
     return env
 end
 
+function (env::DoorKey)(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight})
+    world = get_world(env)
+    objects = get_objects(env)
+    agent = get_agent(env)
+
+    door = objects[end - 1]
+    key = objects[end]
+
+    dest = move(action, get_agent_pos(env))
+
+    if world[door, dest]
+        if get_inventory(env) === key
+            set_agent_pos!(env, dest)
+        end
+    elseif !world[WALL, dest]
+        set_agent_pos!(env, dest)
+    end
+
+    set_reward!(env, 0.0)
+    if RLBase.is_terminated(env)
+        set_reward!(env, env.terminal_reward)
+    end
+
+    return env
+end
+
 function (env::DoorKey)(::PickUp)
     world = get_world(env)
     objects = get_objects(env)
@@ -122,7 +148,7 @@ function RLBase.reset!(env::DoorKey)
     world[EMPTY, new_key_pos] = false
 
     agent_start_pos = rand(rng, pos -> world[EMPTY, pos], left_region)
-    agent_start_dir = rand(rng, DIRECTIONS)
+    agent_start_dir = get_agent_start_dir(env)
 
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)
