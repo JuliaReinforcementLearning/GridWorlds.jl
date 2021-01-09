@@ -1,6 +1,6 @@
 # GridWorlds
 
-This package aims to provide grid world environments (like [gym-minigrid](https://github.com/maximecb/gym-minigrid)) for reinforcement learning research in Julia. The focus of this package is on being **lightweight** and **efficient**.
+This package aims to provide grid world environments for reinforcement learning research in Julia. The focus of this package is on being **lightweight** and **efficient**. This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minigrid)
 
 ### Table of contents:
 
@@ -62,7 +62,11 @@ An instance of `GridWorldBase` contains a 3-D boolean array (`BitArray{3}`) of s
 
 #### Customizing an existing environment
 
-The behaviour of environments is easily customizable. For example, the default implementation of the `ReinforcementLearingBase.reset!` method for an environment is appropriately randomized (like the goal position and agent start position in `EmptyRoom`). In case you need some custom behaviour, you can do so by simply override the `ReinforcementLearningBase.reset!` method, and reusing the rest of the behaviour (like what happens upon taking some action) off the shelf.
+The behaviour of environments is easily customizable. Here are some of the things that one may typically want to customize:
+
+1. Keyword arguments allow for enough flexibility in most environments. For example, most environments allow creation of rectangular worlds.
+1. You can set the navigation style trait (for environments where it makes sense) by `GridWorlds.get_navigation_style(::Type{<:SomeEnv}) = GridWorlds.DIRECTED_NAVIGATION` or `GridWorlds.get_navigation_style(::Type{<:SomeEnv}) = GridWorlds.UNDIRECTED_NAVIGATION`.
+1. You can override specific `ReinforcementLearningBase` methods for customization. For example, the default implementation of the `ReinforcementLearingBase.reset!` method for an environment is appropriately randomized (like the goal position and agent start position in `EmptyRoom`). In case you need some custom behaviour, you can do so by simply overriding the `ReinforcementLearningBase.reset!` method, and reusing the rest of the behaviour (like what happens upon taking some action) as it is. You may also want to customize the `ReinforcementLearningBase.state` method to return the entire grid, or only the agent's view, or anything else you wish. See [RLBase API defaults](https://github.com/JuliaReinforcementLearning/GridWorlds.jl/blob/2e8975c85ce3534c2151121a0791be1ec53a8d31/src/abstract_grid_world.jl#L64) in `abstract_grid_world.jl` for examples.
 
 #### Rendering
 
