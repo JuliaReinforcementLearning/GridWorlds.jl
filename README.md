@@ -57,8 +57,9 @@ This package uses the API provided in [`ReinforcementLearningBase.jl`](https://g
 
 #### Representation of a grid-world
 
-A grid-world environment struct contains within it an instance of `GridWorldBase`, which represents the grid-world.
-An instance of `GridWorldBase` contains a 3-D boolean array (`BitArray{3}`) of size `(num_objects, height, width)`. Each tile of the grid can have multiple objects in it, as indicated by a multi-hot encoding along the first dimension of the `BitArray{3}`.
+A grid-world environment instance (often named `env`) contains within it an instance of `GridWorldBase` (often named `world`), which represents the grid-world. A `world` contains a 3-D boolean array (`BitArray{3}`) (often named `grid`) of size `(num_objects, height, width)`. Each tile of the `grid` can have multiple objects in it, indicated by a multi-hot encoding along the first dimension of the `grid`. The objects in the `world` do not contain any fields. Any related information for such objects that is needed is cached separately as fields of `env`.
+
+`env` contains fields called `world` and `agent` (along with some other fields). The point here is to note that an `agent` is stored separately as a field in `env` instead of an object contained in `world`. You __can__ create a custom field-less agent object and store it in the `world` if you want, but we usually store it as a field in the `env`, since an `agent` often has other information that need caching.
 
 #### Customizing an existing environment
 
