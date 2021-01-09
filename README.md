@@ -86,32 +86,48 @@ The behaviour of environments is easily customizable. For example, the default i
 
 1. #### EmptyRoom
 
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/EmptyRoom.gif" width="300px">
+DirectedNavigation | UndirectedNavigation 
+------------ | -------------
+<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/empty_room_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/empty_room_undirected.gif" width="300px">
 
 1. #### GridRooms
 
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/GridRooms.gif" width="300px">
+DirectedNavigation | UndirectedNavigation 
+------------ | -------------
+<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/grid_rooms_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/grid_rooms_undirected.gif" width="300px">
 
 1. #### SequentialRooms
 
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/SequentialRooms.gif" width="300px">
+DirectedNavigation | UndirectedNavigation 
+------------ | -------------
+<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sequential_rooms_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sequential_rooms_undirected.gif" width="300px">
 
 1. #### GoToDoor
 
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/GoToDoor.gif" width="300px">
+DirectedNavigation | UndirectedNavigation 
+------------ | -------------
+<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/go_to_door_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/go_to_door_undirected.gif" width="300px">
 
 1. #### DoorKey
 
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/DoorKey.gif" width="300px">
+DirectedNavigation | UndirectedNavigation 
+------------ | -------------
+<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/door_key_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/door_key_undirected.gif" width="300px">
 
 1. #### CollectGems
 
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/CollectGems.gif" width="300px">
+DirectedNavigation | UndirectedNavigation 
+------------ | -------------
+<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/collect_gems_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/collect_gems_undirected.gif" width="300px">
 
 1. #### DynamicObstacles
 
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/DynamicObstacles.gif" width="300px">
+DirectedNavigation | UndirectedNavigation 
+------------ | -------------
+<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/dynamic_obstacles_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/dynamic_obstacles_undirected.gif" width="300px">
  
 1. #### Sokoban
 
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/Sokoban.gif" width="300px">
+DirectedNavigation | UndirectedNavigation 
+------------ | -------------
+<img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sokoban_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sokoban_undirected.gif" width="300px">
