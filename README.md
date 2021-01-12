@@ -1,6 +1,9 @@
 # GridWorlds
 
-This package aims to provide grid world environments for reinforcement learning research in Julia. The focus of this package is on being **lightweight** and **efficient**. This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minigrid).
+A package for creating grid world environments for reinforcement learning in Julia.
+The focus of this package is on being **lightweight** and **efficient**.
+This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minigrid).
+In order to cite this package, please refer to the file `CITATION.bib`. Starring the repository on GitHub is also appreciated.
 
 ## Table of contents:
 
