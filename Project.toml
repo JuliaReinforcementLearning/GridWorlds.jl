@@ -1,6 +1,6 @@
 name = "GridWorlds"
 uuid = "e15a9946-cd7f-4d03-83e2-6c30bacb0043"
-authors = ["Siddharth Bhatia <sidb60200@gmail.com> and contributors"]
+authors = ["Siddharth Bhatia <sidb60200@gmail.com>", "Jun Tian <tianjun.cpp@gmail.com>", "contributors"]
 version = "0.3.0"
 
 [deps]
