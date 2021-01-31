@@ -6,6 +6,8 @@ import Requires
 import Crayons
 import MacroTools:@forward
 import Random
+import DataStructures
+const DS = DataStructures
 import ReinforcementLearningBase
 import ReinforcementLearningBase:RLBase
 
