@@ -53,6 +53,16 @@ const TARGET = Target()
 get_char(::Target) = '✖'
 get_color(::Target) = :red
 
+struct Body <: AbstractObject end
+const BODY = Body()
+get_char(::Body) = '█'
+get_color(::Body) = :green
+
+struct Food <: AbstractObject end
+const FOOD = Food()
+get_char(::Food) = '♦'
+get_color(::Food) = :yellow
+
 #####
 # Agent
 #####

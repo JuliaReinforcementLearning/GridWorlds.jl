@@ -139,3 +139,7 @@ The behaviour of environments is easily customizable. Here are some of the thing
     DirectedNavigation | UndirectedNavigation
     ------------ | -------------
     <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sokoban_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sokoban_undirected.gif" width="300px">
+
+1. ### Snake
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/snake.gif" width="300px">
