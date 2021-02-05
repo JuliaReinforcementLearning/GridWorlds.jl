@@ -3,7 +3,7 @@ using Test
 using Random
 using ReinforcementLearningBase
 
-ENVS = [EmptyRoom, GridRooms, SequentialRooms, GoToDoor, DoorKey, CollectGems, DynamicObstacles, Sokoban, Snake]
+ENVS = [EmptyRoom, GridRooms, SequentialRooms, Maze, GoToDoor, DoorKey, CollectGems, DynamicObstacles, Sokoban, Snake]
 
 MAX_STEPS = 3000
 NUM_RESETS = 3
@@ -11,6 +11,7 @@ NUM_RESETS = 3
 get_terminal_rewards(env::EmptyRoom) = (env.terminal_reward,)
 get_terminal_rewards(env::GridRooms) = (env.terminal_reward,)
 get_terminal_rewards(env::SequentialRooms) = (env.terminal_reward,)
+get_terminal_rewards(env::Maze) = (env.terminal_reward,)
 get_terminal_rewards(env::GoToDoor) = (env.terminal_reward, env.terminal_penalty)
 get_terminal_rewards(env::DoorKey) = (env.terminal_reward,)
 get_terminal_rewards(env::CollectGems) = (env.num_gem_init * env.gem_reward,)

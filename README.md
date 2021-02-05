@@ -110,6 +110,12 @@ The behaviour of environments is easily customizable. Here are some of the thing
     ------------ | -------------
     <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sequential_rooms_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sequential_rooms_undirected.gif" width="300px">
 
+1. ### Maze
+
+    DirectedNavigation | UndirectedNavigation
+    ------------ | -------------
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/maze_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/maze_undirected.gif" width="300px">
+
 1. ### GoToDoor
 
     DirectedNavigation | UndirectedNavigation
