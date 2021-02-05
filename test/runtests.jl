@@ -3,7 +3,7 @@ using Test
 using Random
 using ReinforcementLearningBase
 
-ENVS = [EmptyRoom, GridRooms, SequentialRooms, GoToDoor, DoorKey, CollectGems, DynamicObstacles, Sokoban, Snake, Maze]
+ENVS = [EmptyRoom, GridRooms, SequentialRooms, Maze, GoToDoor, DoorKey, CollectGems, DynamicObstacles, Sokoban, Snake]
 
 MAX_STEPS = 3000
 NUM_RESETS = 3
@@ -11,13 +11,13 @@ NUM_RESETS = 3
 get_terminal_rewards(env::EmptyRoom) = (env.terminal_reward,)
 get_terminal_rewards(env::GridRooms) = (env.terminal_reward,)
 get_terminal_rewards(env::SequentialRooms) = (env.terminal_reward,)
+get_terminal_rewards(env::Maze) = (env.terminal_reward,)
 get_terminal_rewards(env::GoToDoor) = (env.terminal_reward, env.terminal_penalty)
 get_terminal_rewards(env::DoorKey) = (env.terminal_reward,)
 get_terminal_rewards(env::CollectGems) = (env.num_gem_init * env.gem_reward,)
 get_terminal_rewards(env::DynamicObstacles) = (env.terminal_reward, env.terminal_penalty)
 get_terminal_rewards(env::Sokoban) = (Float64(length(env.box_pos)),)
 get_terminal_rewards(env::Snake) = zero(env.food_reward):one(env.food_reward):GW.get_height(env)*GW.get_width(env)*one(env.food_reward)
-get_terminal_rewards(env::Maze) = (env.terminal_reward,)
 
 @testset "GridWorlds.jl" begin
     for Env in ENVS
