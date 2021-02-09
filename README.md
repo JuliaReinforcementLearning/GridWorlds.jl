@@ -1,8 +1,11 @@
 # GridWorlds
 
 A package for creating grid world environments for reinforcement learning in Julia.
+
 The focus of this package is on being **lightweight** and **efficient**.
+
 This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minigrid).
+
 In order to cite this package, please refer to the file `CITATION.bib`. Starring the repository on GitHub is also appreciated.
 
 ## Table of contents:
@@ -19,11 +22,14 @@ In order to cite this package, please refer to the file `CITATION.bib`. Starring
   1. [EmptyRoom](#emptyroom)
   1. [GridRooms](#gridrooms)
   1. [SequentialRooms](#sequentialrooms)
+  1. [Maze](#maze)
   1. [GoToDoor](#gotodoor)
   1. [DoorKey](#doorkey)
   1. [CollectGems](#collectgems)
   1. [DynamicObstacles](#dynamicobstacles)
   1. [Sokoban](#sokoban)
+  1. [Catcher](#catcher)
+  1. [Snake](#snake)
 
 ## Getting Started
 
@@ -149,3 +155,7 @@ The behaviour of environments is easily customizable. Here are some of the thing
 1. ### Snake
 
     <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/snake.gif" width="300px">
+
+1. ### Catcher
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/catcher.gif" width="300px">

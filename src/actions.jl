@@ -13,20 +13,27 @@ move(::MoveForward, dir::AbstractDirection, pos::CartesianIndex{2}) = move(dir, 
 struct MoveUp <: AbstractMoveAction end
 const MOVE_UP = MoveUp()
 move(::MoveUp, pos::CartesianIndex{2}) = move(UP, pos)
+move(action::MoveUp, dir::AbstractDirection, pos::CartesianIndex{2}) = move(action, pos)
 
 struct MoveDown <: AbstractMoveAction end
 const MOVE_DOWN = MoveDown()
 move(::MoveDown, pos::CartesianIndex{2}) = move(DOWN, pos)
+move(action::MoveDown, dir::AbstractDirection, pos::CartesianIndex{2}) = move(action, pos)
 
 struct MoveLeft <: AbstractMoveAction end
 const MOVE_LEFT = MoveLeft()
 move(::MoveLeft, pos::CartesianIndex{2}) = move(LEFT, pos)
+move(action::MoveLeft, dir::AbstractDirection, pos::CartesianIndex{2}) = move(action, pos)
 
 struct MoveRight <: AbstractMoveAction end
 const MOVE_RIGHT = MoveRight()
 move(::MoveRight, pos::CartesianIndex{2}) = move(RIGHT, pos)
+move(action::MoveRight, dir::AbstractDirection, pos::CartesianIndex{2}) = move(action, pos)
 
-move(action::Union{MoveUp, MoveDown, MoveLeft, MoveRight}, dir::AbstractDirection, pos::CartesianIndex{2}) = move(action, pos)
+struct MoveCenter <: AbstractMoveAction end
+const MOVE_CENTER = MoveCenter()
+move(::MoveCenter, pos::CartesianIndex{2}) = move(CENTER, pos)
+move(action::MoveCenter, dir::AbstractDirection, pos::CartesianIndex{2}) = move(action, pos)
 
 struct TurnLeft <: AbstractTurnAction end
 const TURN_LEFT = TurnLeft()
