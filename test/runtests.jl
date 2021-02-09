@@ -8,17 +8,17 @@ ENVS = [EmptyRoom, GridRooms, SequentialRooms, Maze, GoToDoor, DoorKey, CollectG
 MAX_STEPS = 3000
 NUM_RESETS = 3
 
-get_terminal_rewards(env::EmptyRoom) = (env.terminal_reward,)
-get_terminal_rewards(env::GridRooms) = (env.terminal_reward,)
-get_terminal_rewards(env::SequentialRooms) = (env.terminal_reward,)
-get_terminal_rewards(env::Maze) = (env.terminal_reward,)
-get_terminal_rewards(env::GoToDoor) = (env.terminal_reward, env.terminal_penalty)
-get_terminal_rewards(env::DoorKey) = (env.terminal_reward,)
-get_terminal_rewards(env::CollectGems) = (env.num_gem_init * env.gem_reward,)
-get_terminal_rewards(env::DynamicObstacles) = (env.terminal_reward, env.terminal_penalty)
-get_terminal_rewards(env::Sokoban) = (Float64(length(env.box_pos)),)
-get_terminal_rewards(env::Snake) = zero(env.food_reward):one(env.food_reward):GW.get_height(env)*GW.get_width(env)*one(env.food_reward)
-get_terminal_rewards(env::Catcher) = env.terminal_reward:env.ball_reward:MAX_STEPS*env.ball_reward
+get_terminal_returns(env::EmptyRoom) = (env.terminal_reward,)
+get_terminal_returns(env::GridRooms) = (env.terminal_reward,)
+get_terminal_returns(env::SequentialRooms) = (env.terminal_reward,)
+get_terminal_returns(env::Maze) = (env.terminal_reward,)
+get_terminal_returns(env::GoToDoor) = (env.terminal_reward, env.terminal_penalty)
+get_terminal_returns(env::DoorKey) = (env.terminal_reward,)
+get_terminal_returns(env::CollectGems) = (env.num_gem_init * env.gem_reward,)
+get_terminal_returns(env::DynamicObstacles) = (env.terminal_reward, env.terminal_penalty)
+get_terminal_returns(env::Sokoban) = (Float64(length(env.box_pos)),)
+get_terminal_returns(env::Snake) = zero(env.food_reward):one(env.food_reward):GW.get_height(env)*GW.get_width(env)*one(env.food_reward)
+get_terminal_returns(env::Catcher) = env.terminal_reward:env.ball_reward:MAX_STEPS*env.ball_reward
 
 @testset "GridWorlds.jl" begin
     for Env in ENVS
@@ -44,7 +44,7 @@ get_terminal_rewards(env::Catcher) = env.terminal_reward:env.ball_reward:MAX_STE
                         @test 1 ≤ GW.get_agent_pos(env)[2] ≤ GW.get_width(env)
 
                         if is_terminated(env)
-                            @test total_reward in get_terminal_rewards(env)
+                            @test total_reward in get_terminal_returns(env)
                             break
                         end
 
