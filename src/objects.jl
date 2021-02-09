@@ -63,6 +63,16 @@ const FOOD = Food()
 get_char(::Food) = '♦'
 get_color(::Food) = :yellow
 
+struct Basket <: AbstractObject end
+const BASKET = Basket()
+get_char(::Basket) = '⊔'
+get_color(::Basket) = :red
+
+struct Ball <: AbstractObject end
+const BALL = Ball()
+get_char(::Ball) = '∘'
+get_color(::Ball) = :yellow
+
 #####
 # Agent
 #####
