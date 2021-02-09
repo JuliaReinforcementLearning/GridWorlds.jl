@@ -3,7 +3,7 @@ using Test
 using Random
 using ReinforcementLearningBase
 
-ENVS = [EmptyRoom, GridRooms, SequentialRooms, Maze, GoToDoor, DoorKey, CollectGems, DynamicObstacles, Sokoban, Snake]
+ENVS = [EmptyRoom, GridRooms, SequentialRooms, Maze, GoToDoor, DoorKey, CollectGems, DynamicObstacles, Sokoban, Snake, Catcher]
 
 MAX_STEPS = 3000
 NUM_RESETS = 3
@@ -18,11 +18,12 @@ get_terminal_rewards(env::CollectGems) = (env.num_gem_init * env.gem_reward,)
 get_terminal_rewards(env::DynamicObstacles) = (env.terminal_reward, env.terminal_penalty)
 get_terminal_rewards(env::Sokoban) = (Float64(length(env.box_pos)),)
 get_terminal_rewards(env::Snake) = zero(env.food_reward):one(env.food_reward):GW.get_height(env)*GW.get_width(env)*one(env.food_reward)
+get_terminal_rewards(env::Catcher) = (env.terminal_reward,)
 
 @testset "GridWorlds.jl" begin
     for Env in ENVS
         for NAVIGATION in (GridWorlds.DIRECTED_NAVIGATION, GridWorlds.UNDIRECTED_NAVIGATION)
-            if Env == Snake && NAVIGATION == GridWorlds.DIRECTED_NAVIGATION
+            if ((Env == Snake) || (Env == Catcher)) && NAVIGATION == GridWorlds.DIRECTED_NAVIGATION
                 continue
             end
             GridWorlds.get_navigation_style(::Env) = NAVIGATION
@@ -41,7 +42,6 @@ get_terminal_rewards(env::Snake) = zero(env.food_reward):one(env.food_reward):GW
 
                         @test 1 ≤ GW.get_agent_pos(env)[1] ≤ GW.get_height(env)
                         @test 1 ≤ GW.get_agent_pos(env)[2] ≤ GW.get_width(env)
-                        @test GW.get_world(env)[GW.WALL, GW.get_agent_pos(env)] == false
 
                         if is_terminated(env)
                             @test total_reward in get_terminal_rewards(env)
