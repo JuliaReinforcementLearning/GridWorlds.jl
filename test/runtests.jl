@@ -18,7 +18,7 @@ get_terminal_rewards(env::CollectGems) = (env.num_gem_init * env.gem_reward,)
 get_terminal_rewards(env::DynamicObstacles) = (env.terminal_reward, env.terminal_penalty)
 get_terminal_rewards(env::Sokoban) = (Float64(length(env.box_pos)),)
 get_terminal_rewards(env::Snake) = zero(env.food_reward):one(env.food_reward):GW.get_height(env)*GW.get_width(env)*one(env.food_reward)
-get_terminal_rewards(env::Catcher) = (env.terminal_reward,)
+get_terminal_rewards(env::Catcher) = env.terminal_reward:env.ball_reward:MAX_STEPS*env.ball_reward
 
 @testset "GridWorlds.jl" begin
     for Env in ENVS
