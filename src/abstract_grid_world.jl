@@ -61,6 +61,8 @@ function get_grid_with_agent_layer(env::AbstractGridWorld)
     return cat(agent_layer, grid, dims = 1)
 end
 
+show_agent_char(env::AbstractGridWorld) = true
+
 #####
 # RLBase API defaults
 #####

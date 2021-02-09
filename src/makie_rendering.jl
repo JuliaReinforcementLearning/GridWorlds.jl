@@ -9,7 +9,7 @@ get_box(pos, tile_size, transform) = Makie.FRect2D((transform(pos).I .- (1,1)) .
 get_markersize(object::AbstractObject, tile_size) = reverse(tile_size)
 get_markersize(object::Empty, tile_size) = reverse(tile_size) ./ 5
 
-function init_screen(env_node::Makie.Observable{<:AbstractGridWorld}; resolution = (720, 720))
+function init_screen(env_node::Makie.Observable{<:AbstractGridWorld}; resolution = (720, 720), render_agent_char = show_agent_char(env_node[]))
     scene = Makie.Scene(resolution = resolution, raw = true, camera = Makie.campixel!)
 
     height = get_height(env_node[])
@@ -34,10 +34,12 @@ function init_screen(env_node::Makie.Observable{<:AbstractGridWorld}; resolution
     view_boxes = Makie.@lift(map(pos -> get_box(pos, $tile_size, transform), filter(pos -> pos in tile_inds, get_agent_view_inds($env_node))))
     Makie.poly!(scene, view_boxes, color = "rgba(255,255,255,0.3)")
 
-    # 4. paint agent
-    agent = Makie.@lift(get_agent($env_node))
-    agent_center = Makie.@lift(get_center(get_agent_pos($env_node), $tile_size, transform))
-    Makie.scatter!(scene, agent_center, color = Makie.@lift(get_color($agent)), marker = Makie.@lift(get_char($agent)), markersize = Makie.@lift(get_markersize($agent, $tile_size)))
+    if render_agent_char
+        # 4. paint agent
+        agent = Makie.@lift(get_agent($env_node))
+        agent_center = Makie.@lift(get_center(get_agent_pos($env_node), $tile_size, transform))
+        Makie.scatter!(scene, agent_center, color = Makie.@lift(get_color($agent)), marker = Makie.@lift(get_char($agent)), markersize = Makie.@lift(get_markersize($agent, $tile_size)))
+    end
 
     Makie.display(scene)
     scene
@@ -87,6 +89,9 @@ function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
             env_node[] = env
         elseif Makie.ispressed(b, Makie.Keyboard.d)
             env(MOVE_RIGHT)
+            env_node[] = env
+        elseif Makie.ispressed(b, Makie.Keyboard.c)
+            env(MOVE_CENTER)
             env_node[] = env
         elseif Makie.ispressed(b, Makie.Keyboard.p)
             env(PICK_UP)

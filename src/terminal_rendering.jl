@@ -34,14 +34,14 @@ function Base.show(io::IO, ::MIME"text/plain", env::AbstractGridWorld, view_type
     grid = get_grid(env, view_type_val)
     objects = get_objects(env)
 
-    agent_pos = get_agent_pos(env, view_type_val)
-    agent_char = get_agent_char(env, view_type_val)
-    agent_color = get_color(get_agent(env))
+    render_agent_char = show_agent_char(env)
 
     for i in 1:get_height(grid)
         for j in 1:get_width(grid)
             pos = CartesianIndex(i, j)
-            if pos == agent_pos
+            if render_agent_char && pos == get_agent_pos(env, view_type_val)
+                agent_char = get_agent_char(env, view_type_val)
+                agent_color = get_color(get_agent(env))
                 print(io, Crayons.Crayon(background = get_background(env, view_type_val, pos), foreground = agent_color, bold = true, reset = true), agent_char)
             else
                 object = get_first_object(grid, objects, pos)
