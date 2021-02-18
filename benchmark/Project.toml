@@ -1,0 +1,11 @@
+[deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+GridWorlds = "e15a9946-cd7f-4d03-83e2-6c30bacb0043"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+ReinforcementLearningBase = "e575027e-6cd6-5018-9292-cdc6200d2b44"
+
+[compat]
+BenchmarkTools = "0.5"
+GridWorlds = "0.3"
+ReinforcementLearningBase = "0.9"
+julia = "1"
