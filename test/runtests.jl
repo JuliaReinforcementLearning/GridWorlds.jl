@@ -3,7 +3,7 @@ using Test
 using Random
 using ReinforcementLearningBase
 
-ENVS = [EmptyRoom, GridRooms, SequentialRooms, Maze, GoToDoor, DoorKey, CollectGems, DynamicObstacles, Sokoban, Snake, Catcher]
+ENVS = [EmptyRoom, GridRooms, SequentialRooms, Maze, GoToDoor, DoorKey, CollectGems, DynamicObstacles, Sokoban, Snake, Catcher, Transport]
 
 MAX_STEPS = 3000
 NUM_RESETS = 3
@@ -19,6 +19,7 @@ get_terminal_returns(env::DynamicObstacles) = (env.terminal_reward, env.terminal
 get_terminal_returns(env::Sokoban) = (Float64(length(env.box_pos)),)
 get_terminal_returns(env::Snake) = zero(env.food_reward):one(env.food_reward):GW.get_height(env)*GW.get_width(env)*one(env.food_reward)
 get_terminal_returns(env::Catcher) = env.terminal_reward:env.ball_reward:MAX_STEPS*env.ball_reward
+get_terminal_returns(env::Transport) = (env.terminal_reward,)
 
 @testset "GridWorlds.jl" begin
     for Env in ENVS

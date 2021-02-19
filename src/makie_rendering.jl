@@ -56,6 +56,7 @@ function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
     a: MoveLeft
     d: MoveRight
     p: PickUp
+    o: Drop
     r: reset!
     q: Quit
     """)
@@ -95,6 +96,9 @@ function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
             env_node[] = env
         elseif Makie.ispressed(b, Makie.Keyboard.p)
             env(PICK_UP)
+            env_node[] = env
+        elseif Makie.ispressed(b, Makie.Keyboard.o)
+            env(DROP)
             env_node[] = env
         elseif Makie.ispressed(b, Makie.Keyboard.r)
             RLBase.reset!(env)

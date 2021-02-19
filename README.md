@@ -24,8 +24,9 @@ This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minig
   1. [CollectGems](#collectgems)
   1. [DynamicObstacles](#dynamicobstacles)
   1. [Sokoban](#sokoban)
-  1. [Catcher](#catcher)
   1. [Snake](#snake)
+  1. [Catcher](#catcher)
+  1. [Transport](#transport)
 
 ## Getting Started
 
@@ -155,3 +156,9 @@ The behaviour of environments is easily customizable. Here are some of the thing
 1. ### Catcher
 
     <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/catcher.gif" width="300px">
+ 
+1. ### Transport
+
+    DirectedNavigation | UndirectedNavigation
+    ------------ | -------------
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/transport_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/transport_undirected.gif" width="300px">
