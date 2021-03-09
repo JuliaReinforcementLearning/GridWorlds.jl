@@ -83,19 +83,19 @@ for Env in ENVS
 
     env_benchmark = Dict()
 
-    env_benchmark[:instantiation] = BT.@benchmark $Env(rng = $rng)
+    env_benchmark[:instantiation] = BT.@benchmark $(Ref(Env))[](rng = $(Ref(rng))[])
 
     env = Env(rng = rng)
 
-    env_benchmark[:reset!] = BT.@benchmark RLBase.reset!($env)
-    env_benchmark[:state] = BT.@benchmark RLBase.state($env)
-    env_benchmark[:action_space] = BT.@benchmark RLBase.action_space($env)
-    env_benchmark[:is_terminated] = BT.@benchmark RLBase.is_terminated($env)
-    env_benchmark[:reward] = BT.@benchmark RLBase.reward($env)
+    env_benchmark[:reset!] = BT.@benchmark RLBase.reset!($(Ref(env))[])
+    env_benchmark[:state] = BT.@benchmark RLBase.state($(Ref(env))[])
+    env_benchmark[:action_space] = BT.@benchmark RLBase.action_space($(Ref(env))[])
+    env_benchmark[:is_terminated] = BT.@benchmark RLBase.is_terminated($(Ref(env))[])
+    env_benchmark[:reward] = BT.@benchmark RLBase.reward($(Ref(env))[])
 
     action_info = Dict()
     for action in RLBase.action_space(env)
-        action_info[Symbol(action)] = BT.@benchmark $env($action)
+        action_info[Symbol(action)] = BT.@benchmark $(Ref(env))[]($(Ref(action))[])
     end
     env_benchmark[:action_info] = action_info
 
@@ -103,4 +103,3 @@ for Env in ENVS
 end
 
 write_benchmarks!(information)
-
