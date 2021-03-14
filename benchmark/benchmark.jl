@@ -12,7 +12,7 @@ const SEED = 0
 rng = Random.MersenneTwister(SEED)
 information = Dict()
 
-ENVS = [GW.EmptyRoom, GW.GridRooms, GW.SequentialRooms, GW.GoToDoor, GW.DoorKey, GW.CollectGems, GW.DynamicObstacles, GW.Sokoban]
+ENVS = [GW.EmptyRoom, GW.GridRooms, GW.SequentialRooms, GW.Maze, GW.GoToDoor, GW.DoorKey, GW.CollectGems, GW.DynamicObstacles, GW.Sokoban, GW.Snake, GW.Catcher, GW.Transport]
 
 function format_benchmark(str::String)
     l = split(str, "\n")
@@ -26,7 +26,7 @@ function write_benchmarks!(information; file = "benchmark.md")
     write(io, "# List of Environments\n")
 
     for Env in ENVS
-        write(io, "  1. [$(Symbol(Env))](#$(Symbol(Env)))\n")
+        write(io, "  1. $(Symbol(Env))\n")
     end
 
     write(io, "\n")
