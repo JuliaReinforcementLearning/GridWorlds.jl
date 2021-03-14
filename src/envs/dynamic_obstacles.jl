@@ -2,7 +2,8 @@ export DynamicObstacles
 
 mutable struct DynamicObstacles{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Obstacle, Goal}}
-    agent::Agent
+    agent_pos::CartesianIndex{2}
+    agent_dir::AbstractDirection
     reward::Float64
     rng::R
     terminal_reward::Float64
@@ -22,13 +23,14 @@ function DynamicObstacles(; height = 8, width = 8, num_obstacles = floor(Int, sq
     world[GOAL, goal_pos] = true
     world[EMPTY, goal_pos] = false
 
-    agent = Agent()
+    agent_pos = CartesianIndex(2, 2)
+    agent_dir = RIGHT
     reward = 0.0
     terminal_reward = 1.0
     obstacle_pos = CartesianIndex{2}[]
     terminal_penalty = -1.0
 
-    env = DynamicObstacles(world, agent, reward, rng, terminal_reward, goal_pos, num_obstacles, obstacle_pos, terminal_penalty)
+    env = DynamicObstacles(world, agent_pos, agent_dir, reward, rng, terminal_reward, goal_pos, num_obstacles, obstacle_pos, terminal_penalty)
 
     RLBase.reset!(env)
 

@@ -2,7 +2,8 @@ export Catcher
 
 mutable struct Catcher{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Basket, Ball}}
-    agent::Agent
+    agent_pos::CartesianIndex{2}
+    agent_dir::AbstractDirection
     reward::Float64
     rng::R
     terminal_reward::Float64
@@ -22,7 +23,6 @@ function Catcher(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
 
     agent_start_pos = CartesianIndex(height, 1)
     agent_start_dir = CENTER
-    agent = Agent(agent_start_pos, agent_start_dir)
     world[BASKET, agent_start_pos] = true
     world[EMPTY, agent_start_pos] = false
 
@@ -30,7 +30,7 @@ function Catcher(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
     terminal_reward = -1.0
     ball_reward = 1.0
 
-    env = Catcher(world, agent, reward, rng, terminal_reward, ball_reward, ball_pos)
+    env = Catcher(world, agent_start_pos, agent_start_dir, reward, rng, terminal_reward, ball_reward, ball_pos)
 
     RLBase.reset!(env)
 

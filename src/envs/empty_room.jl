@@ -2,7 +2,8 @@ export EmptyRoom
 
 mutable struct EmptyRoom{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Goal}}
-    agent::Agent
+    agent_pos::CartesianIndex{2}
+    agent_dir::AbstractDirection
     reward::Float64
     rng::R
     terminal_reward::Float64
@@ -19,11 +20,12 @@ function EmptyRoom(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
     world[GOAL, goal_pos] = true
     world[EMPTY, goal_pos] = false
 
-    agent = Agent()
+    agent_pos = CartesianIndex(2, 2)
+    agent_dir = RIGHT
     reward = 0.0
     terminal_reward = 1.0
 
-    env = EmptyRoom(world, agent, reward, rng, terminal_reward, goal_pos)
+    env = EmptyRoom(world, agent_pos, agent_dir, reward, rng, terminal_reward, goal_pos)
 
     RLBase.reset!(env)
 

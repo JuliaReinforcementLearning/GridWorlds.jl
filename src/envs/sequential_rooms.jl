@@ -2,7 +2,8 @@ export SequentialRooms
 
 mutable struct SequentialRooms{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Goal}}
-    agent::Agent
+    agent_pos::CartesianIndex{2}
+    agent_dir::AbstractDirection
     reward::Float64
     rng::R
     terminal_reward::Float64
@@ -15,11 +16,12 @@ function SequentialRooms(; num_rooms = 3, room_length_range = 4:6, rng = Random.
     objects = (EMPTY, WALL, GOAL)
     big_n = 2 * num_rooms * room_length_range.stop
     world = GridWorldBase(objects, big_n, big_n)
-    agent = Agent()
+    agent_pos = CartesianIndex(2, 2)
+    agent_dir = RIGHT
     reward = 0.0
     terminal_reward = 1.0
 
-    env = SequentialRooms(world, agent, reward, rng, terminal_reward, num_rooms, room_length_range, Room[])
+    env = SequentialRooms(world, agent_pos, agent_dir, reward, rng, terminal_reward, num_rooms, room_length_range, Room[])
 
     RLBase.reset!(env)
 

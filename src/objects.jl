@@ -4,6 +4,9 @@
 
 abstract type AbstractObject end
 
+struct Agent <: AbstractObject end
+const AGENT = Agent()
+
 struct Empty <: AbstractObject end
 const EMPTY = Empty()
 
@@ -42,19 +45,3 @@ const BASKET = Basket()
 
 struct Ball <: AbstractObject end
 const BALL = Ball()
-
-#####
-# Agent
-#####
-
-mutable struct Agent <: AbstractObject
-    pos::CartesianIndex{2}
-    dir::AbstractDirection
-end
-
-Agent() =  Agent(CartesianIndex(2, 2), RIGHT)
-
-get_dir(agent::Agent) = agent.dir
-set_dir!(agent::Agent, dir::AbstractDirection) = agent.dir = dir
-get_pos(agent::Agent) = agent.pos
-set_pos!(agent::Agent, pos::CartesianIndex{2}) = agent.pos = pos

@@ -34,7 +34,8 @@ The dataset file can be updated by creating suitable [hook](https://github.com/J
 """
 mutable struct Sokoban{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Box, Target}}
-    agent::Agent
+    agent_pos::CartesianIndex{2}
+    agent_dir::AbstractDirection
     reward::Float64
     rng::R
     dataset::LevelDataset
@@ -51,13 +52,14 @@ function Sokoban(; file = joinpath(dirname(pathof(@__MODULE__)), "envs/sokoban/b
     objects = (EMPTY, WALL, BOX, TARGET)
     world = GridWorldBase(objects, height, width)
 
-    agent = Agent()
+    agent_pos = CartesianIndex(2, 2)
+    agent_dir = RIGHT
     reward = 0.0
 
     box_pos = CartesianIndex{2}[]
     target_pos = CartesianIndex{2}[]
 
-    env = Sokoban(world, agent, reward, rng, dataset, box_pos, target_pos)
+    env = Sokoban(world, agent_pos, agent_dir, reward, rng, dataset, box_pos, target_pos)
 
     RLBase.reset!(env)
 

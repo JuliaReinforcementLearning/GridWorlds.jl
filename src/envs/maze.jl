@@ -2,7 +2,8 @@ export Maze
 
 mutable struct Maze{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Goal}}
-    agent::Agent
+    agent_pos::CartesianIndex{2}
+    agent_dir::AbstractDirection
     reward::Float64
     rng::R
     terminal_reward::Float64
@@ -30,11 +31,12 @@ function Maze(; height = 9, width = 9, rng = Random.GLOBAL_RNG)
     world[GOAL, goal_pos] = true
     world[EMPTY, goal_pos] = false
 
-    agent = Agent()
+    agent_pos = CartesianIndex(2, 2)
+    agent_dir = RIGHT
     reward = 0.0
     terminal_reward = 1.0
 
-    env = Maze(world, agent, reward, rng, terminal_reward, goal_pos)
+    env = Maze(world, agent_pos, agent_dir, reward, rng, terminal_reward, goal_pos)
 
     RLBase.reset!(env)
 

@@ -6,12 +6,10 @@ get_world(env::AbstractGridWorld) = env.world
 set_world!(env::AbstractGridWorld, world::GridWorldBase) = env.world = world
 @forward AbstractGridWorld.world get_grid, get_objects, get_num_objects, get_height, get_width
 
-get_agent(env::AbstractGridWorld) = env.agent
-set_agent!(env::AbstractGridWorld, agent::Agent) = env.agent = agent
-get_agent_pos(env::AbstractGridWorld) = env |> get_agent |> get_pos
-set_agent_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = set_pos!(get_agent(env), pos)
-get_agent_dir(env::AbstractGridWorld) = env |> get_agent |> get_dir
-set_agent_dir!(env::AbstractGridWorld, dir::AbstractDirection) = set_dir!(get_agent(env), dir)
+get_agent_pos(env::AbstractGridWorld) = env.agent_pos
+set_agent_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = env.agent_pos = pos
+get_agent_dir(env::AbstractGridWorld) = env.agent_dir
+set_agent_dir!(env::AbstractGridWorld, dir::AbstractDirection) = env.agent_dir = dir
 
 set_reward!(env::AbstractGridWorld, reward) = env.reward = reward
 

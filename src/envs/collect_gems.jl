@@ -2,7 +2,8 @@ export CollectGems
 
 mutable struct CollectGems{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Gem}}
-    agent::Agent
+    agent_pos::CartesianIndex{2}
+    agent_dir::AbstractDirection
     reward::Float64
     rng::R
     num_gem_init::Int
@@ -17,13 +18,14 @@ function CollectGems(; height = 8, width = 8, num_gem_init = floor(Int, sqrt(hei
     room = Room(CartesianIndex(1, 1), height, width)
     place_room!(world, room)
 
-    agent = Agent()
+    agent_pos = CartesianIndex(2, 2)
+    agent_dir = RIGHT
     reward = 0.0
     num_gem_current = num_gem_init
     gem_reward = 1.0
     gem_pos = CartesianIndex{2}[]
 
-    env = CollectGems(world, agent, reward, rng, num_gem_init, num_gem_current, gem_reward, gem_pos)
+    env = CollectGems(world, agent_pos, agent_dir, reward, rng, num_gem_init, num_gem_current, gem_reward, gem_pos)
 
     RLBase.reset!(env)
 

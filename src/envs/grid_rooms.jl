@@ -2,7 +2,8 @@ export GridRooms
 
 mutable struct GridRooms{R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Goal}}
-    agent::Agent
+    agent_pos::CartesianIndex{2}
+    agent_dir::AbstractDirection
     reward::Float64
     rng::R
     terminal_reward::Float64
@@ -41,12 +42,13 @@ function GridRooms(; grid_size = (2, 2), room_size = (5, 5), rng = Random.GLOBAL
     world[WALL, :, [1, width]] .= true
     world[EMPTY, :, [1, width]] .= false
 
-    agent = Agent()
+    agent_pos = CartesianIndex(2, 2)
+    agent_dir = RIGHT
     reward = 0.0
     terminal_reward = 1.0
     goal_pos = CartesianIndex(height - 1, width - 1)
 
-    env = GridRooms(world, agent, reward, rng, terminal_reward, goal_pos)
+    env = GridRooms(world, agent_pos, agent_dir, reward, rng, terminal_reward, goal_pos)
 
     RLBase.reset!(env)
 
