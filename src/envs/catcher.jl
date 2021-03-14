@@ -22,7 +22,7 @@ function Catcher(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
 
     agent_start_pos = CartesianIndex(height, 1)
     agent_start_dir = CENTER
-    agent = Agent(pos = agent_start_pos, dir = agent_start_dir)
+    agent = Agent(agent_start_pos, agent_start_dir)
     world[BASKET, agent_start_pos] = true
     world[EMPTY, agent_start_pos] = false
 

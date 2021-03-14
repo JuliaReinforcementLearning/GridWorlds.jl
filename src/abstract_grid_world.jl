@@ -12,7 +12,6 @@ get_agent_pos(env::AbstractGridWorld) = env |> get_agent |> get_pos
 set_agent_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = set_pos!(get_agent(env), pos)
 get_agent_dir(env::AbstractGridWorld) = env |> get_agent |> get_dir
 set_agent_dir!(env::AbstractGridWorld, dir::AbstractDirection) = set_dir!(get_agent(env), dir)
-@forward AbstractGridWorld.agent get_inventory_type, get_inventory, set_inventory!
 
 set_reward!(env::AbstractGridWorld, reward) = env.reward = reward
 
@@ -66,6 +65,9 @@ show_agent_char(env::AbstractGridWorld) = true
 #####
 # RLBase API defaults
 #####
+
+RLBase.state_space(env::AbstractGridWorld, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
+RLBase.state_space(env::AbstractGridWorld, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
 
 const get_state = RLBase.state
 RLBase.state(env::AbstractGridWorld, ss::RLBase.AbstractStateStyle, player::RLBase.DefaultPlayer) = RLBase.state(env, ss, player, get_navigation_style(env))
