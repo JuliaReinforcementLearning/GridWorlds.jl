@@ -15,7 +15,7 @@ get_terminal_returns(env::SequentialRooms) = (env.terminal_reward,)
 get_terminal_returns(env::Maze) = (env.terminal_reward,)
 get_terminal_returns(env::CollectGems) = (env.num_gem_init * env.gem_reward,)
 get_terminal_returns(env::DynamicObstacles) = (env.terminal_reward, env.terminal_penalty)
-get_terminal_returns(env::Sokoban) = (Float64(length(env.box_pos)),)
+get_terminal_returns(env::Sokoban) = (GridWorlds.get_reward_type(env)(length(env.box_pos)),)
 get_terminal_returns(env::Catcher) = env.terminal_reward:env.ball_reward:MAX_STEPS*env.ball_reward
 
 @testset "GridWorlds.jl" begin
@@ -29,10 +29,10 @@ get_terminal_returns(env::Catcher) = env.terminal_reward:env.ball_reward:MAX_STE
                 env = Env()
                 for _ in 1:NUM_RESETS
                     reset!(env)
-                    @test reward(env) == 0.0
+                    @test reward(env) == zero(GridWorlds.get_reward_type(env))
                     @test is_terminated(env) == false
 
-                    total_reward = 0.0
+                    total_reward = zero(GridWorlds.get_reward_type(env))
                     for i in 1:MAX_STEPS
                         action = rand(action_space(env))
                         env(action)

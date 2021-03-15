@@ -32,18 +32,20 @@ year = "2018",
 
 The dataset file can be updated by creating suitable [hook](https://github.com/JuliaReinforcementLearning/ReinforcementLearningCore.jl/blob/master/src/core/hooks.jl)
 """
-mutable struct Sokoban{R} <: AbstractGridWorld
+mutable struct Sokoban{T, R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Box, Target}}
     agent_pos::CartesianIndex{2}
     agent_dir::AbstractDirection
-    reward::Float64
+    reward::T
     rng::R
     dataset::LevelDataset
     box_pos::Vector{CartesianIndex{2}}
     target_pos::Vector{CartesianIndex{2}}
 end
 
-function Sokoban(; file = joinpath(dirname(pathof(@__MODULE__)), "envs/sokoban/boxoban-levels/medium/train/000.txt"), rng = Random.GLOBAL_RNG)
+get_reward_type(env::Sokoban{T}) where {T} = T
+
+function Sokoban(; T = Float32, file = joinpath(dirname(pathof(@__MODULE__)), "envs/sokoban/boxoban-levels/medium/train/000.txt"), rng = Random.GLOBAL_RNG)
     dataset = LevelDataset(readlines(file))
     level = get_level(dataset, 0)
     height = length(level)
@@ -54,7 +56,7 @@ function Sokoban(; file = joinpath(dirname(pathof(@__MODULE__)), "envs/sokoban/b
 
     agent_pos = CartesianIndex(2, 2)
     agent_dir = RIGHT
-    reward = 0.0
+    reward = zero(T)
 
     box_pos = CartesianIndex{2}[]
     target_pos = CartesianIndex{2}[]
@@ -137,7 +139,7 @@ function set_level!(env::Sokoban, level::Vector{String})
     return env
 end
 
-function RLBase.reset!(env::Sokoban)
+function RLBase.reset!(env::Sokoban{T}) where {T}
     rng = get_rng(env)
     world = get_world(env)
 
@@ -153,7 +155,7 @@ function RLBase.reset!(env::Sokoban)
     agent_start_dir = get_agent_start_dir(env)
     set_agent_dir!(env, agent_start_dir)
 
-    set_reward!(env, 0.0)
+    set_reward!(env, zero(T))
 
     return env
 end

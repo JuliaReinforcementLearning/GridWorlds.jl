@@ -1,17 +1,19 @@
 export Catcher
 
-mutable struct Catcher{R} <: AbstractGridWorld
+mutable struct Catcher{T, R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Basket, Ball}}
     agent_pos::CartesianIndex{2}
     agent_dir::AbstractDirection
-    reward::Float64
+    reward::T
     rng::R
-    terminal_reward::Float64
-    ball_reward::Float64
+    terminal_reward::T
+    ball_reward::T
     ball_pos::CartesianIndex{2}
 end
 
-function Catcher(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
+get_reward_type(env::Catcher{T}) where {T} = T
+
+function Catcher(; T = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     objects = (EMPTY, BASKET, BALL)
     world = GridWorldBase(objects, height, width)
 
@@ -26,9 +28,9 @@ function Catcher(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
     world[BASKET, agent_start_pos] = true
     world[EMPTY, agent_start_pos] = false
 
-    reward = 0.0
-    terminal_reward = -1.0
-    ball_reward = 1.0
+    reward = zero(T)
+    terminal_reward = -one(T)
+    ball_reward = one(T)
 
     env = Catcher(world, agent_start_pos, agent_start_dir, reward, rng, terminal_reward, ball_reward, ball_pos)
 
@@ -42,7 +44,7 @@ RLBase.StateStyle(env::Catcher) = RLBase.InternalState{Any}()
 RLBase.is_terminated(env::Catcher) = (env.ball_pos[1] == get_height(env)) && !(get_world(env)[BASKET, env.ball_pos])
 RLBase.action_space(env::Catcher, player::RLBase.DefaultPlayer) = (MOVE_LEFT, MOVE_RIGHT, MOVE_CENTER)
 
-function (env::Catcher)(action::Union{MoveLeft, MoveRight, MoveCenter})
+function (env::Catcher{T})(action::Union{MoveLeft, MoveRight, MoveCenter}) where {T}
     world = get_world(env)
     height = get_height(env)
     old_agent_pos = get_agent_pos(env)
@@ -77,13 +79,13 @@ function (env::Catcher)(action::Union{MoveLeft, MoveRight, MoveCenter})
             set_reward!(env, env.terminal_reward)
         end
     else
-        set_reward!(env, 0.0)
+        set_reward!(env, zero(T))
     end
 
     return env
 end
 
-function RLBase.reset!(env::Catcher)
+function RLBase.reset!(env::Catcher{T}) where {T}
     world = get_world(env)
     rng = get_rng(env)
     height = get_height(env)
@@ -113,7 +115,7 @@ function RLBase.reset!(env::Catcher)
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)
 
-    set_reward!(env, 0.0)
+    set_reward!(env, zero(T))
 
     return env
 end

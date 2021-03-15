@@ -1,16 +1,18 @@
 export EmptyRoom
 
-mutable struct EmptyRoom{R} <: AbstractGridWorld
+mutable struct EmptyRoom{T, R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Goal}}
     agent_pos::CartesianIndex{2}
     agent_dir::AbstractDirection
-    reward::Float64
+    reward::T
     rng::R
-    terminal_reward::Float64
+    terminal_reward::T
     goal_pos::CartesianIndex{2}
 end
 
-function EmptyRoom(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
+get_reward_type(env::EmptyRoom{T}) where {T} = T
+
+function EmptyRoom(; T = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, GOAL)
     world = GridWorldBase(objects, height, width)
     room = Room(CartesianIndex(1, 1), height, width)
@@ -22,8 +24,8 @@ function EmptyRoom(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
 
     agent_pos = CartesianIndex(2, 2)
     agent_dir = RIGHT
-    reward = 0.0
-    terminal_reward = 1.0
+    reward = zero(T)
+    terminal_reward = one(T)
 
     env = EmptyRoom(world, agent_pos, agent_dir, reward, rng, terminal_reward, goal_pos)
 
@@ -32,7 +34,7 @@ function EmptyRoom(; height = 8, width = 8, rng = Random.GLOBAL_RNG)
     return env
 end
 
-function RLBase.reset!(env::EmptyRoom)
+function RLBase.reset!(env::EmptyRoom{T}) where {T}
     world = get_world(env)
     rng = get_rng(env)
 
@@ -52,7 +54,7 @@ function RLBase.reset!(env::EmptyRoom)
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)
 
-    set_reward!(env, 0.0)
+    set_reward!(env, zero(T))
 
     return env
 end

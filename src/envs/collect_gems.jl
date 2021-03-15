@@ -1,18 +1,20 @@
 export CollectGems
 
-mutable struct CollectGems{R} <: AbstractGridWorld
+mutable struct CollectGems{T, R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Gem}}
     agent_pos::CartesianIndex{2}
     agent_dir::AbstractDirection
-    reward::Float64
+    reward::T
     rng::R
     num_gem_init::Int
     num_gem_current::Int
-    gem_reward::Float64
+    gem_reward::T
     gem_pos::Vector{CartesianIndex{2}}
 end
 
-function CollectGems(; height = 8, width = 8, num_gem_init = floor(Int, sqrt(height * width)), rng = Random.GLOBAL_RNG)
+get_reward_type(env::CollectGems{T}) where {T} = T
+
+function CollectGems(; T = Float32, height = 8, width = 8, num_gem_init = floor(Int, sqrt(height * width)), rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, GEM)
     world = GridWorldBase(objects, height, width)
     room = Room(CartesianIndex(1, 1), height, width)
@@ -20,9 +22,9 @@ function CollectGems(; height = 8, width = 8, num_gem_init = floor(Int, sqrt(hei
 
     agent_pos = CartesianIndex(2, 2)
     agent_dir = RIGHT
-    reward = 0.0
+    reward = zero(T)
     num_gem_current = num_gem_init
-    gem_reward = 1.0
+    gem_reward = one(T)
     gem_pos = CartesianIndex{2}[]
 
     env = CollectGems(world, agent_pos, agent_dir, reward, rng, num_gem_init, num_gem_current, gem_reward, gem_pos)
@@ -34,7 +36,7 @@ end
 
 RLBase.is_terminated(env::CollectGems) = env.num_gem_current <= 0
 
-function (env::CollectGems)(action::AbstractMoveAction)
+function (env::CollectGems{T})(action::AbstractMoveAction) where {T}
     world = get_world(env)
 
     dest = move(action, get_agent_dir(env), get_agent_pos(env))
@@ -42,7 +44,7 @@ function (env::CollectGems)(action::AbstractMoveAction)
         set_agent_pos!(env, dest)
     end
 
-    set_reward!(env, 0.0)
+    set_reward!(env, zero(T))
     agent_pos = get_agent_pos(env)
     if world[GEM, agent_pos]
         world[GEM, agent_pos] = false
@@ -54,7 +56,7 @@ function (env::CollectGems)(action::AbstractMoveAction)
     return env
 end
 
-function RLBase.reset!(env::CollectGems)
+function RLBase.reset!(env::CollectGems{T}) where {T}
     world = get_world(env)
     rng = get_rng(env)
 
@@ -78,7 +80,7 @@ function RLBase.reset!(env::CollectGems)
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)
 
-    set_reward!(env, 0.0)
+    set_reward!(env, zero(T))
 
     return env
 end

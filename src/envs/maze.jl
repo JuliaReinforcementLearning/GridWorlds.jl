@@ -1,19 +1,21 @@
 export Maze
 
-mutable struct Maze{R} <: AbstractGridWorld
+mutable struct Maze{T, R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Goal}}
     agent_pos::CartesianIndex{2}
     agent_dir::AbstractDirection
-    reward::Float64
+    reward::T
     rng::R
-    terminal_reward::Float64
+    terminal_reward::T
     goal_pos::CartesianIndex{2}
 end
+
+get_reward_type(env::Maze{T}) where {T} = T
 
 """
 Maze generation uses the iterative implementation of randomized depth-first search from [Wikipedia](https://en.wikipedia.org/wiki/Maze_generation_algorithm#Iterative_implementation).
 """
-function Maze(; height = 9, width = 9, rng = Random.GLOBAL_RNG)
+function Maze(; T = Float32, height = 9, width = 9, rng = Random.GLOBAL_RNG)
     @assert isodd(height) && isodd(width) "height and width must be odd numbers"
     vertical_range = 2:2:height-1
     horizontal_range = 2:2:width-1
@@ -33,8 +35,8 @@ function Maze(; height = 9, width = 9, rng = Random.GLOBAL_RNG)
 
     agent_pos = CartesianIndex(2, 2)
     agent_dir = RIGHT
-    reward = 0.0
-    terminal_reward = 1.0
+    reward = zero(T)
+    terminal_reward = one(T)
 
     env = Maze(world, agent_pos, agent_dir, reward, rng, terminal_reward, goal_pos)
 
@@ -86,7 +88,7 @@ function get_candidate_neighbors(pos::CartesianIndex{2})
     return map(shift -> CartesianIndex(pos.I .+ shift), shifts)
 end
 
-function RLBase.reset!(env::Maze)
+function RLBase.reset!(env::Maze{T}) where {T}
     world = get_world(env)
     rng = get_rng(env)
     height = get_height(env)
@@ -120,7 +122,7 @@ function RLBase.reset!(env::Maze)
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)
 
-    set_reward!(env, 0.0)
+    set_reward!(env, zero(T))
 
     return env
 end

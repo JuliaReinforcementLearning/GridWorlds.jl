@@ -1,16 +1,18 @@
 export GridRooms
 
-mutable struct GridRooms{R} <: AbstractGridWorld
+mutable struct GridRooms{T, R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Goal}}
     agent_pos::CartesianIndex{2}
     agent_dir::AbstractDirection
-    reward::Float64
+    reward::T
     rng::R
-    terminal_reward::Float64
+    terminal_reward::T
     goal_pos::CartesianIndex{2}
 end
 
-function GridRooms(; grid_size = (2, 2), room_size = (5, 5), rng = Random.GLOBAL_RNG)
+get_reward_type(env::GridRooms{T}) where {T} = T
+
+function GridRooms(; T = Float32, grid_size = (2, 2), room_size = (5, 5), rng = Random.GLOBAL_RNG)
     grid_height = grid_size[1]
     grid_width = grid_size[2]
     room_height = room_size[1]
@@ -44,8 +46,8 @@ function GridRooms(; grid_size = (2, 2), room_size = (5, 5), rng = Random.GLOBAL
 
     agent_pos = CartesianIndex(2, 2)
     agent_dir = RIGHT
-    reward = 0.0
-    terminal_reward = 1.0
+    reward = zero(T)
+    terminal_reward = one(T)
     goal_pos = CartesianIndex(height - 1, width - 1)
 
     env = GridRooms(world, agent_pos, agent_dir, reward, rng, terminal_reward, goal_pos)
@@ -67,7 +69,7 @@ function get_room_origins(grid_size, room_size)
     return [CartesianIndex(i, j) for i in vertical_steps for j in horizontal_steps]
 end
 
-function RLBase.reset!(env::GridRooms)
+function RLBase.reset!(env::GridRooms{T}) where {T}
     world = get_world(env)
     rng = get_rng(env)
 
@@ -87,7 +89,7 @@ function RLBase.reset!(env::GridRooms)
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)
 
-    set_reward!(env, 0.0)
+    set_reward!(env, zero(T))
 
     return env
 end

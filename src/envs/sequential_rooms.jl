@@ -1,25 +1,27 @@
 export SequentialRooms
 
-mutable struct SequentialRooms{R} <: AbstractGridWorld
+mutable struct SequentialRooms{T, R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Goal}}
     agent_pos::CartesianIndex{2}
     agent_dir::AbstractDirection
-    reward::Float64
+    reward::T
     rng::R
-    terminal_reward::Float64
+    terminal_reward::T
     num_rooms::Int
     room_length_range::UnitRange{Int}
     rooms::Array{Room, 1}
 end
 
-function SequentialRooms(; num_rooms = 3, room_length_range = 4:6, rng = Random.GLOBAL_RNG)
+get_reward_type(env::SequentialRooms{T}) where {T} = T
+
+function SequentialRooms(; T = Float32, num_rooms = 3, room_length_range = 4:6, rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, GOAL)
     big_n = 2 * num_rooms * room_length_range.stop
     world = GridWorldBase(objects, big_n, big_n)
     agent_pos = CartesianIndex(2, 2)
     agent_dir = RIGHT
-    reward = 0.0
-    terminal_reward = 1.0
+    reward = zero(T)
+    terminal_reward = one(T)
 
     env = SequentialRooms(world, agent_pos, agent_dir, reward, rng, terminal_reward, num_rooms, room_length_range, Room[])
 
@@ -32,7 +34,7 @@ end
 # RLBase API
 #####
 
-function RLBase.reset!(env::AbstractGridWorld)
+function RLBase.reset!(env::SequentialRooms{T}) where {T}
     big_n = 2 * env.num_rooms * env.room_length_range.stop
     world = GridWorldBase(get_objects(env), big_n, big_n)
     set_world!(env, world)
@@ -84,7 +86,7 @@ function RLBase.reset!(env::AbstractGridWorld)
     set_agent_pos!(env, rand(rng, agent_start_pos))
     set_agent_dir!(env, agent_start_dir)
 
-    set_reward!(env, 0.0)
+    set_reward!(env, zero(T))
 
     return env
 end

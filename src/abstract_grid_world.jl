@@ -11,6 +11,7 @@ set_agent_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = env.agent_pos =
 get_agent_dir(env::AbstractGridWorld) = env.agent_dir
 set_agent_dir!(env::AbstractGridWorld, dir::AbstractDirection) = env.agent_dir = dir
 
+get_reward(env::AbstractGridWorld) = env.reward
 set_reward!(env::AbstractGridWorld, reward) = env.reward = reward
 
 get_rng(env::AbstractGridWorld) = env.rng
@@ -78,8 +79,7 @@ RLBase.action_space(env::AbstractGridWorld, player::RLBase.DefaultPlayer) = RLBa
 RLBase.action_space(env::AbstractGridWorld, player::RLBase.DefaultPlayer, ::DirectedNavigation) = DIRECTED_NAVIGATION_ACTIONS
 RLBase.action_space(env::AbstractGridWorld, player::RLBase.DefaultPlayer, ::UndirectedNavigation) = UNDIRECTED_NAVIGATION_ACTIONS
 
-const get_reward = RLBase.reward
-RLBase.reward(env::AbstractGridWorld, ::RLBase.DefaultPlayer) = env.reward
+RLBase.reward(env::AbstractGridWorld, ::RLBase.DefaultPlayer) = get_reward(env)
 
 RLBase.is_terminated(env::AbstractGridWorld) = get_world(env)[GOAL, get_agent_pos(env)]
 
@@ -88,7 +88,7 @@ function (env::AbstractGridWorld)(action::AbstractTurnAction)
     new_dir = turn(action, dir)
     set_agent_dir!(env, new_dir)
 
-    set_reward!(env, 0.0)
+    set_reward!(env, zero(get_reward_type(env)))
 
     return env
 end
@@ -101,7 +101,7 @@ function (env::AbstractGridWorld)(action::AbstractMoveAction)
         set_agent_pos!(env, dest)
     end
 
-    set_reward!(env, 0.0)
+    set_reward!(env, zero(get_reward_type(env)))
     if RLBase.is_terminated(env)
         set_reward!(env, env.terminal_reward)
     end

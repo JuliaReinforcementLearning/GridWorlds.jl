@@ -1,19 +1,21 @@
 export DynamicObstacles
 
-mutable struct DynamicObstacles{R} <: AbstractGridWorld
+mutable struct DynamicObstacles{T, R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Obstacle, Goal}}
     agent_pos::CartesianIndex{2}
     agent_dir::AbstractDirection
-    reward::Float64
+    reward::T
     rng::R
-    terminal_reward::Float64
+    terminal_reward::T
     goal_pos::CartesianIndex{2}
     num_obstacles::Int
     obstacle_pos::Vector{CartesianIndex{2}}
-    terminal_penalty::Float64
+    terminal_penalty::T
 end
 
-function DynamicObstacles(; height = 8, width = 8, num_obstacles = floor(Int, sqrt(height * width) / 2), rng = Random.GLOBAL_RNG)
+get_reward_type(env::DynamicObstacles{T}) where {T} = T
+
+function DynamicObstacles(; T = Float32, height = 8, width = 8, num_obstacles = floor(Int, sqrt(height * width) / 2), rng = Random.GLOBAL_RNG)
     objects = (EMPTY, WALL, OBSTACLE, GOAL)
     world = GridWorldBase(objects, height, width)
     room = Room(CartesianIndex(1, 1), height, width)
@@ -25,10 +27,10 @@ function DynamicObstacles(; height = 8, width = 8, num_obstacles = floor(Int, sq
 
     agent_pos = CartesianIndex(2, 2)
     agent_dir = RIGHT
-    reward = 0.0
-    terminal_reward = 1.0
+    reward = zero(T)
+    terminal_reward = one(T)
     obstacle_pos = CartesianIndex{2}[]
-    terminal_penalty = -1.0
+    terminal_penalty = -one(T)
 
     env = DynamicObstacles(world, agent_pos, agent_dir, reward, rng, terminal_reward, goal_pos, num_obstacles, obstacle_pos, terminal_penalty)
 
@@ -39,7 +41,7 @@ end
 
 iscollision(env::DynamicObstacles) = get_world(env)[OBSTACLE, get_agent_pos(env)]
 
-function (env::DynamicObstacles)(action::AbstractMoveAction)
+function (env::DynamicObstacles{T})(action::AbstractMoveAction) where {T}
     world = get_world(env)
     update_obstacles!(env)
 
@@ -48,7 +50,7 @@ function (env::DynamicObstacles)(action::AbstractMoveAction)
         set_agent_pos!(env, dest)
     end
 
-    set_reward!(env, 0.0)
+    set_reward!(env, zero(T))
     if world[GOAL, get_agent_pos(env)]
         set_reward!(env, env.terminal_reward)
     elseif iscollision(env)
@@ -58,7 +60,7 @@ function (env::DynamicObstacles)(action::AbstractMoveAction)
     return env
 end
 
-function (env::DynamicObstacles)(action::AbstractTurnAction)
+function (env::DynamicObstacles{T})(action::AbstractTurnAction) where {T}
     world = get_world(env)
     update_obstacles!(env)
 
@@ -66,7 +68,7 @@ function (env::DynamicObstacles)(action::AbstractTurnAction)
     new_dir = turn(action, old_dir)
     set_agent_dir!(env, new_dir)
 
-    set_reward!(env, 0.0)
+    set_reward!(env, zero(T))
     if world[GOAL, get_agent_pos(env)]
         set_reward!(env, env.terminal_reward)
     elseif iscollision(env)
@@ -100,7 +102,7 @@ end
 
 RLBase.is_terminated(env::DynamicObstacles) = iscollision(env) || get_world(env)[GOAL, get_agent_pos(env)]
 
-function RLBase.reset!(env::DynamicObstacles)
+function RLBase.reset!(env::DynamicObstacles{T}) where {T}
     world = get_world(env)
     rng = get_rng(env)
 
@@ -134,7 +136,7 @@ function RLBase.reset!(env::DynamicObstacles)
     set_agent_pos!(env, agent_start_pos)
     set_agent_dir!(env, agent_start_dir)
 
-    set_reward!(env, 0.0)
+    set_reward!(env, zero(T))
 
     return env
 end
