@@ -9,6 +9,7 @@ mutable struct Catcher{T, R} <: AbstractGridWorld
     terminal_reward::T
     ball_reward::T
     ball_pos::CartesianIndex{2}
+    done::Bool
 end
 
 get_reward_type(env::Catcher{T}) where {T} = T
@@ -31,8 +32,9 @@ function Catcher(; T = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     reward = zero(T)
     terminal_reward = -one(T)
     ball_reward = one(T)
+    done = false
 
-    env = Catcher(world, agent_start_pos, agent_start_dir, reward, rng, terminal_reward, ball_reward, ball_pos)
+    env = Catcher(world, agent_start_pos, agent_start_dir, reward, rng, terminal_reward, ball_reward, ball_pos, done)
 
     RLBase.reset!(env)
 
@@ -72,6 +74,7 @@ function (env::Catcher{T})(action::Union{MoveLeft, MoveRight, MoveCenter}) where
     world[BALL, new_ball_pos] = true
     world[EMPTY, new_ball_pos] = false
 
+    set_done!(env, (env.ball_pos[1] == get_height(env)) && !(get_world(env)[BASKET, env.ball_pos]))
     if new_ball_pos[1] == height
         if new_ball_pos[2] == new_agent_pos[2]
             set_reward!(env, env.ball_reward)
@@ -116,6 +119,7 @@ function RLBase.reset!(env::Catcher{T}) where {T}
     set_agent_dir!(env, agent_start_dir)
 
     set_reward!(env, zero(T))
+    set_done!(env, false)
 
     return env
 end

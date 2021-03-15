@@ -8,6 +8,7 @@ mutable struct GridRooms{T, R} <: AbstractGridWorld
     rng::R
     terminal_reward::T
     goal_pos::CartesianIndex{2}
+    done::Bool
 end
 
 get_reward_type(env::GridRooms{T}) where {T} = T
@@ -49,8 +50,9 @@ function GridRooms(; T = Float32, grid_size = (2, 2), room_size = (5, 5), rng = 
     reward = zero(T)
     terminal_reward = one(T)
     goal_pos = CartesianIndex(height - 1, width - 1)
+    done = false
 
-    env = GridRooms(world, agent_pos, agent_dir, reward, rng, terminal_reward, goal_pos)
+    env = GridRooms(world, agent_pos, agent_dir, reward, rng, terminal_reward, goal_pos, done)
 
     RLBase.reset!(env)
 
@@ -90,6 +92,7 @@ function RLBase.reset!(env::GridRooms{T}) where {T}
     set_agent_dir!(env, agent_start_dir)
 
     set_reward!(env, zero(T))
+    set_done!(env, false)
 
     return env
 end

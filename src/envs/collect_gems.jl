@@ -10,6 +10,7 @@ mutable struct CollectGems{T, R} <: AbstractGridWorld
     num_gem_current::Int
     gem_reward::T
     gem_pos::Vector{CartesianIndex{2}}
+    done::Bool
 end
 
 get_reward_type(env::CollectGems{T}) where {T} = T
@@ -26,15 +27,14 @@ function CollectGems(; T = Float32, height = 8, width = 8, num_gem_init = floor(
     num_gem_current = num_gem_init
     gem_reward = one(T)
     gem_pos = CartesianIndex{2}[]
+    done = false
 
-    env = CollectGems(world, agent_pos, agent_dir, reward, rng, num_gem_init, num_gem_current, gem_reward, gem_pos)
+    env = CollectGems(world, agent_pos, agent_dir, reward, rng, num_gem_init, num_gem_current, gem_reward, gem_pos, done)
 
     RLBase.reset!(env)
 
     return env
 end
-
-RLBase.is_terminated(env::CollectGems) = env.num_gem_current <= 0
 
 function (env::CollectGems{T})(action::AbstractMoveAction) where {T}
     world = get_world(env)
@@ -44,6 +44,8 @@ function (env::CollectGems{T})(action::AbstractMoveAction) where {T}
         set_agent_pos!(env, dest)
     end
 
+    set_done!(env, env.num_gem_current <= 0)
+
     set_reward!(env, zero(T))
     agent_pos = get_agent_pos(env)
     if world[GEM, agent_pos]
@@ -52,6 +54,18 @@ function (env::CollectGems{T})(action::AbstractMoveAction) where {T}
         env.num_gem_current = env.num_gem_current - 1
         set_reward!(env, env.gem_reward)
     end
+
+    return env
+end
+
+function (env::CollectGems{T})(action::AbstractTurnAction) where {T}
+    dir = get_agent_dir(env)
+    new_dir = turn(action, dir)
+    set_agent_dir!(env, new_dir)
+    world = get_world(env)
+
+    set_done!(env, env.num_gem_current <= 0)
+    set_reward!(env, zero(T))
 
     return env
 end
@@ -81,6 +95,7 @@ function RLBase.reset!(env::CollectGems{T}) where {T}
     set_agent_dir!(env, agent_start_dir)
 
     set_reward!(env, zero(T))
+    set_done!(env, false)
 
     return env
 end

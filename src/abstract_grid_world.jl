@@ -14,6 +14,9 @@ set_agent_dir!(env::AbstractGridWorld, dir::AbstractDirection) = env.agent_dir =
 get_reward(env::AbstractGridWorld) = env.reward
 set_reward!(env::AbstractGridWorld, reward) = env.reward = reward
 
+get_done(env::AbstractGridWorld) = env.done
+set_done!(env::AbstractGridWorld, done) = env.done = done
+
 get_rng(env::AbstractGridWorld) = env.rng
 
 get_goal_pos(env::AbstractGridWorld) = env.goal_pos
@@ -81,14 +84,21 @@ RLBase.action_space(env::AbstractGridWorld, player::RLBase.DefaultPlayer, ::Undi
 
 RLBase.reward(env::AbstractGridWorld, ::RLBase.DefaultPlayer) = get_reward(env)
 
-RLBase.is_terminated(env::AbstractGridWorld) = get_world(env)[GOAL, get_agent_pos(env)]
+RLBase.is_terminated(env::AbstractGridWorld) = get_done(env)
 
 function (env::AbstractGridWorld)(action::AbstractTurnAction)
     dir = get_agent_dir(env)
     new_dir = turn(action, dir)
     set_agent_dir!(env, new_dir)
+    world = get_world(env)
 
-    set_reward!(env, zero(get_reward_type(env)))
+    if world[GOAL, get_agent_pos(env)]
+        set_done!(env, true)
+        set_reward!(env, env.terminal_reward)
+    else
+        set_done!(env, false)
+        set_reward!(env, zero(get_reward_type(env)))
+    end
 
     return env
 end
@@ -101,9 +111,12 @@ function (env::AbstractGridWorld)(action::AbstractMoveAction)
         set_agent_pos!(env, dest)
     end
 
-    set_reward!(env, zero(get_reward_type(env)))
-    if RLBase.is_terminated(env)
+    if world[GOAL, get_agent_pos(env)]
+        set_done!(env, true)
         set_reward!(env, env.terminal_reward)
+    else
+        set_done!(env, false)
+        set_reward!(env, zero(get_reward_type(env)))
     end
 
     return env

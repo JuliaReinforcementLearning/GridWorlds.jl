@@ -11,6 +11,7 @@ mutable struct DynamicObstacles{T, R} <: AbstractGridWorld
     num_obstacles::Int
     obstacle_pos::Vector{CartesianIndex{2}}
     terminal_penalty::T
+    done::Bool
 end
 
 get_reward_type(env::DynamicObstacles{T}) where {T} = T
@@ -31,8 +32,9 @@ function DynamicObstacles(; T = Float32, height = 8, width = 8, num_obstacles = 
     terminal_reward = one(T)
     obstacle_pos = CartesianIndex{2}[]
     terminal_penalty = -one(T)
+    done = false
 
-    env = DynamicObstacles(world, agent_pos, agent_dir, reward, rng, terminal_reward, goal_pos, num_obstacles, obstacle_pos, terminal_penalty)
+    env = DynamicObstacles(world, agent_pos, agent_dir, reward, rng, terminal_reward, goal_pos, num_obstacles, obstacle_pos, terminal_penalty, done)
 
     RLBase.reset!(env)
 
@@ -48,6 +50,12 @@ function (env::DynamicObstacles{T})(action::AbstractMoveAction) where {T}
     dest = move(action, get_agent_dir(env), get_agent_pos(env))
     if !world[WALL, dest]
         set_agent_pos!(env, dest)
+    end
+
+    if iscollision(env) || world[GOAL, get_agent_pos(env)]
+        set_done!(env, true)
+    else
+        set_done!(env, false)
     end
 
     set_reward!(env, zero(T))
@@ -137,6 +145,7 @@ function RLBase.reset!(env::DynamicObstacles{T}) where {T}
     set_agent_dir!(env, agent_start_dir)
 
     set_reward!(env, zero(T))
+    set_done!(env, false)
 
     return env
 end

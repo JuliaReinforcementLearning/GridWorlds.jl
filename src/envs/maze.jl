@@ -8,6 +8,7 @@ mutable struct Maze{T, R} <: AbstractGridWorld
     rng::R
     terminal_reward::T
     goal_pos::CartesianIndex{2}
+    done::Bool
 end
 
 get_reward_type(env::Maze{T}) where {T} = T
@@ -37,8 +38,9 @@ function Maze(; T = Float32, height = 9, width = 9, rng = Random.GLOBAL_RNG)
     agent_dir = RIGHT
     reward = zero(T)
     terminal_reward = one(T)
+    done = false
 
-    env = Maze(world, agent_pos, agent_dir, reward, rng, terminal_reward, goal_pos)
+    env = Maze(world, agent_pos, agent_dir, reward, rng, terminal_reward, goal_pos, done)
 
     RLBase.reset!(env)
 
@@ -123,6 +125,7 @@ function RLBase.reset!(env::Maze{T}) where {T}
     set_agent_dir!(env, agent_start_dir)
 
     set_reward!(env, zero(T))
+    set_done!(env, false)
 
     return env
 end

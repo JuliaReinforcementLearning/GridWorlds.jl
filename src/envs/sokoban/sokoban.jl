@@ -41,6 +41,7 @@ mutable struct Sokoban{T, R} <: AbstractGridWorld
     dataset::LevelDataset
     box_pos::Vector{CartesianIndex{2}}
     target_pos::Vector{CartesianIndex{2}}
+    done::Bool
 end
 
 get_reward_type(env::Sokoban{T}) where {T} = T
@@ -60,8 +61,9 @@ function Sokoban(; T = Float32, file = joinpath(dirname(pathof(@__MODULE__)), "e
 
     box_pos = CartesianIndex{2}[]
     target_pos = CartesianIndex{2}[]
+    done = false
 
-    env = Sokoban(world, agent_pos, agent_dir, reward, rng, dataset, box_pos, target_pos)
+    env = Sokoban(world, agent_pos, agent_dir, reward, rng, dataset, box_pos, target_pos, done)
 
     RLBase.reset!(env)
 
@@ -70,8 +72,6 @@ end
 
 RLBase.StateStyle(env::Sokoban) = RLBase.InternalState{Any}()
 get_navigation_style(env::Sokoban) = UNDIRECTED_NAVIGATION
-
-RLBase.is_terminated(env::Sokoban) = all(pos -> get_world(env)[TARGET, pos], env.box_pos)
 
 function (env::Sokoban)(action::AbstractMoveAction)
     world = get_world(env)
@@ -103,8 +103,21 @@ function (env::Sokoban)(action::AbstractMoveAction)
         end
     end
 
+    set_done!(env, all(pos -> get_world(env)[TARGET, pos], env.box_pos))
     r2 = sum(pos -> world[TARGET, pos], env.box_pos)
     set_reward!(env, r2 - r1)
+
+    return env
+end
+
+function (env::Sokoban{T})(action::AbstractTurnAction) where {T}
+    dir = get_agent_dir(env)
+    new_dir = turn(action, dir)
+    set_agent_dir!(env, new_dir)
+    world = get_world(env)
+
+    set_done!(env, all(pos -> get_world(env)[TARGET, pos], env.box_pos))
+    set_reward!(env, zero(T))
 
     return env
 end
@@ -156,6 +169,7 @@ function RLBase.reset!(env::Sokoban{T}) where {T}
     set_agent_dir!(env, agent_start_dir)
 
     set_reward!(env, zero(T))
+    set_done!(env, false)
 
     return env
 end

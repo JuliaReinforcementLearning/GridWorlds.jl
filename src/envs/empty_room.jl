@@ -8,6 +8,7 @@ mutable struct EmptyRoom{T, R} <: AbstractGridWorld
     rng::R
     terminal_reward::T
     goal_pos::CartesianIndex{2}
+    done::Bool
 end
 
 get_reward_type(env::EmptyRoom{T}) where {T} = T
@@ -26,8 +27,9 @@ function EmptyRoom(; T = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG
     agent_dir = RIGHT
     reward = zero(T)
     terminal_reward = one(T)
+    done = false
 
-    env = EmptyRoom(world, agent_pos, agent_dir, reward, rng, terminal_reward, goal_pos)
+    env = EmptyRoom(world, agent_pos, agent_dir, reward, rng, terminal_reward, goal_pos, done)
 
     RLBase.reset!(env)
 
@@ -55,6 +57,7 @@ function RLBase.reset!(env::EmptyRoom{T}) where {T}
     set_agent_dir!(env, agent_start_dir)
 
     set_reward!(env, zero(T))
+    set_done!(env, false)
 
     return env
 end

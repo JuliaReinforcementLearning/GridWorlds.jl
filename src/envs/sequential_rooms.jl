@@ -10,6 +10,7 @@ mutable struct SequentialRooms{T, R} <: AbstractGridWorld
     num_rooms::Int
     room_length_range::UnitRange{Int}
     rooms::Array{Room, 1}
+    done::Bool
 end
 
 get_reward_type(env::SequentialRooms{T}) where {T} = T
@@ -22,8 +23,9 @@ function SequentialRooms(; T = Float32, num_rooms = 3, room_length_range = 4:6, 
     agent_dir = RIGHT
     reward = zero(T)
     terminal_reward = one(T)
+    done = false
 
-    env = SequentialRooms(world, agent_pos, agent_dir, reward, rng, terminal_reward, num_rooms, room_length_range, Room[])
+    env = SequentialRooms(world, agent_pos, agent_dir, reward, rng, terminal_reward, num_rooms, room_length_range, Room[], done)
 
     RLBase.reset!(env)
 
@@ -87,6 +89,7 @@ function RLBase.reset!(env::SequentialRooms{T}) where {T}
     set_agent_dir!(env, agent_start_dir)
 
     set_reward!(env, zero(T))
+    set_done!(env, false)
 
     return env
 end
