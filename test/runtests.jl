@@ -1,54 +1,73 @@
-using GridWorlds
-using Test
-using Random
-using ReinforcementLearningBase
+import GridWorlds
+import GridWorlds: GW
+import Test
+import Random
+import ReinforcementLearningBase
+import ReinforcementLearningBase: RLBase
 
 # ENVS = [EmptyRoom, GridRooms, SequentialRooms, Maze, GoToDoor, DoorKey, CollectGems, DynamicObstacles, Sokoban, Snake, Catcher, Transport]
-ENVS = [EmptyRoom, GridRooms, SequentialRooms, Maze, CollectGems, DynamicObstacles, Sokoban, Catcher]
+ENVS = [GW.EmptyRoomDirected,
+        GW.EmptyRoomUndirected,
+        GW.GridRoomsDirected,
+        GW.SequentialRoomsUndirected,
+        GW.SequentialRoomsDirected,
+        GW.SequentialRoomsUndirected,
+        GW.MazeDirected,
+        GW.MazeUndirected,
+        GW.CollectGemsDirected,
+        GW.CollectGemsUndirected,
+        GW.DynamicObstaclesDirected,
+        GW.DynamicObstaclesUndirected,
+        GW.SokobanDirected,
+        GW.SokobanUndirected,
+        GW.Catcher,
+       ]
 
-MAX_STEPS = 3000
-NUM_RESETS = 3
+const MAX_STEPS = 3000
+const NUM_RESETS = 3
 
-get_terminal_returns(env::EmptyRoom) = (env.terminal_reward,)
-get_terminal_returns(env::GridRooms) = (env.terminal_reward,)
-get_terminal_returns(env::SequentialRooms) = (env.terminal_reward,)
-get_terminal_returns(env::Maze) = (env.terminal_reward,)
-get_terminal_returns(env::CollectGems) = (env.num_gem_init * env.gem_reward,)
-get_terminal_returns(env::DynamicObstacles) = (env.terminal_reward, env.terminal_penalty)
-get_terminal_returns(env::Sokoban) = (GridWorlds.get_reward_type(env)(length(env.box_pos)),)
-get_terminal_returns(env::Catcher) = env.terminal_reward:env.ball_reward:MAX_STEPS*env.ball_reward
+get_terminal_returns(env::GW.EmptyRoomDirected) = (env.terminal_reward,)
+get_terminal_returns(env::GW.EmptyRoomUndirected) = (env.terminal_reward,)
+get_terminal_returns(env::GW.GridRoomsDirected) = (env.terminal_reward,)
+get_terminal_returns(env::GW.GridRoomsUndirected) = (env.terminal_reward,)
+get_terminal_returns(env::GW.SequentialRoomsDirected) = (env.terminal_reward,)
+get_terminal_returns(env::GW.SequentialRoomsUndirected) = (env.terminal_reward,)
+get_terminal_returns(env::GW.MazeDirected) = (env.terminal_reward,)
+get_terminal_returns(env::GW.MazeUndirected) = (env.terminal_reward,)
+get_terminal_returns(env::GW.CollectGemsDirected) = (env.num_gem_init * env.gem_reward,)
+get_terminal_returns(env::GW.CollectGemsUndirected) = (env.num_gem_init * env.gem_reward,)
+get_terminal_returns(env::GW.DynamicObstaclesDirected) = (env.terminal_reward, env.terminal_penalty)
+get_terminal_returns(env::GW.DynamicObstaclesUndirected) = (env.terminal_reward, env.terminal_penalty)
+get_terminal_returns(env::GW.SokobanDirected{T}) where {T} = (T(length(env.box_pos)),)
+get_terminal_returns(env::GW.SokobanUndirected{T}) where {T} = (T(length(env.box_pos)),)
+get_terminal_returns(env::GW.Catcher) = env.terminal_reward:env.ball_reward:MAX_STEPS*env.ball_reward
 
-@testset "GridWorlds.jl" begin
+Test.@testset "GridWorlds.jl" begin
     for Env in ENVS
-        for NAVIGATION in (GridWorlds.DIRECTED_NAVIGATION, GridWorlds.UNDIRECTED_NAVIGATION)
-            if Env == Catcher && NAVIGATION == GridWorlds.DIRECTED_NAVIGATION
-                continue
-            end
-            GridWorlds.get_navigation_style(::Env) = NAVIGATION
-            @testset "$(NAVIGATION) $(Env)" begin
-                env = Env()
-                for _ in 1:NUM_RESETS
-                    reset!(env)
-                    @test reward(env) == zero(GridWorlds.get_reward_type(env))
-                    @test is_terminated(env) == false
+        Test.@testset "$(Env)" begin
+            T = Float32
+            env = Env(T = T)
+            for _ in 1:NUM_RESETS
+                RLBase.reset!(env)
+                Test.@test RLBase.reward(env) == zero(T)
+                Test.@test RLBase.is_terminated(env) == false
 
-                    total_reward = zero(GridWorlds.get_reward_type(env))
-                    for i in 1:MAX_STEPS
-                        action = rand(action_space(env))
-                        env(action)
-                        total_reward += reward(env)
+                total_reward = zero(T)
+                for i in 1:MAX_STEPS
+                    action = rand(RLBase.action_space(env))
+                    env(action)
+                    total_reward += RLBase.reward(env)
 
-                        @test 1 ≤ GW.get_agent_pos(env)[1] ≤ GW.get_height(env)
-                        @test 1 ≤ GW.get_agent_pos(env)[2] ≤ GW.get_width(env)
+                    Test.@test 1 ≤ GW.get_agent_pos(env)[1] ≤ GW.get_height(env)
+                    Test.@test 1 ≤ GW.get_agent_pos(env)[2] ≤ GW.get_width(env)
 
-                        if is_terminated(env)
-                            @test total_reward in get_terminal_returns(env)
-                            break
-                        end
+                    if RLBase.is_terminated(env)
+                        Test.@test total_reward in get_terminal_returns(env)
+                        break
+                    end
 
-                        if i == MAX_STEPS
-                            @info "$Env not terminated after MAX_STEPS = $MAX_STEPS"
-                        end
+                    if i == MAX_STEPS
+                        @info "$Env not terminated after MAX_STEPS = $MAX_STEPS"
                     end
                 end
             end

@@ -3,7 +3,6 @@ export Catcher
 mutable struct Catcher{T, R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Basket, Ball}}
     agent_pos::CartesianIndex{2}
-    agent_dir::AbstractDirection
     reward::T
     rng::R
     terminal_reward::T
@@ -11,8 +10,6 @@ mutable struct Catcher{T, R} <: AbstractGridWorld
     ball_pos::CartesianIndex{2}
     done::Bool
 end
-
-get_reward_type(env::Catcher{T}) where {T} = T
 
 function Catcher(; T = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     objects = (EMPTY, BASKET, BALL)
@@ -25,7 +22,6 @@ function Catcher(; T = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     world[EMPTY, ball_pos] = false
 
     agent_start_pos = CartesianIndex(height, 1)
-    agent_start_dir = CENTER
     world[BASKET, agent_start_pos] = true
     world[EMPTY, agent_start_pos] = false
 
@@ -34,19 +30,20 @@ function Catcher(; T = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     ball_reward = one(T)
     done = false
 
-    env = Catcher(world, agent_start_pos, agent_start_dir, reward, rng, terminal_reward, ball_reward, ball_pos, done)
+    env = Catcher(world, agent_start_pos, reward, rng, terminal_reward, ball_reward, ball_pos, done)
 
     RLBase.reset!(env)
 
     return env
 end
 
-get_navigation_style(::Catcher) = UNDIRECTED_NAVIGATION
+RLBase.state_space(env::Catcher, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
 RLBase.StateStyle(env::Catcher) = RLBase.InternalState{Any}()
-RLBase.is_terminated(env::Catcher) = (env.ball_pos[1] == get_height(env)) && !(get_world(env)[BASKET, env.ball_pos])
-RLBase.action_space(env::Catcher, player::RLBase.DefaultPlayer) = (MOVE_LEFT, MOVE_RIGHT, MOVE_CENTER)
+RLBase.action_space(env::Catcher, player::RLBase.DefaultPlayer) = (MOVE_LEFT, MOVE_RIGHT, NO_MOVE)
+RLBase.reward(env::Catcher, ::RLBase.DefaultPlayer) = get_reward(env)
+RLBase.is_terminated(env::Catcher) = get_done(env)
 
-function (env::Catcher{T})(action::Union{MoveLeft, MoveRight, MoveCenter}) where {T}
+function (env::Catcher{T})(action::Union{MoveLeft, MoveRight, NoMove}) where {T}
     world = get_world(env)
     height = get_height(env)
     old_agent_pos = get_agent_pos(env)
@@ -113,10 +110,7 @@ function RLBase.reset!(env::Catcher{T}) where {T}
     world[BASKET, agent_start_pos] = true
     world[EMPTY, agent_start_pos] = false
 
-    agent_start_dir = get_agent_start_dir(env)
-
     set_agent_pos!(env, agent_start_pos)
-    set_agent_dir!(env, agent_start_dir)
 
     set_reward!(env, zero(T))
     set_done!(env, false)

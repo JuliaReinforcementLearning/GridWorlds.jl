@@ -30,10 +30,10 @@ const MOVE_RIGHT = MoveRight()
 move(::MoveRight, pos::CartesianIndex{2}) = move(RIGHT, pos)
 move(action::MoveRight, dir::AbstractDirection, pos::CartesianIndex{2}) = move(action, pos)
 
-struct MoveCenter <: AbstractMoveAction end
-const MOVE_CENTER = MoveCenter()
-move(::MoveCenter, pos::CartesianIndex{2}) = move(CENTER, pos)
-move(action::MoveCenter, dir::AbstractDirection, pos::CartesianIndex{2}) = move(action, pos)
+struct NoMove <: AbstractMoveAction end
+const NO_MOVE = NoMove()
+move(::NoMove, pos::CartesianIndex{2}) = pos
+move(action::NoMove, dir::AbstractDirection, pos::CartesianIndex{2}) = move(action, pos)
 
 struct TurnLeft <: AbstractTurnAction end
 const TURN_LEFT = TurnLeft()

@@ -15,15 +15,22 @@ This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minig
     1. [Terminal Rendering](#terminal-rendering)
     1.  [Makie Rendering](#makie-rendering)
 * [List of Environments](#list-of-environments)
-  1. [EmptyRoom](#emptyroom)
-  1. [GridRooms](#gridrooms)
-  1. [SequentialRooms](#sequentialrooms)
-  1. [Maze](#maze)
+  1. [EmptyRoomUndirected](#emptyroomundirected)
+  1. [EmptyRoomDirected](#emptyroomdirected)
+  1. [GridRoomsUndirected](#gridroomsundirected)
+  1. [GridRoomsDirected](#gridroomsdirected)
+  1. [SequentialRoomsUndirected](#sequentialroomsundirected)
+  1. [SequentialRoomsDirected](#sequentialroomsdirected)
+  1. [MazeUndirected](#mazeundirected)
+  1. [MazeDirected](#mazedirected)
   1. [GoToDoor](#gotodoor)
   1. [DoorKey](#doorkey)
-  1. [CollectGems](#collectgems)
-  1. [DynamicObstacles](#dynamicobstacles)
-  1. [Sokoban](#sokoban)
+  1. [CollectGemsUndirected](#collectgemsundirected)
+  1. [CollectGemsDirected](#collectgemsdirected)
+  1. [DynamicObstaclesUndirected](#dynamicobstaclesundirected)
+  1. [DynamicObstaclesDirected](#dynamicobstaclesdirected)
+  1. [SokobanUndirected](#sokobanundirected)
+  1. [SokobanDirected](#sokobandirected)
   1. [Snake](#snake)
   1. [Catcher](#catcher)
   1. [Transport](#transport)
@@ -95,29 +102,37 @@ The behaviour of environments is easily customizable. Here are some of the thing
 
 ## List of Environments
 
-1. ### EmptyRoom
+1. ### EmptyRoomUndirected
 
-    DirectedNavigation | UndirectedNavigation
-    ------------ | -------------
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/empty_room_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/empty_room_undirected.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/empty_room_undirected.gif" width="300px">
 
-1. ### GridRooms
+1. ### EmptyRoomDirected
 
-    DirectedNavigation | UndirectedNavigation
-    ------------ | -------------
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/grid_rooms_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/grid_rooms_undirected.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/empty_room_directed.gif" width="300px">
 
-1. ### SequentialRooms
+1. ### GridRoomsUndirected
 
-    DirectedNavigation | UndirectedNavigation
-    ------------ | -------------
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sequential_rooms_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sequential_rooms_undirected.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/grid_rooms_undirected.gif" width="300px">
 
-1. ### Maze
+1. ### GridRoomsDirected
 
-    DirectedNavigation | UndirectedNavigation
-    ------------ | -------------
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/maze_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/maze_undirected.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/grid_rooms_directed.gif" width="300px">
+
+1. ### SequentialRoomsUndirected
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sequential_rooms_undirected.gif" width="300px">
+
+1. ### SequentialRoomsDirected
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sequential_rooms_directed.gif" width="300px">
+
+1. ### MazeUndirected
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/maze_undirected.gif" width="300px">
+
+1. ### MazeDirected
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/maze_directed.gif" width="300px">
 
 1. ### GoToDoor
 
@@ -131,23 +146,29 @@ The behaviour of environments is easily customizable. Here are some of the thing
     ------------ | -------------
     <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/door_key_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/door_key_undirected.gif" width="300px">
 
-1. ### CollectGems
+1. ### CollectGemsUndirected
 
-    DirectedNavigation | UndirectedNavigation
-    ------------ | -------------
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/collect_gems_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/collect_gems_undirected.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/collect_gems_undirected.gif" width="300px">
 
-1. ### DynamicObstacles
+1. ### CollectGemsDirected
 
-    DirectedNavigation | UndirectedNavigation
-    ------------ | -------------
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/dynamic_obstacles_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/dynamic_obstacles_undirected.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/collect_gems_directed.gif" width="300px">
+
+1. ### DynamicObstaclesUndirected
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/dynamic_obstacles_undirected.gif" width="300px">
  
-1. ### Sokoban
+1. ### DynamicObstaclesDirected
 
-    DirectedNavigation | UndirectedNavigation
-    ------------ | -------------
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sokoban_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sokoban_undirected.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/dynamic_obstacles_directed.gif" width="300px">
+
+1. ### SokobanUndirected
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sokoban_undirected.gif" width="300px">
+
+1. ### SokobanDirected
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sokoban_directed.gif" width="300px">
 
 1. ### Snake
 

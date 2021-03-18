@@ -41,13 +41,14 @@ Base.setindex!(world::GridWorldBase, value::Bool, object::AbstractObject, args..
 # methods for agent view
 #####
 
-get_grid_inds((i, j), (m, n), ::Center) = CartesianIndices((i-m÷2:i-m÷2+m-1, j-n÷2:j-n÷2+n-1))
+# get_grid_inds((i, j), (m, n), ::Center) = CartesianIndices((i-m÷2:i-m÷2+m-1, j-n÷2:j-n÷2+n-1))
+get_grid_inds((i, j), (m, n)) = CartesianIndices((i-m÷2:i-m÷2+m-1, j-n÷2:j-n÷2+n-1))
 get_grid_inds((i, j), (m, n), ::Up) = CartesianIndices((i-m+1:i, j-(n-1)÷2:j+(n-(n-1)÷2)-1))
 get_grid_inds((i, j), (m, n), ::Down) = CartesianIndices((i:i+m-1, j-(n-1)÷2:j+(n-(n-1)÷2)-1))
 get_grid_inds((i, j), (m, n), ::Left) = CartesianIndices((i-(n-1)÷2:i+(n-(n-1)÷2)-1, j-m+1:j))
 get_grid_inds((i, j), (m, n), ::Right) = CartesianIndices((i-(n-1)÷2:i+(n-(n-1)÷2)-1, j:j+m-1))
 
-map_ind((i,j), (m, n), ::Center) = (i,j)
+# map_ind((i,j), (m, n), ::Center) = (i,j)
 map_ind((i,j), (m, n), ::Up) = (m-i+1, n-j+1)
 map_ind((i,j), (m, n), ::Down) = (i,j)
 map_ind((i,j), (m, n), ::Left) = (m-j+1, i)
@@ -69,6 +70,28 @@ function get_grid!(dest_grid::AbstractArray{Bool, 3}, src_grid::AbstractArray{Bo
         pos = window_inds[ind]
         if pos ∈ valid_inds
             dest_grid[:, map_ind(ind.I, window_size, dir)...] .= src_grid[:, pos]
+        end
+    end
+
+    return dest_grid
+end
+
+function get_grid(src_grid::AbstractArray{Bool, 3}, window_size, pos::CartesianIndex{2})
+    dest_grid = falses(get_num_objects(src_grid), window_size...)
+    get_grid!(dest_grid, src_grid, pos)
+    return dest_grid
+end
+
+function get_grid!(dest_grid::AbstractArray{Bool, 3}, src_grid::AbstractArray{Bool, 3}, pos::CartesianIndex{2})
+    window_size = (get_height(dest_grid), get_width(dest_grid))
+    window_inds = get_grid_inds(pos.I, window_size)
+
+    valid_inds = CartesianIndices((get_height(src_grid), get_width(src_grid)))
+
+    for ind in CartesianIndices(window_inds)
+        pos = window_inds[ind]
+        if pos ∈ valid_inds
+            dest_grid[:, ind.I...] .= src_grid[:, pos]
         end
     end
 
