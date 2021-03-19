@@ -41,14 +41,12 @@ Base.setindex!(world::GridWorldBase, value::Bool, object::AbstractObject, args..
 # methods for agent view
 #####
 
-# get_grid_inds((i, j), (m, n), ::Center) = CartesianIndices((i-m÷2:i-m÷2+m-1, j-n÷2:j-n÷2+n-1))
 get_grid_inds((i, j), (m, n)) = CartesianIndices((i-m÷2:i-m÷2+m-1, j-n÷2:j-n÷2+n-1))
 get_grid_inds((i, j), (m, n), ::Up) = CartesianIndices((i-m+1:i, j-(n-1)÷2:j+(n-(n-1)÷2)-1))
 get_grid_inds((i, j), (m, n), ::Down) = CartesianIndices((i:i+m-1, j-(n-1)÷2:j+(n-(n-1)÷2)-1))
 get_grid_inds((i, j), (m, n), ::Left) = CartesianIndices((i-(n-1)÷2:i+(n-(n-1)÷2)-1, j-m+1:j))
 get_grid_inds((i, j), (m, n), ::Right) = CartesianIndices((i-(n-1)÷2:i+(n-(n-1)÷2)-1, j:j+m-1))
 
-# map_ind((i,j), (m, n), ::Center) = (i,j)
 map_ind((i,j), (m, n), ::Up) = (m-i+1, n-j+1)
 map_ind((i,j), (m, n), ::Down) = (i,j)
 map_ind((i,j), (m, n), ::Left) = (m-j+1, i)

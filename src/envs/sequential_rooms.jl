@@ -1,5 +1,5 @@
 mutable struct SequentialRoomsDirected{T, R} <: AbstractGridWorld
-    world::GridWorldBase{Tuple{Empty, Wall, Goal}}
+    world::GridWorldBase{Tuple{Agent, Wall, Goal}}
     agent_pos::CartesianIndex{2}
     agent_dir::AbstractDirection
     reward::T
@@ -15,9 +15,8 @@ end
 @generate_setters(SequentialRoomsDirected)
 
 mutable struct SequentialRoomsUndirected{T, R} <: AbstractGridWorld
-    world::GridWorldBase{Tuple{Empty, Wall, Goal}}
+    world::GridWorldBase{Tuple{Agent, Wall, Goal}}
     agent_pos::CartesianIndex{2}
-    agent_dir::AbstractDirection
     reward::T
     rng::R
     terminal_reward::T
@@ -35,7 +34,7 @@ end
 #####
 
 function SequentialRoomsDirected(; T = Float32, num_rooms = 3, room_length_range = 4:6, rng = Random.GLOBAL_RNG)
-    objects = (EMPTY, WALL, GOAL)
+    objects = (AGENT, WALL, GOAL)
     big_n = 2 * num_rooms * room_length_range.stop
     world = GridWorldBase(objects, big_n, big_n)
     agent_pos = CartesianIndex(2, 2)
@@ -53,6 +52,10 @@ end
 
 RLBase.state_space(env::SequentialRoomsDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
 RLBase.state(env::SequentialRoomsDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_agent_view(env)
+
+RLBase.state_space(env::SequentialRoomsDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
+RLBase.state(env::SequentialRoomsDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (get_grid(env), get_agent_dir(env))
+
 RLBase.action_space(env::SequentialRoomsDirected, ::RLBase.DefaultPlayer) = DIRECTED_NAVIGATION_ACTIONS
 RLBase.reward(env::SequentialRoomsDirected, ::RLBase.DefaultPlayer) = get_reward(env)
 RLBase.is_terminated(env::SequentialRoomsDirected) = get_done(env)
@@ -82,7 +85,6 @@ function RLBase.reset!(env::SequentialRoomsDirected{T}) where {T}
 
             door_pos = rand(rng, intersect(env.rooms[end - 1].region, room.region)[2:end-1])
             world[WALL, door_pos] = false
-            world[EMPTY, door_pos] = true
         end
 
         tries += 1
@@ -100,14 +102,13 @@ function RLBase.reset!(env::SequentialRoomsDirected{T}) where {T}
         goal_pos = rand(rng, get_interior(env.rooms[end]))
     end
     world[GOAL, goal_pos] = true
-    world[EMPTY, goal_pos] = false
 
     # add the agent randomly in the first room
-    agent_start_pos = get_interior(env.rooms[1])
-    agent_start_dir = rand(rng, DIRECTIONS)
+    agent_start_pos = rand(rng, get_interior(env.rooms[1]))
+    set_agent_pos!(env, agent_start_pos)
+    world[AGENT, agent_start_pos] = true
 
-    set_agent_pos!(env, rand(rng, agent_start_pos))
-    set_agent_dir!(env, agent_start_dir)
+    set_agent_dir!(env, rand(rng, DIRECTIONS))
 
     set_reward!(env, zero(T))
     set_done!(env, false)
@@ -116,14 +117,13 @@ function RLBase.reset!(env::SequentialRoomsDirected{T}) where {T}
 end
 
 function (env::SequentialRoomsDirected{T})(action::AbstractTurnAction) where {T}
-    dir = get_agent_dir(env)
-    new_dir = turn(action, dir)
+    new_dir = turn(action, get_agent_dir(env))
     set_agent_dir!(env, new_dir)
     world = get_world(env)
 
     if world[GOAL, get_agent_pos(env)]
         set_done!(env, true)
-        set_reward!(env, env.terminal_reward)
+        set_reward!(env, get_terminal_reward(env))
     else
         set_done!(env, false)
         set_reward!(env, zero(T))
@@ -135,14 +135,18 @@ end
 function (env::SequentialRoomsDirected{T})(action::AbstractMoveAction) where {T}
     world = get_world(env)
 
-    dest = move(action, get_agent_dir(env), get_agent_pos(env))
+    agent_pos = get_agent_pos(env)
+    dest = move(action, get_agent_dir(env), agent_pos)
+
     if !world[WALL, dest]
+        world[AGENT, agent_pos] = false
         set_agent_pos!(env, dest)
+        world[AGENT, dest] = true
     end
 
     if world[GOAL, get_agent_pos(env)]
         set_done!(env, true)
-        set_reward!(env, env.terminal_reward)
+        set_reward!(env, get_terminal_reward(env))
     else
         set_done!(env, false)
         set_reward!(env, zero(T))
@@ -156,16 +160,15 @@ end
 #####
 
 function SequentialRoomsUndirected(; T = Float32, num_rooms = 3, room_length_range = 4:6, rng = Random.GLOBAL_RNG)
-    objects = (EMPTY, WALL, GOAL)
+    objects = (AGENT, WALL, GOAL)
     big_n = 2 * num_rooms * room_length_range.stop
     world = GridWorldBase(objects, big_n, big_n)
     agent_pos = CartesianIndex(2, 2)
-    agent_dir = RIGHT
     reward = zero(T)
     terminal_reward = one(T)
     done = false
 
-    env = SequentialRoomsUndirected(world, agent_pos, agent_dir, reward, rng, terminal_reward, num_rooms, room_length_range, Room[], done)
+    env = SequentialRoomsUndirected(world, agent_pos, reward, rng, terminal_reward, num_rooms, room_length_range, Room[], done)
 
     RLBase.reset!(env)
 
@@ -174,6 +177,10 @@ end
 
 RLBase.state_space(env::SequentialRoomsUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
 RLBase.state(env::SequentialRoomsUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_view_size(env), get_agent_pos(env))
+
+RLBase.state_space(env::SequentialRoomsUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
+RLBase.state(env::SequentialRoomsUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = get_grid(env)
+
 RLBase.action_space(env::SequentialRoomsUndirected, player::RLBase.DefaultPlayer) = UNDIRECTED_NAVIGATION_ACTIONS
 RLBase.reward(env::SequentialRoomsUndirected, ::RLBase.DefaultPlayer) = get_reward(env)
 RLBase.is_terminated(env::SequentialRoomsUndirected) = get_done(env)
@@ -203,7 +210,6 @@ function RLBase.reset!(env::SequentialRoomsUndirected{T}) where {T}
 
             door_pos = rand(rng, intersect(env.rooms[end - 1].region, room.region)[2:end-1])
             world[WALL, door_pos] = false
-            world[EMPTY, door_pos] = true
         end
 
         tries += 1
@@ -221,11 +227,11 @@ function RLBase.reset!(env::SequentialRoomsUndirected{T}) where {T}
         goal_pos = rand(rng, get_interior(env.rooms[end]))
     end
     world[GOAL, goal_pos] = true
-    world[EMPTY, goal_pos] = false
 
     # add the agent randomly in the first room
-    agent_start_pos = get_interior(env.rooms[1])
-    set_agent_pos!(env, rand(rng, agent_start_pos))
+    agent_start_pos = rand(rng, get_interior(env.rooms[1]))
+    set_agent_pos!(env, agent_start_pos)
+    world[AGENT, agent_start_pos] = true
 
     set_reward!(env, zero(T))
     set_done!(env, false)
@@ -236,14 +242,18 @@ end
 function (env::SequentialRoomsUndirected{T})(action::AbstractMoveAction) where {T}
     world = get_world(env)
 
-    dest = move(action, get_agent_pos(env))
+    agent_pos = get_agent_pos(env)
+    dest = move(action, agent_pos)
+
     if !world[WALL, dest]
+        world[AGENT, agent_pos] = false
         set_agent_pos!(env, dest)
+        world[AGENT, dest] = true
     end
 
     if world[GOAL, get_agent_pos(env)]
         set_done!(env, true)
-        set_reward!(env, env.terminal_reward)
+        set_reward!(env, get_terminal_reward(env))
     else
         set_done!(env, false)
         set_reward!(env, zero(T))

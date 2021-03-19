@@ -18,15 +18,6 @@ get_agent_view(env::AbstractGridWorld) = get_grid(get_world(env), get_agent_view
 
 get_agent_view!(agent_view::AbstractArray{Bool, 3}, env::AbstractGridWorld) = get_grid!(agent_view, get_world(env), get_agent_pos(env), get_agent_dir(env))
 
-function get_grid_with_agent_layer(env::AbstractGridWorld)
-    grid = get_grid(env)
-    agent_layer = falses(1, get_height(env), get_width(env))
-    agent_layer[1, get_agent_pos(env)] = true
-    return cat(agent_layer, grid, dims = 1)
-end
-
-show_agent_char(env::AbstractGridWorld) = true
-
 #####
 # utils
 #####

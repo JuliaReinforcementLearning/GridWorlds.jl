@@ -25,7 +25,11 @@ end
 place_room!(env::AbstractGridWorld, room::Room) = place_room!(get_world(env), room)
 
 function place_room!(world::GridWorldBase, room::Room)
-    world[WALL, room.region] .= true
-    world[WALL, get_interior(room)] .= false
-    world[EMPTY, get_interior(room)] .= true
+    top = room.region.indices[1].start
+    bottom = room.region.indices[1].stop
+    left = room.region.indices[2].start
+    right = room.region.indices[2].stop
+
+    world[WALL, [top, bottom], left:right] .= true
+    world[WALL, top:bottom, [left, right]] .= true
 end

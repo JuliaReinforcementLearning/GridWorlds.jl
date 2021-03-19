@@ -1,14 +1,7 @@
-#####
-# Objects
-#####
-
 abstract type AbstractObject end
 
 struct Agent <: AbstractObject end
 const AGENT = Agent()
-
-struct Empty <: AbstractObject end
-const EMPTY = Empty()
 
 struct Wall <: AbstractObject end
 const WALL = Wall()

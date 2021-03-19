@@ -1,11 +1,3 @@
-const CHAR_TO_OBJECT = Dict(
-                            '@' => :agent,
-                            ' ' => EMPTY,
-                            '#' => WALL,
-                            '$' => BOX,
-                            '.' => TARGET,
-                           )
-
 struct LevelDataset
     contents::Vector{String}
 end
@@ -31,7 +23,7 @@ year = "2018",
 The dataset file can be updated by creating suitable [hook](https://github.com/JuliaReinforcementLearning/ReinforcementLearningCore.jl/blob/master/src/core/hooks.jl)
 """
 mutable struct SokobanDirected{T, R} <: AbstractGridWorld
-    world::GridWorldBase{Tuple{Empty, Wall, Box, Target}}
+    world::GridWorldBase{Tuple{Agent, Wall, Box, Target}}
     agent_pos::CartesianIndex{2}
     agent_dir::AbstractDirection
     reward::T
@@ -46,7 +38,7 @@ end
 @generate_setters(SokobanDirected)
 
 mutable struct SokobanUndirected{T, R} <: AbstractGridWorld
-    world::GridWorldBase{Tuple{Empty, Wall, Box, Target}}
+    world::GridWorldBase{Tuple{Agent, Wall, Box, Target}}
     agent_pos::CartesianIndex{2}
     reward::T
     rng::R
@@ -69,10 +61,12 @@ function SokobanDirected(; T = Float32, file = joinpath(dirname(pathof(@__MODULE
     height = length(level)
     width = length(level[1])
 
-    objects = (EMPTY, WALL, BOX, TARGET)
+    objects = (AGENT, WALL, BOX, TARGET)
     world = GridWorldBase(objects, height, width)
 
     agent_pos = CartesianIndex(2, 2)
+    world[AGENT, agent_pos] = true
+
     agent_dir = RIGHT
     reward = zero(T)
 
@@ -89,85 +83,12 @@ end
 
 RLBase.StateStyle(env::SokobanDirected) = RLBase.InternalState{Any}()
 
-function (env::SokobanDirected{T})(action::AbstractMoveAction) where {T}
-    world = get_world(env)
-
-    r1 = sum(pos -> world[TARGET, pos], env.box_pos)
-    agent_pos = get_agent_pos(env)
-    dir = get_agent_dir(env)
-    dest = move(action, dir, agent_pos)
-    if !world[WALL, dest]
-        beyond_dest = move(action, dir, dest)
-        if !world[BOX, dest]
-            set_agent_pos!(env, dest)
-        else
-            if !world[BOX, beyond_dest] && !world[WALL, beyond_dest]
-                world[BOX, dest] = false
-                if !world[TARGET, dest]
-                    world[EMPTY, dest] = true
-                end
-
-                world[BOX, beyond_dest] = true
-                if world[EMPTY, beyond_dest]
-                    world[EMPTY, beyond_dest] = false
-                end
-
-                idx = findfirst(pos -> pos == dest, env.box_pos)
-                env.box_pos[idx] = beyond_dest
-                set_agent_pos!(env, dest)
-            end
-        end
-    end
-
-    set_done!(env, all(pos -> get_world(env)[TARGET, pos], env.box_pos))
-    r2 = sum(pos -> world[TARGET, pos], env.box_pos)
-    set_reward!(env, convert(T, r2 - r1))
-
-    return env
-end
-
-function (env::SokobanDirected{T})(action::AbstractTurnAction) where {T}
-    dir = get_agent_dir(env)
-    new_dir = turn(action, dir)
-    set_agent_dir!(env, new_dir)
-    world = get_world(env)
-
-    set_done!(env, all(pos -> get_world(env)[TARGET, pos], env.box_pos))
-    set_reward!(env, zero(T))
-
-    return env
-end
-
-function set_level!(env::SokobanDirected, level::Vector{String})
-    world = get_world(env)
-    for i in 1:length(level)
-        for j in 1:length(level[1])
-            pos = CartesianIndex(i, j)
-            object = CHAR_TO_OBJECT[level[i][j]]
-
-            if object === :agent
-                set_agent_pos!(env, pos)
-                set_agent_dir!(env, RIGHT)
-                world[EMPTY, pos] = true
-            elseif object === EMPTY
-                world[object, pos] = true
-            elseif object === WALL
-                world[object, pos] = true
-            elseif object === BOX
-                push!(env.box_pos, pos)
-                world[object, pos] = true
-            elseif object === TARGET
-                push!(env.target_pos, pos)
-                world[object, pos] = true
-            end
-        end
-    end
-
-    return env
-end
-
 RLBase.state_space(env::SokobanDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
 RLBase.state(env::SokobanDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_agent_view(env)
+
+RLBase.state_space(env::SokobanDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
+RLBase.state(env::SokobanDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (get_grid(env), get_agent_dir(env))
+
 RLBase.action_space(env::SokobanDirected, ::RLBase.DefaultPlayer) = DIRECTED_NAVIGATION_ACTIONS
 RLBase.reward(env::SokobanDirected, ::RLBase.DefaultPlayer) = get_reward(env)
 RLBase.is_terminated(env::SokobanDirected) = get_done(env)
@@ -185,11 +106,79 @@ function RLBase.reset!(env::SokobanDirected{T}) where {T}
 
     set_level!(env, level)
 
-    agent_start_dir = RIGHT
-    set_agent_dir!(env, agent_start_dir)
+    set_agent_dir!(env, RIGHT)
 
     set_reward!(env, zero(T))
     set_done!(env, false)
+
+    return env
+end
+
+function (env::SokobanDirected{T})(action::AbstractTurnAction) where {T}
+    new_dir = turn(action, get_agent_dir(env))
+    set_agent_dir!(env, new_dir)
+    world = get_world(env)
+
+    set_done!(env, all(pos -> get_world(env)[TARGET, pos], env.box_pos))
+    set_reward!(env, zero(T))
+
+    return env
+end
+
+function (env::SokobanDirected{T})(action::AbstractMoveAction) where {T}
+    world = get_world(env)
+
+    r1 = sum(pos -> world[TARGET, pos], env.box_pos) # can just use get_reward(env) here?
+    agent_pos = get_agent_pos(env)
+    dir = get_agent_dir(env)
+    dest = move(action, dir, agent_pos)
+    if !world[WALL, dest]
+        beyond_dest = move(action, dir, dest)
+        if !world[BOX, dest]
+            world[AGENT, agent_pos] = false
+            set_agent_pos!(env, dest)
+            world[AGENT, dest] = true
+        else
+            if !world[BOX, beyond_dest] && !world[WALL, beyond_dest]
+                world[BOX, dest] = false
+                world[BOX, beyond_dest] = true
+
+                idx = findfirst(pos -> pos == dest, env.box_pos)
+                env.box_pos[idx] = beyond_dest
+                world[AGENT, agent_pos] = false
+                set_agent_pos!(env, dest)
+                world[AGENT, dest] = true
+            end
+        end
+    end
+
+    set_done!(env, all(pos -> get_world(env)[TARGET, pos], env.box_pos))
+    r2 = sum(pos -> world[TARGET, pos], env.box_pos)
+    set_reward!(env, convert(T, r2 - r1))
+
+    return env
+end
+
+function set_level!(env::SokobanDirected, level::Vector{String})
+    world = get_world(env)
+    for i in 1:length(level), j in 1:length(level[1])
+        pos = CartesianIndex(i, j)
+        char = level[i][j]
+
+        if char === '@'
+            set_agent_pos!(env, pos)
+            world[AGENT, pos] = true
+            set_agent_dir!(env, RIGHT)
+        elseif char === '#'
+            world[WALL, pos] = true
+        elseif char === '$'
+            push!(env.box_pos, pos)
+            world[BOX, pos] = true
+        elseif char === '.'
+            push!(env.target_pos, pos)
+            world[TARGET, pos] = true
+        end
+    end
 
     return env
 end
@@ -204,10 +193,12 @@ function SokobanUndirected(; T = Float32, file = joinpath(dirname(pathof(@__MODU
     height = length(level)
     width = length(level[1])
 
-    objects = (EMPTY, WALL, BOX, TARGET)
+    objects = (AGENT, WALL, BOX, TARGET)
     world = GridWorldBase(objects, height, width)
 
     agent_pos = CartesianIndex(2, 2)
+    world[AGENT, agent_pos] = true
+
     reward = zero(T)
 
     box_pos = CartesianIndex{2}[]
@@ -221,75 +212,17 @@ function SokobanUndirected(; T = Float32, file = joinpath(dirname(pathof(@__MODU
     return env
 end
 
-function set_level!(env::SokobanUndirected, level::Vector{String})
-    world = get_world(env)
-    for i in 1:length(level)
-        for j in 1:length(level[1])
-            pos = CartesianIndex(i, j)
-            object = CHAR_TO_OBJECT[level[i][j]]
-
-            if object === :agent
-                set_agent_pos!(env, pos)
-                world[EMPTY, pos] = true
-            elseif object === EMPTY
-                world[object, pos] = true
-            elseif object === WALL
-                world[object, pos] = true
-            elseif object === BOX
-                push!(env.box_pos, pos)
-                world[object, pos] = true
-            elseif object === TARGET
-                push!(env.target_pos, pos)
-                world[object, pos] = true
-            end
-        end
-    end
-
-    return env
-end
+RLBase.StateStyle(env::SokobanUndirected) = RLBase.InternalState{Any}()
 
 RLBase.state_space(env::SokobanUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
-RLBase.StateStyle(env::SokobanUndirected) = RLBase.InternalState{Any}()
 RLBase.state(env::SokobanUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_view_size(env), get_agent_pos(env))
+
+RLBase.state_space(env::SokobanUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
+RLBase.state(env::SokobanUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = get_grid(env)
+
 RLBase.action_space(env::SokobanUndirected, player::RLBase.DefaultPlayer) = UNDIRECTED_NAVIGATION_ACTIONS
 RLBase.reward(env::SokobanUndirected, ::RLBase.DefaultPlayer) = get_reward(env)
 RLBase.is_terminated(env::SokobanUndirected) = get_done(env)
-
-function (env::SokobanUndirected{T})(action::AbstractMoveAction) where {T}
-    world = get_world(env)
-
-    r1 = sum(pos -> world[TARGET, pos], env.box_pos)
-    agent_pos = get_agent_pos(env)
-    dest = move(action, agent_pos)
-    if !world[WALL, dest]
-        beyond_dest = move(action, dest)
-        if !world[BOX, dest]
-            set_agent_pos!(env, dest)
-        else
-            if !world[BOX, beyond_dest] && !world[WALL, beyond_dest]
-                world[BOX, dest] = false
-                if !world[TARGET, dest]
-                    world[EMPTY, dest] = true
-                end
-
-                world[BOX, beyond_dest] = true
-                if world[EMPTY, beyond_dest]
-                    world[EMPTY, beyond_dest] = false
-                end
-
-                idx = findfirst(pos -> pos == dest, env.box_pos)
-                env.box_pos[idx] = beyond_dest
-                set_agent_pos!(env, dest)
-            end
-        end
-    end
-
-    set_done!(env, all(pos -> get_world(env)[TARGET, pos], env.box_pos))
-    r2 = sum(pos -> world[TARGET, pos], env.box_pos)
-    set_reward!(env, convert(T, r2 - r1))
-
-    return env
-end
 
 function RLBase.reset!(env::SokobanUndirected{T}) where {T}
     rng = get_rng(env)
@@ -306,6 +239,62 @@ function RLBase.reset!(env::SokobanUndirected{T}) where {T}
 
     set_reward!(env, zero(T))
     set_done!(env, false)
+
+    return env
+end
+
+function (env::SokobanUndirected{T})(action::AbstractMoveAction) where {T}
+    world = get_world(env)
+
+    r1 = sum(pos -> world[TARGET, pos], env.box_pos) # can just use get_reward(env) here?
+    agent_pos = get_agent_pos(env)
+    dest = move(action, agent_pos)
+    if !world[WALL, dest]
+        beyond_dest = move(action, dest)
+        if !world[BOX, dest]
+            world[AGENT, agent_pos] = false
+            set_agent_pos!(env, dest)
+            world[AGENT, dest] = true
+        else
+            if !world[BOX, beyond_dest] && !world[WALL, beyond_dest]
+                world[BOX, dest] = false
+                world[BOX, beyond_dest] = true
+
+                idx = findfirst(pos -> pos == dest, env.box_pos)
+                env.box_pos[idx] = beyond_dest
+                world[AGENT, agent_pos] = false
+                set_agent_pos!(env, dest)
+                world[AGENT, dest] = true
+            end
+        end
+    end
+
+    set_done!(env, all(pos -> get_world(env)[TARGET, pos], env.box_pos))
+    r2 = sum(pos -> world[TARGET, pos], env.box_pos)
+    set_reward!(env, convert(T, r2 - r1))
+
+    return env
+end
+
+function set_level!(env::SokobanUndirected, level::Vector{String})
+    world = get_world(env)
+    for i in 1:length(level), j in 1:length(level[1])
+        pos = CartesianIndex(i, j)
+        char = level[i][j]
+
+        if char === '@'
+            set_agent_pos!(env, pos)
+            world[AGENT, pos] = true
+        elseif char === '#'
+            world[WALL, pos] = true
+        elseif char === '$'
+            push!(env.box_pos, pos)
+            world[BOX, pos] = true
+        elseif char === '.'
+            push!(env.target_pos, pos)
+            world[TARGET, pos] = true
+        end
+    end
 
     return env
 end
