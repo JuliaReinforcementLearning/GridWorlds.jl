@@ -9,6 +9,9 @@ mutable struct MazeDirected{T, R} <: AbstractGridWorld
     done::Bool
 end
 
+@generate_getters(MazeDirected)
+@generate_setters(MazeDirected)
+
 mutable struct MazeUndirected{T, R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Goal}}
     agent_pos::CartesianIndex{2}
@@ -18,6 +21,9 @@ mutable struct MazeUndirected{T, R} <: AbstractGridWorld
     goal_pos::CartesianIndex{2}
     done::Bool
 end
+
+@generate_getters(MazeUndirected)
+@generate_setters(MazeUndirected)
 
 #####
 # Directed

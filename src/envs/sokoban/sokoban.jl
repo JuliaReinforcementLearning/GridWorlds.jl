@@ -42,6 +42,9 @@ mutable struct SokobanDirected{T, R} <: AbstractGridWorld
     done::Bool
 end
 
+@generate_getters(SokobanDirected)
+@generate_setters(SokobanDirected)
+
 mutable struct SokobanUndirected{T, R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Box, Target}}
     agent_pos::CartesianIndex{2}
@@ -52,6 +55,9 @@ mutable struct SokobanUndirected{T, R} <: AbstractGridWorld
     target_pos::Vector{CartesianIndex{2}}
     done::Bool
 end
+
+@generate_getters(SokobanUndirected)
+@generate_setters(SokobanUndirected)
 
 #####
 # Directed
@@ -83,7 +89,7 @@ end
 
 RLBase.StateStyle(env::SokobanDirected) = RLBase.InternalState{Any}()
 
-function (env::SokobanDirected)(action::AbstractMoveAction)
+function (env::SokobanDirected{T})(action::AbstractMoveAction) where {T}
     world = get_world(env)
 
     r1 = sum(pos -> world[TARGET, pos], env.box_pos)
@@ -115,7 +121,7 @@ function (env::SokobanDirected)(action::AbstractMoveAction)
 
     set_done!(env, all(pos -> get_world(env)[TARGET, pos], env.box_pos))
     r2 = sum(pos -> world[TARGET, pos], env.box_pos)
-    set_reward!(env, r2 - r1)
+    set_reward!(env, convert(T, r2 - r1))
 
     return env
 end
@@ -249,7 +255,7 @@ RLBase.action_space(env::SokobanUndirected, player::RLBase.DefaultPlayer) = UNDI
 RLBase.reward(env::SokobanUndirected, ::RLBase.DefaultPlayer) = get_reward(env)
 RLBase.is_terminated(env::SokobanUndirected) = get_done(env)
 
-function (env::SokobanUndirected)(action::AbstractMoveAction)
+function (env::SokobanUndirected{T})(action::AbstractMoveAction) where {T}
     world = get_world(env)
 
     r1 = sum(pos -> world[TARGET, pos], env.box_pos)
@@ -280,7 +286,7 @@ function (env::SokobanUndirected)(action::AbstractMoveAction)
 
     set_done!(env, all(pos -> get_world(env)[TARGET, pos], env.box_pos))
     r2 = sum(pos -> world[TARGET, pos], env.box_pos)
-    set_reward!(env, r2 - r1)
+    set_reward!(env, convert(T, r2 - r1))
 
     return env
 end

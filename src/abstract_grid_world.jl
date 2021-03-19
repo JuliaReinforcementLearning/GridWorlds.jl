@@ -2,25 +2,7 @@ export AbstractGridWorld
 
 abstract type AbstractGridWorld <: RLBase.AbstractEnv end
 
-get_world(env::AbstractGridWorld) = env.world
-set_world!(env::AbstractGridWorld, world::GridWorldBase) = env.world = world
 @forward AbstractGridWorld.world get_grid, get_objects, get_num_objects, get_height, get_width
-
-get_agent_pos(env::AbstractGridWorld) = env.agent_pos
-set_agent_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = env.agent_pos = pos
-get_agent_dir(env::AbstractGridWorld) = env.agent_dir
-set_agent_dir!(env::AbstractGridWorld, dir::AbstractDirection) = env.agent_dir = dir
-
-get_reward(env::AbstractGridWorld) = env.reward
-set_reward!(env::AbstractGridWorld, reward) = env.reward = reward
-
-get_done(env::AbstractGridWorld) = env.done
-set_done!(env::AbstractGridWorld, done) = env.done = done
-
-get_rng(env::AbstractGridWorld) = env.rng
-
-get_goal_pos(env::AbstractGridWorld) = env.goal_pos
-set_goal_pos!(env::AbstractGridWorld, pos::CartesianIndex{2}) = env.goal_pos = pos
 
 Random.rand(rng::Random.AbstractRNG, f::Function, env::AbstractGridWorld; max_try = 1000) = rand(rng, f, get_world(env), max_try = max_try)
 
@@ -44,3 +26,29 @@ function get_grid_with_agent_layer(env::AbstractGridWorld)
 end
 
 show_agent_char(env::AbstractGridWorld) = true
+
+#####
+# utils
+#####
+
+macro generate_getters(type)
+    T = getfield(__module__, type)::Union{Type,DataType}
+    defs = Expr(:block)
+    for field in fieldnames(T)
+        get = Symbol(:get_, field)
+        qn = QuoteNode(field)
+        push!(defs.args, :($(esc(get))(instance::$type) = getfield(instance, $qn)))
+    end
+    return defs
+end
+
+macro generate_setters(type)
+    T = getfield(__module__, type)::Union{Type,DataType}
+    defs = Expr(:block)
+    for field in fieldnames(T)
+        set = Symbol(:set_, field, :!)
+        qn = QuoteNode(field)
+        push!(defs.args, :($(esc(set))(instance::$type, x) = setfield!(instance, $qn, x)))
+    end
+    return defs
+end

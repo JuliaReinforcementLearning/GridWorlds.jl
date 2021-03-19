@@ -12,6 +12,9 @@ mutable struct DynamicObstaclesDirected{T, R} <: AbstractGridWorld
     done::Bool
 end
 
+@generate_getters(DynamicObstaclesDirected)
+@generate_setters(DynamicObstaclesDirected)
+
 mutable struct DynamicObstaclesUndirected{T, R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Obstacle, Goal}}
     agent_pos::CartesianIndex{2}
@@ -24,6 +27,9 @@ mutable struct DynamicObstaclesUndirected{T, R} <: AbstractGridWorld
     terminal_penalty::T
     done::Bool
 end
+
+@generate_getters(DynamicObstaclesUndirected)
+@generate_setters(DynamicObstaclesUndirected)
 
 #####
 # Directed

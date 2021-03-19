@@ -9,6 +9,9 @@ mutable struct GridRoomsDirected{T, R} <: AbstractGridWorld
     done::Bool
 end
 
+@generate_getters(GridRoomsDirected)
+@generate_setters(GridRoomsDirected)
+
 mutable struct GridRoomsUndirected{T, R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Goal}}
     agent_pos::CartesianIndex{2}
@@ -18,6 +21,9 @@ mutable struct GridRoomsUndirected{T, R} <: AbstractGridWorld
     goal_pos::CartesianIndex{2}
     done::Bool
 end
+
+@generate_getters(GridRoomsUndirected)
+@generate_setters(GridRoomsUndirected)
 
 #####
 # Directed

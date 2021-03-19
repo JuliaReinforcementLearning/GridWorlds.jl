@@ -1,5 +1,3 @@
-export Catcher
-
 mutable struct Catcher{T, R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Basket, Ball}}
     agent_pos::CartesianIndex{2}
@@ -10,6 +8,9 @@ mutable struct Catcher{T, R} <: AbstractGridWorld
     ball_pos::CartesianIndex{2}
     done::Bool
 end
+
+@generate_getters(Catcher)
+@generate_setters(Catcher)
 
 function Catcher(; T = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     objects = (EMPTY, BASKET, BALL)

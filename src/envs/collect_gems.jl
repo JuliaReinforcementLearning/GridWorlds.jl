@@ -11,6 +11,9 @@ mutable struct CollectGemsDirected{T, R} <: AbstractGridWorld
     done::Bool
 end
 
+@generate_getters(CollectGemsDirected)
+@generate_setters(CollectGemsDirected)
+
 mutable struct CollectGemsUndirected{T, R} <: AbstractGridWorld
     world::GridWorldBase{Tuple{Empty, Wall, Gem}}
     agent_pos::CartesianIndex{2}
@@ -22,6 +25,9 @@ mutable struct CollectGemsUndirected{T, R} <: AbstractGridWorld
     gem_pos::Vector{CartesianIndex{2}}
     done::Bool
 end
+
+@generate_getters(CollectGemsUndirected)
+@generate_setters(CollectGemsUndirected)
 
 #####
 # Directed
