@@ -52,14 +52,13 @@ map_ind((i,j), (m, n), ::Down) = (i,j)
 map_ind((i,j), (m, n), ::Left) = (m-j+1, i)
 map_ind((i,j), (m, n), ::Right) = (j, n-i+1)
 
-function get_grid(src_grid::AbstractArray{Bool, 3}, window_size, pos::CartesianIndex{2}, dir::AbstractDirection)
-    dest_grid = falses(get_num_objects(src_grid), window_size...)
-    get_grid!(dest_grid, src_grid, pos, dir)
+function get_grid(src_grid::AbstractArray{Bool, 3}, pos::CartesianIndex{2}, dir::AbstractDirection, window_size, layers)
+    dest_grid = falses(length(layers), window_size...)
+    get_grid!(dest_grid, src_grid, pos, dir, window_size, layers)
     return dest_grid
 end
 
-function get_grid!(dest_grid::AbstractArray{Bool, 3}, src_grid::AbstractArray{Bool, 3}, pos::CartesianIndex{2}, dir::AbstractDirection)
-    window_size = (get_height(dest_grid), get_width(dest_grid))
+function get_grid!(dest_grid::AbstractArray{Bool, 3}, src_grid::AbstractArray{Bool, 3}, pos::CartesianIndex{2}, dir::AbstractDirection, window_size, layers)
     window_inds = get_grid_inds(pos.I, window_size, dir)
 
     valid_inds = CartesianIndices((get_height(src_grid), get_width(src_grid)))
@@ -67,21 +66,20 @@ function get_grid!(dest_grid::AbstractArray{Bool, 3}, src_grid::AbstractArray{Bo
     @views for ind in CartesianIndices(window_inds)
         pos = window_inds[ind]
         if pos ∈ valid_inds
-            dest_grid[:, map_ind(ind.I, window_size, dir)...] .= src_grid[:, pos]
+            dest_grid[:, map_ind(ind.I, window_size, dir)...] .= src_grid[layers, pos]
         end
     end
 
     return nothing
 end
 
-function get_grid(src_grid::AbstractArray{Bool, 3}, window_size, pos::CartesianIndex{2})
-    dest_grid = falses(get_num_objects(src_grid), window_size...)
-    get_grid!(dest_grid, src_grid, pos)
+function get_grid(src_grid::AbstractArray{Bool, 3}, pos::CartesianIndex{2}, window_size, layers)
+    dest_grid = falses(length(layers), window_size...)
+    get_grid!(dest_grid, src_grid, pos, window_size, layers)
     return dest_grid
 end
 
-function get_grid!(dest_grid::AbstractArray{Bool, 3}, src_grid::AbstractArray{Bool, 3}, pos::CartesianIndex{2})
-    window_size = (get_height(dest_grid), get_width(dest_grid))
+function get_grid!(dest_grid::AbstractArray{Bool, 3}, src_grid::AbstractArray{Bool, 3}, pos::CartesianIndex{2}, window_size, layers)
     window_inds = get_grid_inds(pos.I, window_size)
 
     valid_inds = CartesianIndices((get_height(src_grid), get_width(src_grid)))
@@ -89,7 +87,7 @@ function get_grid!(dest_grid::AbstractArray{Bool, 3}, src_grid::AbstractArray{Bo
     @views for ind in CartesianIndices(window_inds)
         pos = window_inds[ind]
         if pos ∈ valid_inds
-            dest_grid[:, ind.I...] .= src_grid[:, pos]
+            dest_grid[:, ind.I...] .= src_grid[layers, pos]
         end
     end
 

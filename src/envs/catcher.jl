@@ -37,10 +37,11 @@ end
 RLBase.StateStyle(env::Catcher) = RLBase.InternalState{Any}()
 
 RLBase.state_space(env::Catcher, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::Catcher, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_view_size(env), get_agent_pos(env))
+const CATCHER_LAYERS = SA.SVector(1)
+RLBase.state(env::Catcher, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_half_size(env), CATCHER_LAYERS)
 
 RLBase.state_space(env::Catcher, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::Catcher, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = get_grid(env)
+RLBase.state(env::Catcher, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = copy(get_grid(env))
 
 RLBase.action_space(env::Catcher, player::RLBase.DefaultPlayer) = (MOVE_LEFT, MOVE_RIGHT, NO_MOVE)
 RLBase.reward(env::Catcher, ::RLBase.DefaultPlayer) = get_reward(env)

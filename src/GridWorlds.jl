@@ -10,6 +10,8 @@ import DataStructures
 const DS = DataStructures
 import ReinforcementLearningBase
 import ReinforcementLearningBase:RLBase
+import StaticArrays
+const SA = StaticArrays
 
 const GW = GridWorlds
 

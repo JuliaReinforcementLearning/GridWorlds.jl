@@ -3,20 +3,9 @@ export AbstractGridWorld
 abstract type AbstractGridWorld <: RLBase.AbstractEnv end
 
 @forward AbstractGridWorld.world get_grid, get_objects, get_num_objects, get_height, get_width
+get_half_size(env::AbstractGridWorld) = (2 * (get_height(env) ÷ 4) + 1, 2 * (get_width(env) ÷ 4) + 1)
 
 Random.rand(rng::Random.AbstractRNG, f::Function, env::AbstractGridWorld; max_try = 1000) = rand(rng, f, get_world(env), max_try = max_try)
-
-#####
-# Agent's view
-#####
-
-get_agent_view_size(env::AbstractGridWorld) = (2 * (get_height(env) ÷ 4) + 1, 2 * (get_width(env) ÷ 4) + 1)
-
-get_agent_view_inds(env::AbstractGridWorld) = get_grid_inds(get_agent_pos(env).I, get_agent_view_size(env), get_agent_dir(env))
-
-get_agent_view(env::AbstractGridWorld) = get_grid(get_world(env), get_agent_view_size(env), get_agent_pos(env), get_agent_dir(env))
-
-get_agent_view!(agent_view::AbstractArray{Bool, 3}, env::AbstractGridWorld) = get_grid!(agent_view, get_world(env), get_agent_pos(env), get_agent_dir(env))
 
 #####
 # utils

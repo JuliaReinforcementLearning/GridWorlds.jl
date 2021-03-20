@@ -64,10 +64,11 @@ function MazeDirected(; T = Float32, height = 9, width = 9, rng = Random.GLOBAL_
 end
 
 RLBase.state_space(env::MazeDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::MazeDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_agent_view(env)
+const MAZE_DIRECTED_LAYERS = SA.SVector(2, 3)
+RLBase.state(env::MazeDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_agent_dir(env), get_half_size(env), MAZE_DIRECTED_LAYERS)
 
 RLBase.state_space(env::MazeDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::MazeDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (get_grid(env), get_agent_dir(env))
+RLBase.state(env::MazeDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (copy(get_grid(env)), get_agent_dir(env))
 
 RLBase.action_space(env::MazeDirected, ::RLBase.DefaultPlayer) = DIRECTED_NAVIGATION_ACTIONS
 RLBase.reward(env::MazeDirected, ::RLBase.DefaultPlayer) = get_reward(env)
@@ -185,10 +186,11 @@ function MazeUndirected(; T = Float32, height = 9, width = 9, rng = Random.GLOBA
 end
 
 RLBase.state_space(env::MazeUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::MazeUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_view_size(env), get_agent_pos(env))
+const MAZE_UNDIRECTED_LAYERS = SA.SVector(2, 3)
+RLBase.state(env::MazeUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_half_size(env), MAZE_UNDIRECTED_LAYERS)
 
 RLBase.state_space(env::MazeUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::MazeUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = get_grid(env)
+RLBase.state(env::MazeUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = copy(get_grid(env))
 
 RLBase.action_space(env::MazeUndirected, player::RLBase.DefaultPlayer) = UNDIRECTED_NAVIGATION_ACTIONS
 RLBase.reward(env::MazeUndirected, ::RLBase.DefaultPlayer) = get_reward(env)

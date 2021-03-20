@@ -51,10 +51,11 @@ function SequentialRoomsDirected(; T = Float32, num_rooms = 3, room_length_range
 end
 
 RLBase.state_space(env::SequentialRoomsDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::SequentialRoomsDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_agent_view(env)
+const SEQUENTIAL_ROOMS_DIRECTED_LAYERS = SA.SVector(2, 3)
+RLBase.state(env::SequentialRoomsDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_agent_dir(env), get_half_size(env), SEQUENTIAL_ROOMS_DIRECTED_LAYERS)
 
 RLBase.state_space(env::SequentialRoomsDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::SequentialRoomsDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (get_grid(env), get_agent_dir(env))
+RLBase.state(env::SequentialRoomsDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (copy(get_grid(env)), get_agent_dir(env))
 
 RLBase.action_space(env::SequentialRoomsDirected, ::RLBase.DefaultPlayer) = DIRECTED_NAVIGATION_ACTIONS
 RLBase.reward(env::SequentialRoomsDirected, ::RLBase.DefaultPlayer) = get_reward(env)
@@ -176,10 +177,11 @@ function SequentialRoomsUndirected(; T = Float32, num_rooms = 3, room_length_ran
 end
 
 RLBase.state_space(env::SequentialRoomsUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::SequentialRoomsUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_view_size(env), get_agent_pos(env))
+const SEQUENTIAL_ROOMS_UNDIRECTED_LAYERS = SA.SVector(2, 3)
+RLBase.state(env::SequentialRoomsUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_half_size(env), SEQUENTIAL_ROOMS_UNDIRECTED_LAYERS)
 
 RLBase.state_space(env::SequentialRoomsUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::SequentialRoomsUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = get_grid(env)
+RLBase.state(env::SequentialRoomsUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = copy(get_grid(env))
 
 RLBase.action_space(env::SequentialRoomsUndirected, player::RLBase.DefaultPlayer) = UNDIRECTED_NAVIGATION_ACTIONS
 RLBase.reward(env::SequentialRoomsUndirected, ::RLBase.DefaultPlayer) = get_reward(env)

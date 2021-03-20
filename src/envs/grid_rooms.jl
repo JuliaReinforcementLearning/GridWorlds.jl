@@ -70,10 +70,11 @@ function GridRoomsDirected(; T = Float32, grid_size = (2, 2), room_size = (5, 5)
 end
 
 RLBase.state_space(env::GridRoomsDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::GridRoomsDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_agent_view(env)
+const GRID_ROOMS_DIRECTED_LAYERS = SA.SVector(2, 3)
+RLBase.state(env::GridRoomsDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_agent_dir(env), get_half_size(env), GRID_ROOMS_DIRECTED_LAYERS)
 
 RLBase.state_space(env::GridRoomsDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::GridRoomsDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (get_grid(env), get_agent_dir(env))
+RLBase.state(env::GridRoomsDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (copy(get_grid(env)), get_agent_dir(env))
 
 RLBase.action_space(env::GridRoomsDirected, ::RLBase.DefaultPlayer) = DIRECTED_NAVIGATION_ACTIONS
 RLBase.reward(env::GridRoomsDirected, ::RLBase.DefaultPlayer) = get_reward(env)
@@ -185,10 +186,11 @@ function GridRoomsUndirected(; T = Float32, grid_size = (2, 2), room_size = (5, 
 end
 
 RLBase.state_space(env::GridRoomsUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::GridRoomsUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_view_size(env), get_agent_pos(env))
+const GRID_ROOMS_UNDIRECTED_LAYERS = SA.SVector(2, 3)
+RLBase.state(env::GridRoomsUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_half_size(env), GRID_ROOMS_UNDIRECTED_LAYERS)
 
 RLBase.state_space(env::GridRoomsUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::GridRoomsUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = get_grid(env)
+RLBase.state(env::GridRoomsUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = copy(get_grid(env))
 
 RLBase.action_space(env::GridRoomsUndirected, player::RLBase.DefaultPlayer) = UNDIRECTED_NAVIGATION_ACTIONS
 RLBase.reward(env::GridRoomsUndirected, ::RLBase.DefaultPlayer) = get_reward(env)

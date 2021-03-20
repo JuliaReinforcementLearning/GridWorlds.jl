@@ -63,10 +63,11 @@ function DynamicObstaclesDirected(; T = Float32, height = 8, width = 8, num_obst
 end
 
 RLBase.state_space(env::DynamicObstaclesDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::DynamicObstaclesDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_agent_view(env)
+const DYNAMIC_OBSTACLES_DIRECTED_LAYERS = SA.SVector(2, 3, 4)
+RLBase.state(env::DynamicObstaclesDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_agent_dir(env), get_half_size(env), DYNAMIC_OBSTACLES_DIRECTED_LAYERS)
 
 RLBase.state_space(env::DynamicObstaclesDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::DynamicObstaclesDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (get_grid(env), get_agent_dir(env))
+RLBase.state(env::DynamicObstaclesDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (copy(get_grid(env)), get_agent_dir(env))
 
 RLBase.action_space(env::DynamicObstaclesDirected, ::RLBase.DefaultPlayer) = DIRECTED_NAVIGATION_ACTIONS
 RLBase.reward(env::DynamicObstaclesDirected, ::RLBase.DefaultPlayer) = get_reward(env)
@@ -185,10 +186,11 @@ function DynamicObstaclesUndirected(; T = Float32, height = 8, width = 8, num_ob
 end
 
 RLBase.state_space(env::DynamicObstaclesUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::DynamicObstaclesUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_view_size(env), get_agent_pos(env))
+const DYNAMIC_OBSTACLES_UNDIRECTED_LAYERS = SA.SVector(2, 3, 4)
+RLBase.state(env::DynamicObstaclesUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_half_size(env), DYNAMIC_OBSTACLES_UNDIRECTED_LAYERS)
 
 RLBase.state_space(env::DynamicObstaclesUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::DynamicObstaclesUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = get_grid(env)
+RLBase.state(env::DynamicObstaclesUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = copy(get_grid(env))
 
 RLBase.action_space(env::DynamicObstaclesUndirected, player::RLBase.DefaultPlayer) = UNDIRECTED_NAVIGATION_ACTIONS
 RLBase.reward(env::DynamicObstaclesUndirected, ::RLBase.DefaultPlayer) = get_reward(env)

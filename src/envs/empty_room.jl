@@ -55,10 +55,11 @@ function EmptyRoomDirected(; T = Float32, height = 8, width = 8, rng = Random.GL
 end
 
 RLBase.state_space(env::EmptyRoomDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::EmptyRoomDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_agent_view(env)
+const EMPTY_ROOM_DIRECTED_LAYERS = SA.SVector(2, 3)
+RLBase.state(env::EmptyRoomDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_agent_dir(env), get_half_size(env), EMPTY_ROOM_DIRECTED_LAYERS)
 
 RLBase.state_space(env::EmptyRoomDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::EmptyRoomDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (get_grid(env), get_agent_dir(env))
+RLBase.state(env::EmptyRoomDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (copy(get_grid(env)), get_agent_dir(env))
 
 RLBase.action_space(env::EmptyRoomDirected, ::RLBase.DefaultPlayer) = DIRECTED_NAVIGATION_ACTIONS
 RLBase.reward(env::EmptyRoomDirected, ::RLBase.DefaultPlayer) = get_reward(env)
@@ -154,10 +155,11 @@ function EmptyRoomUndirected(; T = Float32, height = 8, width = 8, rng = Random.
 end
 
 RLBase.state_space(env::EmptyRoomUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::EmptyRoomUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_view_size(env), get_agent_pos(env))
+const EMPTY_ROOM_UNDIRECTED_LAYERS = SA.SVector(2, 3)
+RLBase.state(env::EmptyRoomUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_half_size(env), EMPTY_ROOM_UNDIRECTED_LAYERS)
 
 RLBase.state_space(env::EmptyRoomUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::EmptyRoomUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = get_grid(env)
+RLBase.state(env::EmptyRoomUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = copy(get_grid(env))
 
 RLBase.action_space(env::EmptyRoomUndirected, player::RLBase.DefaultPlayer) = UNDIRECTED_NAVIGATION_ACTIONS
 RLBase.reward(env::EmptyRoomUndirected, ::RLBase.DefaultPlayer) = get_reward(env)

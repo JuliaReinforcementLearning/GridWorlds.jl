@@ -84,10 +84,11 @@ end
 RLBase.StateStyle(env::SokobanDirected) = RLBase.InternalState{Any}()
 
 RLBase.state_space(env::SokobanDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::SokobanDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_agent_view(env)
+const SOKOBAN_DIRECTED_LAYERS = SA.SVector(2, 3, 4)
+RLBase.state(env::SokobanDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_agent_dir(env), get_half_size(env), SOKOBAN_DIRECTED_LAYERS)
 
 RLBase.state_space(env::SokobanDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::SokobanDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (get_grid(env), get_agent_dir(env))
+RLBase.state(env::SokobanDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (copy(get_grid(env)), get_agent_dir(env))
 
 RLBase.action_space(env::SokobanDirected, ::RLBase.DefaultPlayer) = DIRECTED_NAVIGATION_ACTIONS
 RLBase.reward(env::SokobanDirected, ::RLBase.DefaultPlayer) = get_reward(env)
@@ -215,10 +216,11 @@ end
 RLBase.StateStyle(env::SokobanUndirected) = RLBase.InternalState{Any}()
 
 RLBase.state_space(env::SokobanUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::SokobanUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_view_size(env), get_agent_pos(env))
+const SOKOBAN_UNDIRECTED_LAYERS = SA.SVector(2, 3, 4)
+RLBase.state(env::SokobanUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_half_size(env), SOKOBAN_UNDIRECTED_LAYERS)
 
 RLBase.state_space(env::SokobanUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::SokobanUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = get_grid(env)
+RLBase.state(env::SokobanUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = copy(get_grid(env))
 
 RLBase.action_space(env::SokobanUndirected, player::RLBase.DefaultPlayer) = UNDIRECTED_NAVIGATION_ACTIONS
 RLBase.reward(env::SokobanUndirected, ::RLBase.DefaultPlayer) = get_reward(env)
