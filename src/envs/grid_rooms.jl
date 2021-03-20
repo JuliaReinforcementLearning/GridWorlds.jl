@@ -99,7 +99,7 @@ function RLBase.reset!(env::GridRoomsDirected{T}) where {T}
     set_reward!(env, zero(T))
     set_done!(env, false)
 
-    return env
+    return nothing
 end
 
 function (env::GridRoomsDirected{T})(action::AbstractTurnAction) where {T}
@@ -115,7 +115,7 @@ function (env::GridRoomsDirected{T})(action::AbstractTurnAction) where {T}
         set_reward!(env, zero(T))
     end
 
-    return env
+    return nothing
 end
 
 function (env::GridRoomsDirected{T})(action::AbstractMoveAction) where {T}
@@ -138,7 +138,7 @@ function (env::GridRoomsDirected{T})(action::AbstractMoveAction) where {T}
         set_reward!(env, zero(T))
     end
 
-    return env
+    return nothing
 end
 
 #####
@@ -212,7 +212,7 @@ function RLBase.reset!(env::GridRoomsUndirected{T}) where {T}
     set_reward!(env, zero(T))
     set_done!(env, false)
 
-    return env
+    return nothing
 end
 
 function (env::GridRoomsUndirected{T})(action::AbstractMoveAction) where {T}
@@ -235,7 +235,7 @@ function (env::GridRoomsUndirected{T})(action::AbstractMoveAction) where {T}
         set_reward!(env, zero(T))
     end
 
-    return env
+    return nothing
 end
 
 #####

@@ -111,7 +111,7 @@ function RLBase.reset!(env::SokobanDirected{T}) where {T}
     set_reward!(env, zero(T))
     set_done!(env, false)
 
-    return env
+    return nothing
 end
 
 function (env::SokobanDirected{T})(action::AbstractTurnAction) where {T}
@@ -122,7 +122,7 @@ function (env::SokobanDirected{T})(action::AbstractTurnAction) where {T}
     set_done!(env, all(pos -> get_world(env)[TARGET, pos], env.box_pos))
     set_reward!(env, zero(T))
 
-    return env
+    return nothing
 end
 
 function (env::SokobanDirected{T})(action::AbstractMoveAction) where {T}
@@ -156,7 +156,7 @@ function (env::SokobanDirected{T})(action::AbstractMoveAction) where {T}
     r2 = sum(pos -> world[TARGET, pos], env.box_pos)
     set_reward!(env, convert(T, r2 - r1))
 
-    return env
+    return nothing
 end
 
 function set_level!(env::SokobanDirected, level::Vector{String})
@@ -180,7 +180,7 @@ function set_level!(env::SokobanDirected, level::Vector{String})
         end
     end
 
-    return env
+    return nothing
 end
 
 #####
@@ -240,7 +240,7 @@ function RLBase.reset!(env::SokobanUndirected{T}) where {T}
     set_reward!(env, zero(T))
     set_done!(env, false)
 
-    return env
+    return nothing
 end
 
 function (env::SokobanUndirected{T})(action::AbstractMoveAction) where {T}
@@ -273,7 +273,7 @@ function (env::SokobanUndirected{T})(action::AbstractMoveAction) where {T}
     r2 = sum(pos -> world[TARGET, pos], env.box_pos)
     set_reward!(env, convert(T, r2 - r1))
 
-    return env
+    return nothing
 end
 
 function set_level!(env::SokobanUndirected, level::Vector{String})
@@ -296,5 +296,5 @@ function set_level!(env::SokobanUndirected, level::Vector{String})
         end
     end
 
-    return env
+    return nothing
 end

@@ -104,7 +104,7 @@ function RLBase.reset!(env::DynamicObstaclesDirected{T}) where {T}
     set_reward!(env, zero(T))
     set_done!(env, false)
 
-    return env
+    return nothing
 end
 
 function (env::DynamicObstaclesDirected{T})(action::AbstractTurnAction) where {T}
@@ -125,7 +125,7 @@ function (env::DynamicObstaclesDirected{T})(action::AbstractTurnAction) where {T
         set_reward!(env, zero(T))
     end
 
-    return env
+    return nothing
 end
 
 function (env::DynamicObstaclesDirected{T})(action::AbstractMoveAction) where {T}
@@ -151,7 +151,7 @@ function (env::DynamicObstaclesDirected{T})(action::AbstractMoveAction) where {T
         set_reward!(env, zero(T))
     end
 
-    return env
+    return nothing
 end
 
 #####
@@ -224,7 +224,7 @@ function RLBase.reset!(env::DynamicObstaclesUndirected{T}) where {T}
     set_reward!(env, zero(T))
     set_done!(env, false)
 
-    return env
+    return nothing
 end
 
 function (env::DynamicObstaclesUndirected{T})(action::AbstractMoveAction) where {T}
@@ -250,7 +250,7 @@ function (env::DynamicObstaclesUndirected{T})(action::AbstractMoveAction) where 
         set_reward!(env, zero(T))
     end
 
-    return env
+    return nothing
 end
 
 #####
@@ -276,5 +276,5 @@ function update_obstacles!(env::Union{DynamicObstaclesDirected, DynamicObstacles
         world[OBSTACLE, new_pos] = true
     end
     
-    return env
+    return nothing
 end

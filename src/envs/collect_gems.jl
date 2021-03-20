@@ -93,7 +93,7 @@ function RLBase.reset!(env::CollectGemsDirected{T}) where {T}
     set_reward!(env, zero(T))
     set_done!(env, false)
 
-    return env
+    return nothing
 end
 
 function (env::CollectGemsDirected{T})(action::AbstractTurnAction) where {T}
@@ -104,7 +104,7 @@ function (env::CollectGemsDirected{T})(action::AbstractTurnAction) where {T}
     set_done!(env, env.num_gem_current <= 0)
     set_reward!(env, zero(T))
 
-    return env
+    return nothing
 end
 
 function (env::CollectGemsDirected{T})(action::AbstractMoveAction) where {T}
@@ -128,7 +128,7 @@ function (env::CollectGemsDirected{T})(action::AbstractMoveAction) where {T}
         set_reward!(env, get_gem_reward(env))
     end
 
-    return env
+    return nothing
 end
 
 #####
@@ -192,7 +192,7 @@ function RLBase.reset!(env::CollectGemsUndirected{T}) where {T}
     set_reward!(env, zero(T))
     set_done!(env, false)
 
-    return env
+    return nothing
 end
 
 function (env::CollectGemsUndirected{T})(action::AbstractMoveAction) where {T}
@@ -216,5 +216,5 @@ function (env::CollectGemsUndirected{T})(action::AbstractMoveAction) where {T}
         set_reward!(env, get_gem_reward(env))
     end
 
-    return env
+    return nothing
 end

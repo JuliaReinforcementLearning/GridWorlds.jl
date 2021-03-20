@@ -84,7 +84,7 @@ function RLBase.reset!(env::EmptyRoomDirected{T}) where {T}
     set_reward!(env, zero(T))
     set_done!(env, false)
 
-    return env
+    return nothing
 end
 
 function (env::EmptyRoomDirected{T})(action::AbstractTurnAction) where {T}
@@ -100,7 +100,7 @@ function (env::EmptyRoomDirected{T})(action::AbstractTurnAction) where {T}
         set_reward!(env, zero(T))
     end
 
-    return env
+    return nothing
 end
 
 function (env::EmptyRoomDirected{T})(action::AbstractMoveAction) where {T}
@@ -122,7 +122,7 @@ function (env::EmptyRoomDirected{T})(action::AbstractMoveAction) where {T}
         set_reward!(env, zero(T))
     end
 
-    return env
+    return nothing
 end
 
 #####
@@ -181,7 +181,7 @@ function RLBase.reset!(env::EmptyRoomUndirected{T}) where {T}
     set_reward!(env, zero(T))
     set_done!(env, false)
 
-    return env
+    return nothing
 end
 
 function (env::EmptyRoomUndirected{T})(action::AbstractMoveAction) where {T}
@@ -204,5 +204,5 @@ function (env::EmptyRoomUndirected{T})(action::AbstractMoveAction) where {T}
         set_reward!(env, zero(T))
     end
 
-    return env
+    return nothing
 end

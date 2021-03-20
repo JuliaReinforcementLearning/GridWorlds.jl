@@ -113,7 +113,7 @@ function RLBase.reset!(env::SequentialRoomsDirected{T}) where {T}
     set_reward!(env, zero(T))
     set_done!(env, false)
 
-    return env
+    return nothing
 end
 
 function (env::SequentialRoomsDirected{T})(action::AbstractTurnAction) where {T}
@@ -129,7 +129,7 @@ function (env::SequentialRoomsDirected{T})(action::AbstractTurnAction) where {T}
         set_reward!(env, zero(T))
     end
 
-    return env
+    return nothing
 end
 
 function (env::SequentialRoomsDirected{T})(action::AbstractMoveAction) where {T}
@@ -152,7 +152,7 @@ function (env::SequentialRoomsDirected{T})(action::AbstractMoveAction) where {T}
         set_reward!(env, zero(T))
     end
 
-    return env
+    return nothing
 end
 
 #####
@@ -236,7 +236,7 @@ function RLBase.reset!(env::SequentialRoomsUndirected{T}) where {T}
     set_reward!(env, zero(T))
     set_done!(env, false)
 
-    return env
+    return nothing
 end
 
 function (env::SequentialRoomsUndirected{T})(action::AbstractMoveAction) where {T}
@@ -259,7 +259,7 @@ function (env::SequentialRoomsUndirected{T})(action::AbstractMoveAction) where {
         set_reward!(env, zero(T))
     end
 
-    return env
+    return nothing
 end
 
 #####

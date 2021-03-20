@@ -105,7 +105,7 @@ function RLBase.reset!(env::MazeDirected{T}) where {T}
     set_reward!(env, zero(T))
     set_done!(env, false)
 
-    return env
+    return nothing
 end
 
 function (env::MazeDirected{T})(action::AbstractTurnAction) where {T}
@@ -121,7 +121,7 @@ function (env::MazeDirected{T})(action::AbstractTurnAction) where {T}
         set_reward!(env, zero(T))
     end
 
-    return env
+    return nothing
 end
 
 function (env::MazeDirected{T})(action::AbstractMoveAction) where {T}
@@ -144,7 +144,7 @@ function (env::MazeDirected{T})(action::AbstractMoveAction) where {T}
         set_reward!(env, zero(T))
     end
 
-    return env
+    return nothing
 end
 
 #####
@@ -224,7 +224,7 @@ function RLBase.reset!(env::MazeUndirected{T}) where {T}
     set_reward!(env, zero(T))
     set_done!(env, false)
 
-    return env
+    return nothing
 end
 
 function (env::MazeUndirected{T})(action::AbstractMoveAction) where {T}
@@ -247,7 +247,7 @@ function (env::MazeUndirected{T})(action::AbstractMoveAction) where {T}
         set_reward!(env, zero(T))
     end
 
-    return env
+    return nothing
 end
 
 #####
@@ -293,5 +293,5 @@ function generate_maze!(env::Union{MazeDirected, MazeUndirected})
         end
     end
 
-    return env
+    return nothing
 end

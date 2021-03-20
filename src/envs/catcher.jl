@@ -66,7 +66,7 @@ function RLBase.reset!(env::Catcher{T}) where {T}
     set_reward!(env, zero(T))
     set_done!(env, false)
 
-    return env
+    return nothing
 end
 
 function (env::Catcher{T})(action::Union{MoveLeft, MoveRight, NoMove}) where {T}
@@ -98,7 +98,7 @@ function (env::Catcher{T})(action::Union{MoveLeft, MoveRight, NoMove}) where {T}
         set_reward!(env, zero(T))
     end
 
-    return env
+    return nothing
 end
 
 function wrap_ball(env::Catcher, pos::CartesianIndex{2})
