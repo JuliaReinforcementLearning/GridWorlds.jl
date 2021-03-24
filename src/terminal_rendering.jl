@@ -1,24 +1,52 @@
-get_grid(env::AbstractGridWorld, ::Val{:global}) = get_grid(env)
-get_grid(env::AbstractGridWorld, ::Val{:local}) = get_agent_view(env)
-
-get_agent_pos(env::AbstractGridWorld, ::Val{:global}) = get_agent_pos(env)
-get_agent_pos(env::AbstractGridWorld, view_type_val::Val{:local}) = get_agent_pos(env, view_type_val, get_navigation_style(env))
-get_agent_pos(env::AbstractGridWorld, view_type_val::Val{:local}, ::DirectedNavigation) = CartesianIndex(1, get_width(get_grid(env, view_type_val)) ÷ 2 + 1)
-function get_agent_pos(env::AbstractGridWorld, view_type_val::Val{:local}, ::UndirectedNavigation)
-    grid = get_grid(env, view_type_val)
-    CartesianIndex(get_height(grid) ÷ 2 + 1, get_width(grid) ÷ 2 + 1)
-end
-
-get_agent_char(env::AbstractGridWorld, ::Val{:global}) = get_char(get_agent(env))
-get_agent_char(env::AbstractGridWorld, view_type_val::Val{:local}) = get_agent_char(env, view_type_val, get_navigation_style(env))
-get_agent_char(env::AbstractGridWorld, ::Val{:local}, ::DirectedNavigation) = get_char(Agent, DOWN)
-get_agent_char(env::AbstractGridWorld, ::Val{:local}, ::UndirectedNavigation) = get_char(get_agent(env))
-
-get_background(env::AbstractGridWorld, ::Val{:global}, pos::CartesianIndex{2}) = pos in get_agent_view_inds(env) ? :dark_gray : :black
-get_background(env::AbstractGridWorld, ::Val{:local}, pos::CartesianIndex{2}) = :dark_gray
-
+get_char(::Nothing) = '⋅'
 get_color(::Nothing) = :white
-get_char(::Nothing) = '~'
+
+get_char(::Agent) = '☻'
+get_char(::Agent, ::Up) = '↑'
+get_char(::Agent, ::Down) = '↓'
+get_char(::Agent, ::Left) = '←'
+get_char(::Agent, ::Right) = '→'
+get_color(::Agent) = :red
+
+get_char(::Wall) = '█'
+get_color(::Wall) = :white
+
+get_char(::Goal) = '♥'
+get_color(::Goal) = :red
+
+get_char(::Door) = '⩎'
+get_color(::Door) = :yellow
+
+get_char(::Key) = '⚷'
+get_color(::Key) = :yellow
+
+get_char(::Gem) = '♦'
+get_color(::Gem) = :magenta
+
+get_char(::Obstacle) = '⊗'
+get_color(::Obstacle) = :blue
+
+get_char(::Box) = '▒'
+get_color(::Box) = :yellow
+
+get_char(::Target) = '✖'
+get_color(::Target) = :red
+
+get_char(::Body) = '█'
+get_color(::Body) = :green
+
+get_char(::Food) = '♦'
+get_color(::Food) = :yellow
+
+get_char(::Basket) = '⊔'
+get_color(::Basket) = :red
+
+get_char(::Ball) = '∘'
+get_color(::Ball) = :yellow
+
+#####
+# GridWorldBase
+#####
 
 function get_first_object(grid::AbstractArray{Bool, 3}, objects, pos::CartesianIndex{2})
     idx = findfirst(grid[:, pos])
@@ -29,50 +57,116 @@ function get_first_object(grid::AbstractArray{Bool, 3}, objects, pos::CartesianI
     end
 end
 
-function Base.show(io::IO, ::MIME"text/plain", env::AbstractGridWorld, view_type::Symbol)
-    view_type_val = Val{view_type}()
-    grid = get_grid(env, view_type_val)
-    objects = get_objects(env)
-
-    render_agent_char = show_agent_char(env)
-
-    for i in 1:get_height(grid)
-        for j in 1:get_width(grid)
-            pos = CartesianIndex(i, j)
-            if render_agent_char && pos == get_agent_pos(env, view_type_val)
-                agent_char = get_agent_char(env, view_type_val)
-                agent_color = get_color(get_agent(env))
-                print(io, Crayons.Crayon(background = get_background(env, view_type_val, pos), foreground = agent_color, bold = true, reset = true), agent_char)
-            else
-                object = get_first_object(grid, objects, pos)
-                print(io, Crayons.Crayon(background = get_background(env, view_type_val, pos), foreground = get_color(object), bold = true, reset = true), get_char(object))
-            end
-        end
-        println(io, Crayons.Crayon(reset = true))
-    end
-end
-
-function Base.show(io::IO, ::MIME"text/plain", world::GridWorldBase)
+function get_render_data(world::GridWorldBase, pos::CartesianIndex{2})
     grid = get_grid(world)
     objects = get_objects(world)
 
-    for i in 1:get_height(grid)
-        for j in 1:get_width(grid)
+    object = get_first_object(grid, objects, pos)
+    background = :black
+    foreground = get_color(object)
+    char = get_char(object)
+
+    return background, foreground, char
+end
+
+function get_render_data(world::GridWorldBase, pos::CartesianIndex{2}, layer)
+    if world[layer, pos]
+        object = get_objects(world)[layer]
+        return :black, get_color(object), get_char(object)
+    else
+        return :black, get_color(nothing), get_char(nothing)
+    end
+end
+
+function render(io::IO, ::MIME"text/plain", world)
+    for i in 1:get_height(world)
+        for j in 1:get_width(world)
             pos = CartesianIndex(i, j)
-            object = get_first_object(grid, objects, pos)
-            print(io, Crayons.Crayon(background = :black, foreground = get_color(object), bold = true, reset = true), get_char(object))
+            background, foreground, char = get_render_data(world, pos)
+            print(io, Crayons.Crayon(background = background, foreground = foreground, bold = true, reset = true), char)
         end
         println(io, Crayons.Crayon(reset = true))
     end
 end
 
-function Base.show(io::IO, mime::MIME"text/plain", env::AbstractGridWorld)
-    println(io, "Global view:")
-    show(io, mime, env, :global)
-    println(io)
-    println(io, "Local view:")
-    show(io, mime, env, :local)
-    println(io)
-    println(io, "RLBase.reward(env): $(RLBase.reward(env))")
-    println(io, "RLBase.is_terminated(env): $(RLBase.is_terminated(env))")
+function render_layers(io::IO, ::MIME"text/plain", world)
+    objects = get_objects(world)
+    for (layer, object) in enumerate(objects)
+        println("layer = $layer, object = $object")
+        for i in 1:get_height(world)
+            for j in 1:get_width(world)
+                pos = CartesianIndex(i, j)
+                background, foreground, char = get_render_data(world, pos, layer)
+                print(io, Crayons.Crayon(background = background, foreground = foreground, bold = true, reset = true), char)
+            end
+            println(io, Crayons.Crayon(reset = true))
+        end
+    end
+end
+
+#####
+# AbstractGridWorld
+#####
+
+function get_render_data(env::AbstractGridWorld, pos::CartesianIndex{2})
+    grid = get_grid(env)
+    objects = get_objects(env)
+
+    object = get_first_object(grid, objects, pos)
+    background = :black
+    foreground = get_color(object)
+    char = get_char(object)
+
+    if hasfield(typeof(env), :agent_pos)
+        agent_pos = get_agent_pos(env)
+        if hasfield(typeof(env), :agent_dir)
+            agent_dir = get_agent_dir(env)
+            if object === AGENT
+                char = get_char(object, agent_dir)
+            end
+            if pos in get_grid_inds(agent_pos.I, get_half_size(env), agent_dir)
+                background = :dark_gray
+            end
+        else
+            if pos in get_grid_inds(agent_pos.I, get_half_size(env))
+                background = :dark_gray
+            end
+        end
+    end
+
+    return background, foreground, char
+end
+
+function get_render_data(env::AbstractGridWorld, pos::CartesianIndex{2}, layer)
+    world = get_world(env)
+    grid = get_grid(world)
+
+    object = nothing
+    background = :black
+    foreground = get_color(nothing)
+    char = get_char(nothing)
+    if world[layer, pos]
+        object = get_objects(world)[layer]
+        foreground = get_color(object)
+        char = get_char(object)
+    end
+
+    if hasfield(typeof(env), :agent_pos)
+        agent_pos = get_agent_pos(env)
+        if hasfield(typeof(env), :agent_dir)
+            agent_dir = get_agent_dir(env)
+            if object === AGENT
+                char = get_char(object, agent_dir)
+            end
+            if pos in get_grid_inds(agent_pos.I, get_half_size(env), agent_dir)
+                background = :dark_gray
+            end
+        else
+            if pos in get_grid_inds(agent_pos.I, get_half_size(env))
+                background = :dark_gray
+            end
+        end
+    end
+
+    return background, foreground, char
 end
