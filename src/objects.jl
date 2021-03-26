@@ -27,6 +27,12 @@ const BOX = Box()
 struct Target <: AbstractObject end
 const TARGET = Target()
 
+struct Target1 <: AbstractObject end
+const TARGET1 = Target1()
+
+struct Target2 <: AbstractObject end
+const TARGET2 = Target2()
+
 struct Body <: AbstractObject end
 const BODY = Body()
 

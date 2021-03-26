@@ -37,7 +37,7 @@ end
 RLBase.StateStyle(env::Catcher) = RLBase.InternalState{Any}()
 
 RLBase.state_space(env::Catcher, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
-const CATCHER_LAYERS = SA.SVector(1)
+const CATCHER_LAYERS = SA.SVector(2)
 RLBase.state(env::Catcher, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_half_size(env), CATCHER_LAYERS)
 
 RLBase.state_space(env::Catcher, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing

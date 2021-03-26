@@ -106,7 +106,7 @@ function Random.rand(rng::Random.AbstractRNG, f::Function, inds::Union{Vector{Ca
         end
     end
     @warn "number of tries exceeded max_try = $max_try"
-    return nothing
+    return inds[1]
 end
 
 function Random.rand(rng::Random.AbstractRNG, f::Function, world::GridWorldBase; max_try = 1000)

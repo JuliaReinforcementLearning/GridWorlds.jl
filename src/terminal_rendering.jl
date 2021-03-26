@@ -32,7 +32,13 @@ get_color(::Box) = :yellow
 get_char(::Target) = '✖'
 get_color(::Target) = :red
 
-get_char(::Body) = '█'
+get_char(::Target1) = '✖'
+get_color(::Target1) = :yellow
+
+get_char(::Target2) = '✖'
+get_color(::Target2) = :green
+
+get_char(::Body) = '∘'
 get_color(::Body) = :green
 
 get_char(::Food) = '♦'
