@@ -24,7 +24,7 @@ get_char(::Gem) = '♦'
 get_color(::Gem) = :magenta
 
 get_char(::Obstacle) = '⊗'
-get_color(::Obstacle) = :blue
+get_color(::Obstacle) = :yellow
 
 get_char(::Box) = '▒'
 get_color(::Box) = :yellow
@@ -114,7 +114,7 @@ end
 # AbstractGridWorld
 #####
 
-function get_render_data(env::AbstractGridWorld, pos::CartesianIndex{2})
+function get_render_data(env::E, pos::CartesianIndex{2}) where {E<:AbstractGridWorld}
     grid = get_grid(env)
     objects = get_objects(env)
 
@@ -123,19 +123,23 @@ function get_render_data(env::AbstractGridWorld, pos::CartesianIndex{2})
     foreground = get_color(object)
     char = get_char(object)
 
-    if hasfield(typeof(env), :agent_pos)
+    if hasfield(E, :agent_pos)
         agent_pos = get_agent_pos(env)
-        if hasfield(typeof(env), :agent_dir)
+        if hasfield(E, :agent_dir)
             agent_dir = get_agent_dir(env)
+            if isa(RLBase.StateStyle(env), RLBase.Observation)
+                if pos in get_grid_inds(agent_pos.I, get_half_size(env), agent_dir)
+                    background = :dark_gray
+                end
+            end
             if object === AGENT
                 char = get_char(object, agent_dir)
             end
-            if pos in get_grid_inds(agent_pos.I, get_half_size(env), agent_dir)
-                background = :dark_gray
-            end
         else
-            if pos in get_grid_inds(agent_pos.I, get_half_size(env))
-                background = :dark_gray
+            if isa(RLBase.StateStyle(env), RLBase.Observation)
+                if pos in get_grid_inds(agent_pos.I, get_half_size(env))
+                    background = :dark_gray
+                end
             end
         end
     end
@@ -143,36 +147,43 @@ function get_render_data(env::AbstractGridWorld, pos::CartesianIndex{2})
     return background, foreground, char
 end
 
-function get_render_data(env::AbstractGridWorld, pos::CartesianIndex{2}, layer)
+function get_render_data(env::E, pos::CartesianIndex{2}, layer) where {E<:AbstractGridWorld}
     world = get_world(env)
     grid = get_grid(world)
 
     object = nothing
     background = :black
-    foreground = get_color(nothing)
-    char = get_char(nothing)
+    foreground = get_color(object)
+    char = get_char(object)
     if world[layer, pos]
         object = get_objects(world)[layer]
         foreground = get_color(object)
         char = get_char(object)
     end
 
-    if hasfield(typeof(env), :agent_pos)
+    if hasfield(E, :agent_pos)
         agent_pos = get_agent_pos(env)
-        if hasfield(typeof(env), :agent_dir)
+        if hasfield(E, :agent_dir)
             agent_dir = get_agent_dir(env)
+            if isa(RLBase.StateStyle(env), RLBase.Observation)
+                if pos in get_grid_inds(agent_pos.I, get_half_size(env), agent_dir)
+                    background = :dark_gray
+                end
+            end
             if object === AGENT
                 char = get_char(object, agent_dir)
             end
-            if pos in get_grid_inds(agent_pos.I, get_half_size(env), agent_dir)
-                background = :dark_gray
-            end
         else
-            if pos in get_grid_inds(agent_pos.I, get_half_size(env))
-                background = :dark_gray
+            if isa(RLBase.StateStyle(env), RLBase.Observation)
+                if pos in get_grid_inds(agent_pos.I, get_half_size(env))
+                    background = :dark_gray
+                end
             end
         end
     end
 
     return background, foreground, char
 end
+
+get_render_data(env::Snake, pos::CartesianIndex{2}) = get_render_data(get_world(env), pos)
+get_render_data(env::Snake, pos::CartesianIndex{2}, layer) = get_render_data(get_world(env), pos, layer)

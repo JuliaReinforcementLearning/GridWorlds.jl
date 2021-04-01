@@ -15,25 +15,28 @@ This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minig
     1. [Terminal Rendering](#terminal-rendering)
     1. [Makie Rendering](#makie-rendering)
 * [List of Environments](#list-of-environments)
-  1. [EmptyRoomUndirected](#emptyroomundirected)
   1. [EmptyRoomDirected](#emptyroomdirected)
-  1. [GridRoomsUndirected](#gridroomsundirected)
+  1. [EmptyRoomUndirected](#emptyroomundirected)
   1. [GridRoomsDirected](#gridroomsdirected)
-  1. [SequentialRoomsUndirected](#sequentialroomsundirected)
+  1. [GridRoomsUndirected](#gridroomsundirected)
   1. [SequentialRoomsDirected](#sequentialroomsdirected)
-  1. [MazeUndirected](#mazeundirected)
+  1. [SequentialRoomsUndirected](#sequentialroomsundirected)
   1. [MazeDirected](#mazedirected)
-  1. [GoToDoor](#gotodoor)
-  1. [DoorKey](#doorkey)
-  1. [CollectGemsUndirected](#collectgemsundirected)
+  1. [MazeUndirected](#mazeundirected)
+  1. [GoToTargetDirected](#gototargetdirected)
+  1. [GoToTargetUndirected](#gototargetundirected)
+  1. [DoorKeyDirected](#doorkeydirected)
+  1. [DoorKeyUndirected](#doorkeyundirected)
   1. [CollectGemsDirected](#collectgemsdirected)
-  1. [DynamicObstaclesUndirected](#dynamicobstaclesundirected)
+  1. [CollectGemsUndirected](#collectgemsundirected)
   1. [DynamicObstaclesDirected](#dynamicobstaclesdirected)
-  1. [SokobanUndirected](#sokobanundirected)
+  1. [DynamicObstaclesUndirected](#dynamicobstaclesundirected)
   1. [SokobanDirected](#sokobandirected)
+  1. [SokobanUndirected](#sokobanundirected)
   1. [Snake](#snake)
   1. [Catcher](#catcher)
-  1. [Transport](#transport)
+  1. [TransportDirected](#transport)
+  1. [TransportUndirected](#transportundirected)
 
 ## Getting Started
 
@@ -60,7 +63,7 @@ ReinforcementLearningBase.reset!(env)
 # first time plot may be slow
 import Makie
 
-GridWorlds.play(env, file_name = "example.gif", frame_rate = 12)
+GridWorlds.play(env, file_name = "example.gif", frame_rate = 24)
 ```
 
 ## Design
@@ -79,7 +82,15 @@ The behaviour of environments is easily customizable. Here are some of the thing
 
 1. Keyword arguments allow for enough flexibility in most environments. For example, most environments allow creation of rectangular worlds.
 1. Of course, one can also override the `ReinforcementLearningBase` (`RLBase`) API methods directly for a greater degree of customization. For example, the default implementation of the `RLBase.reset!` method for an environment is appropriately randomized (like the goal position and agent start position in the EmptyRoom environment). In case one needs some other behaviour, one can do so by simply overriding this particular method, and reuse the rest of the behaviour as it is (like the effects of actions in this environment).
-1. Most environments offer multiple state representations. One can modify the `RLBase.StateStyle` method to choose to partially observe (`RLBase.StateStyle` of type `RLBase.Observation{Any}`) or fully observe (`RLBase.StateStyle` of type `RLBase.InternalState{Any}`) the current state of an environment.
+1. Most environments offer multiple state representations. One can modify the `RLBase.StateStyle(env)` method to choose to partially observe (`RLBase.StateStyle(env)` returns `RLBase.Observation{Any}()`) or fully observe (`RLBase.StateStyle(env)` returns `RLBase.InternalState{Any}()`) the current state of an environment. During rendering, some environments display a gray shaded area surrounding the agent's character. The shaded area corresponds to the region of the `grid` that is observed via `RLBase.state(env)` in partially observable settings (when `RLBase.StateStyle(env)` is set to return `RLBase.Observation{Any}()`). In the case of fully observable environments (`RLBase.StateStyle(env)` returns `RLBase.InternalState{Any}()`), the entire `grid` is returned as part of `RLBase.state(env)`. For `Directed` environments, the direction of the agent is not encoded inside the `grid`. So when fully observing the environment using `RLBase.InternalState{Any}()`, `RLBase.state(env)` would return the direction of the agent separately.
+
+Here is the `EmptyRoomUndirected` environment with `RLBase.Observation{Any}()`:
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/observation.png" width="300px">
+
+Here is the `EmptyRoomUndirected` environment with `RLBase.InternalState{Any}()`:
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/internal_state.png" width="300px">
+
+For more details, it is highly recommended that you take a look at the source code of the particular environment that you are working with.
 
 ### Rendering
 

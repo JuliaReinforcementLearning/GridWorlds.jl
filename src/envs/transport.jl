@@ -262,6 +262,7 @@ function (env::Union{TransportDirected{T}, TransportUndirected{T}})(::Drop) wher
 
     if get_has_ball(env)
         set_has_ball!(env, false)
+        set_ball_pos!(env, agent_pos)
         world[BALL, agent_pos] = true
     end
 

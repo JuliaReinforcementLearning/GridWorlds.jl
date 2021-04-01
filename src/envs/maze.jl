@@ -83,8 +83,8 @@ function RLBase.reset!(env::MazeDirected{T}) where {T}
     vertical_range = 2:2:height-1
     horizontal_range = 2:2:width-1
 
-    old_goal_pos = get_goal_pos(env)
-    world[GOAL, old_goal_pos] = false
+    world[AGENT, get_agent_pos(env)] = false
+    world[GOAL, get_goal_pos(env)] = false
 
     world[WALL, :, :] .= true
     for i in vertical_range, j in horizontal_range
@@ -205,8 +205,8 @@ function RLBase.reset!(env::MazeUndirected{T}) where {T}
     vertical_range = 2:2:height-1
     horizontal_range = 2:2:width-1
 
-    old_goal_pos = get_goal_pos(env)
-    world[GOAL, old_goal_pos] = false
+    world[AGENT, get_agent_pos(env)] = false
+    world[GOAL, get_goal_pos(env)] = false
 
     world[WALL, :, :] .= true
     for i in vertical_range, j in horizontal_range

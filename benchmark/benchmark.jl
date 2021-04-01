@@ -5,14 +5,57 @@ import ReinforcementLearningBase: RLBase
 import BenchmarkTools
 const BT = BenchmarkTools
 import Random
+import Dates
 
-const MAX_STEPS = 3000
+const STEPS_PER_RESET = 100
+const NUM_RESETS = 100
 const SEED = 0
 
-rng = Random.MersenneTwister(SEED)
-information = Dict()
+const rng = Random.MersenneTwister(SEED)
+const information = Dict()
 
-ENVS = [GW.EmptyRoom, GW.GridRooms, GW.SequentialRooms, GW.Maze, GW.GoToDoor, GW.DoorKey, GW.CollectGems, GW.DynamicObstacles, GW.Sokoban, GW.Snake, GW.Catcher, GW.Transport]
+ENVS = [GW.EmptyRoomDirected,
+        GW.EmptyRoomUndirected,
+        GW.GridRoomsDirected,
+        GW.GridRoomsUndirected,
+        GW.SequentialRoomsDirected,
+        GW.SequentialRoomsUndirected,
+        GW.MazeDirected,
+        GW.MazeUndirected,
+        GW.GoToTargetDirected,
+        GW.GoToTargetUndirected,
+        GW.DoorKeyDirected,
+        GW.DoorKeyUndirected,
+        GW.CollectGemsDirected,
+        GW.CollectGemsUndirected,
+        GW.DynamicObstaclesDirected,
+        GW.DynamicObstaclesUndirected,
+        GW.SokobanDirected,
+        GW.SokobanUndirected,
+        GW.Snake,
+        GW.Catcher,
+        GW.TransportDirected,
+        GW.TransportUndirected,
+       ]
+
+function run_experiment(rng, Env, num_resets, steps_per_reset)
+    env = Env(rng = rng)
+
+    for _ in 1:num_resets
+        RLBase.reset!(env)
+        total_reward = 0
+        for _ in 1:steps_per_reset
+            state = RLBase.state(env)
+            action = rand(RLBase.action_space(env))
+            env(action)
+            is_terminated = RLBase.is_terminated(env)
+            reward = RLBase.reward(env)
+            total_reward += reward
+        end
+    end
+
+    return nothing
+end
 
 function format_benchmark(str::String)
     l = split(str, "\n")
@@ -20,22 +63,30 @@ function format_benchmark(str::String)
     return strip.(l)
 end
 
-function write_benchmarks!(information; file = "benchmark.md")
+function write_benchmarks(information; file = "benchmark.md")
     io = open(file, "w")
 
+    write(io, "Date: " * Dates.format(Dates.now(), "yyyy_mm_dd_HH_MM_SS") * "\n")
     write(io, "# List of Environments\n")
 
     for Env in ENVS
-        write(io, "  1. $(Symbol(Env))\n")
+        name = Env.body.body.name.name
+        write(io, "  1. [$(String(name))](#$(lowercase(String(name))))\n")
     end
 
     write(io, "\n")
     write(io, "# Benchmarks\n\n")
 
     for Env in ENVS
-        env_benchmark = information[Symbol(Env)]
+        name = Env.body.body.name.name
+        env_benchmark = information[name]
 
-        write(io, "# $(String(Symbol(Env)))\n\n")
+        write(io, "# $(String(name))\n\n")
+
+        write(io, "#### Run uniformly random policy, NUM_RESETS = $(NUM_RESETS), STEPS_PER_RESET = $(STEPS_PER_RESET), TOTAL_STEPS = $(NUM_RESETS * STEPS_PER_RESET)\n\n")
+        for line in format_benchmark(repr("text/plain", env_benchmark[:run_experiment]))
+            write(io, line * "\n\n")
+        end
 
         write(io, "#### $(String(Symbol(Env)))()\n\n")
         for line in format_benchmark(repr("text/plain", env_benchmark[:instantiation]))
@@ -79,9 +130,18 @@ function write_benchmarks!(information; file = "benchmark.md")
     close(io)
 end
 
+# compile everything once
+for Env in ENVS
+    run_experiment(rng, Env, NUM_RESETS, STEPS_PER_RESET)
+end
+
+@info "First run (for compilation) is complete"
+
 for Env in ENVS
 
     env_benchmark = Dict()
+
+    env_benchmark[:run_experiment] = BT.@benchmark run_experiment($(Ref(rng))[], $(Ref(Env))[], $(Ref(NUM_RESETS))[], $(Ref(STEPS_PER_RESET))[])
 
     env_benchmark[:instantiation] = BT.@benchmark $(Ref(Env))[](rng = $(Ref(rng))[])
 
@@ -99,7 +159,10 @@ for Env in ENVS
     end
     env_benchmark[:action_info] = action_info
 
-    information[Symbol(Env)] = env_benchmark
+    name = Env.body.body.name.name
+    information[name] = env_benchmark
+
+    @info "$(name) benchmark complete"
 end
 
-write_benchmarks!(information)
+write_benchmarks(information)

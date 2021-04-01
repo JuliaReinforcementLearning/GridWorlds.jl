@@ -1,6 +1,3 @@
-export AbstractGridWorldAction, MoveForward, TurnLeft, TurnRight, MoveUp, MoveDown, MoveLeft, MoveRight, PickUp, Drop
-export MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT, PICK_UP, DROP
-
 abstract type AbstractGridWorldAction end
 
 abstract type AbstractMoveAction <: AbstractGridWorldAction end

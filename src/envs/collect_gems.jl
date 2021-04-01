@@ -7,7 +7,7 @@ mutable struct CollectGemsDirected{T, R} <: AbstractGridWorld
     num_gem_init::Int
     num_gem_current::Int
     gem_reward::T
-    gem_pos::Vector{CartesianIndex{2}}
+    gem_pos_init::Vector{CartesianIndex{2}}
     done::Bool
 end
 
@@ -22,7 +22,7 @@ mutable struct CollectGemsUndirected{T, R} <: AbstractGridWorld
     num_gem_init::Int
     num_gem_current::Int
     gem_reward::T
-    gem_pos::Vector{CartesianIndex{2}}
+    gem_pos_init::Vector{CartesianIndex{2}}
     done::Bool
 end
 
@@ -47,10 +47,10 @@ function CollectGemsDirected(; T = Float32, height = 8, width = 8, num_gem_init 
     reward = zero(T)
     num_gem_current = num_gem_init
     gem_reward = one(T)
-    gem_pos = CartesianIndex{2}[]
+    gem_pos_init = CartesianIndex{2}[]
     done = false
 
-    env = CollectGemsDirected(world, agent_pos, agent_dir, reward, rng, num_gem_init, num_gem_current, gem_reward, gem_pos, done)
+    env = CollectGemsDirected(world, agent_pos, agent_dir, reward, rng, num_gem_init, num_gem_current, gem_reward, gem_pos_init, done)
 
     RLBase.reset!(env)
 
@@ -71,19 +71,19 @@ RLBase.is_terminated(env::CollectGemsDirected) = get_done(env)
 function RLBase.reset!(env::CollectGemsDirected{T}) where {T}
     world = get_world(env)
     rng = get_rng(env)
+    gem_pos_init = get_gem_pos_init(env)
+    num_gem_init = get_num_gem_init(env)
 
     world[AGENT, get_agent_pos(env)] = false
-    for pos in env.gem_pos
-        world[GEM, pos] = false
-    end
+    map(pos -> world[GEM, pos] = false, gem_pos_init)
+    empty!(gem_pos_init)
 
-    env.gem_pos = CartesianIndex{2}[]
-    for i in 1:env.num_gem_init
+    for i in 1:num_gem_init
         pos = rand(rng, pos -> !any(@view world[:, pos]), env)
         world[GEM, pos] = true
-        push!(env.gem_pos, pos)
+        push!(gem_pos_init, pos)
     end
-    env.num_gem_current = env.num_gem_init
+    set_num_gem_current!(env, num_gem_init)
 
     agent_start_pos = rand(rng, pos -> !any(@view world[:, pos]), env)
     set_agent_pos!(env, agent_start_pos)
@@ -102,7 +102,7 @@ function (env::CollectGemsDirected{T})(action::AbstractTurnAction) where {T}
     set_agent_dir!(env, new_dir)
     world = get_world(env)
 
-    set_done!(env, env.num_gem_current <= 0)
+    set_done!(env, get_num_gem_current(env) <= 0)
     set_reward!(env, zero(T))
 
     return nothing
@@ -119,8 +119,6 @@ function (env::CollectGemsDirected{T})(action::AbstractMoveAction) where {T}
         world[AGENT, dest] = true
     end
 
-    set_done!(env, env.num_gem_current <= 0)
-
     set_reward!(env, zero(T))
     agent_pos = get_agent_pos(env)
     if world[GEM, agent_pos]
@@ -128,6 +126,8 @@ function (env::CollectGemsDirected{T})(action::AbstractMoveAction) where {T}
         set_num_gem_current!(env, get_num_gem_current(env) - 1)
         set_reward!(env, get_gem_reward(env))
     end
+
+    set_done!(env, get_num_gem_current(env) <= 0)
 
     return nothing
 end
@@ -160,10 +160,10 @@ function CollectGemsUndirected(; T = Float32, height = 8, width = 8, num_gem_ini
     reward = zero(T)
     num_gem_current = num_gem_init
     gem_reward = one(T)
-    gem_pos = CartesianIndex{2}[]
+    gem_pos_init = CartesianIndex{2}[]
     done = false
 
-    env = CollectGemsUndirected(world, agent_pos, reward, rng, num_gem_init, num_gem_current, gem_reward, gem_pos, done)
+    env = CollectGemsUndirected(world, agent_pos, reward, rng, num_gem_init, num_gem_current, gem_reward, gem_pos_init, done)
 
     RLBase.reset!(env)
 
@@ -173,19 +173,19 @@ end
 function RLBase.reset!(env::CollectGemsUndirected{T}) where {T}
     world = get_world(env)
     rng = get_rng(env)
+    gem_pos_init = get_gem_pos_init(env)
+    num_gem_init = get_num_gem_init(env)
 
     world[AGENT, get_agent_pos(env)] = false
-    for pos in env.gem_pos
-        world[GEM, pos] = false
-    end
+    map(pos -> world[GEM, pos] = false, gem_pos_init)
+    empty!(gem_pos_init)
 
-    env.gem_pos = CartesianIndex{2}[]
-    for i in 1:env.num_gem_init
+    for i in 1:num_gem_init
         pos = rand(rng, pos -> !any(@view world[:, pos]), env)
         world[GEM, pos] = true
-        push!(env.gem_pos, pos)
+        push!(gem_pos_init, pos)
     end
-    env.num_gem_current = env.num_gem_init
+    set_num_gem_current!(env, num_gem_init)
 
     agent_start_pos = rand(rng, pos -> !any(@view world[:, pos]), env)
     set_agent_pos!(env, agent_start_pos)
@@ -208,8 +208,6 @@ function (env::CollectGemsUndirected{T})(action::AbstractMoveAction) where {T}
         world[AGENT, dest] = true
     end
 
-    set_done!(env, env.num_gem_current <= 0)
-
     set_reward!(env, zero(T))
     agent_pos = get_agent_pos(env)
     if world[GEM, agent_pos]
@@ -217,6 +215,8 @@ function (env::CollectGemsUndirected{T})(action::AbstractMoveAction) where {T}
         set_num_gem_current!(env, get_num_gem_current(env) - 1)
         set_reward!(env, get_gem_reward(env))
     end
+
+    set_done!(env, get_num_gem_current(env) <= 0)
 
     return nothing
 end

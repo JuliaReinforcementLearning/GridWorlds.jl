@@ -1,5 +1,3 @@
-export AbstractGridWorld
-
 abstract type AbstractGridWorld <: RLBase.AbstractEnv end
 
 @forward AbstractGridWorld.world get_grid, get_objects, get_num_objects, get_height, get_width

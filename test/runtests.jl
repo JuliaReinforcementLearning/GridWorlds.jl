@@ -8,7 +8,7 @@ import ReinforcementLearningBase: RLBase
 ENVS = [GW.EmptyRoomDirected,
         GW.EmptyRoomUndirected,
         GW.GridRoomsDirected,
-        GW.SequentialRoomsUndirected,
+        GW.GridRoomsUndirected,
         GW.SequentialRoomsDirected,
         GW.SequentialRoomsUndirected,
         GW.MazeDirected,

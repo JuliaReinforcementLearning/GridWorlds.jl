@@ -69,7 +69,7 @@ RLBase.state(env::DynamicObstaclesDirected, ::RLBase.Observation, ::RLBase.Defau
 RLBase.state_space(env::DynamicObstaclesDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
 RLBase.state(env::DynamicObstaclesDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (copy(get_grid(env)), get_agent_dir(env))
 
-RLBase.action_space(env::DynamicObstaclesDirected, ::RLBase.DefaultPlayer) = DIRECTED_NAVIGATION_ACTIONS
+RLBase.action_space(env::DynamicObstaclesDirected, ::RLBase.DefaultPlayer) = (DIRECTED_NAVIGATION_ACTIONS..., NO_MOVE)
 RLBase.reward(env::DynamicObstaclesDirected, ::RLBase.DefaultPlayer) = get_reward(env)
 RLBase.is_terminated(env::DynamicObstaclesDirected) = get_done(env)
 
@@ -192,7 +192,7 @@ RLBase.state(env::DynamicObstaclesUndirected, ::RLBase.Observation, ::RLBase.Def
 RLBase.state_space(env::DynamicObstaclesUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
 RLBase.state(env::DynamicObstaclesUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = copy(get_grid(env))
 
-RLBase.action_space(env::DynamicObstaclesUndirected, player::RLBase.DefaultPlayer) = UNDIRECTED_NAVIGATION_ACTIONS
+RLBase.action_space(env::DynamicObstaclesUndirected, player::RLBase.DefaultPlayer) = (UNDIRECTED_NAVIGATION_ACTIONS..., NO_MOVE)
 RLBase.reward(env::DynamicObstaclesUndirected, ::RLBase.DefaultPlayer) = get_reward(env)
 RLBase.is_terminated(env::DynamicObstaclesUndirected) = get_done(env)
 
@@ -263,8 +263,7 @@ iscollision(env::Union{DynamicObstaclesDirected, DynamicObstaclesUndirected}) = 
 
 function valid_obstacle_dest(env::Union{DynamicObstaclesDirected, DynamicObstaclesUndirected}, pos::CartesianIndex{2})
     world = get_world(env)
-    shifts = (-1, 0, 1)
-    candidate_pos = [CartesianIndex(pos[1] + i, pos[2] + j) for i in shifts for j in shifts]
+    candidate_pos = CartesianIndices((pos[1]-1:pos[1]+1, pos[2]-1:pos[2]+1))
     return filter(p -> (!any(@view world[:, p]) || p == pos), candidate_pos)
 end
 

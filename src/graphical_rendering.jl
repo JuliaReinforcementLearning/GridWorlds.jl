@@ -6,7 +6,7 @@ get_box(pos, tile_size, transform) = Makie.FRect2D((transform(pos).I .- (1,1)) .
 
 get_markersize(object::AbstractObject, tile_size) = reverse(tile_size)
 
-function init_screen(env_node::Makie.Observable{<:AbstractGridWorld}; resolution = (720, 720))
+function init_screen(env_node::Makie.Observable{E}; resolution = (720, 720)) where {E<:AbstractGridWorld}
     scene = Makie.Scene(resolution = resolution, raw = true, camera = Makie.campixel!)
 
     height = get_height(env_node[])
@@ -23,9 +23,9 @@ function init_screen(env_node::Makie.Observable{<:AbstractGridWorld}; resolution
     Makie.scatter!(scene, Makie.@lift(map(x -> get_center(x, $tile_size, transform), filter(pos -> !any(get_world($env_node)[:, pos]), $tile_inds))), color = :white, marker = '⋅', markersize = Makie.@lift((reverse($tile_size) ./ 5)))
 
     # 2. paint each kind of object
-    for object in get_objects(env_node[])
+    for object in reverse(get_objects(env_node[]))
         if object === AGENT
-            if hasfield(typeof(env_node[]), :agent_dir)
+            if hasfield(E, :agent_dir)
                 Makie.scatter!(scene, Makie.@lift(broadcast(x -> get_center(x, $tile_size, transform), findall(get_world($env_node)[object, :, :]))), color = get_color(object), marker = Makie.@lift(get_char(object, get_agent_dir($env_node))), markersize = Makie.@lift(get_markersize(object, $tile_size)))
             else
                 Makie.scatter!(scene, Makie.@lift(broadcast(x -> get_center(x, $tile_size, transform), findall(get_world($env_node)[object, :, :]))), color = get_color(object), marker = get_char(object), markersize = Makie.@lift(get_markersize(object, $tile_size)))
@@ -35,13 +35,15 @@ function init_screen(env_node::Makie.Observable{<:AbstractGridWorld}; resolution
         end
     end
 
-    # # 3. paint agent's view
-    if hasfield(typeof(env_node[]), :agent_dir)
-        view_boxes = Makie.@lift(map(pos -> get_box(pos, $tile_size, transform), filter(pos -> pos in tile_inds, get_grid_inds(get_agent_pos($env_node).I, get_half_size($env_node), get_agent_dir($env_node)))))
-        Makie.poly!(scene, view_boxes, color = "rgba(255,255,255,0.3)")
-    else
-        view_boxes = Makie.@lift(map(pos -> get_box(pos, $tile_size, transform), filter(pos -> pos in tile_inds, get_grid_inds(get_agent_pos($env_node).I, get_half_size($env_node)))))
-        Makie.poly!(scene, view_boxes, color = "rgba(255,255,255,0.3)")
+    # 3. paint agent's view
+    if isa(RLBase.StateStyle(env_node[]), RLBase.Observation) && !(isa(env_node[], Snake))
+        if hasfield(E, :agent_dir)
+            view_boxes = Makie.@lift(map(pos -> get_box(pos, $tile_size, transform), filter(pos -> pos in tile_inds, get_grid_inds(get_agent_pos($env_node).I, get_half_size($env_node), get_agent_dir($env_node)))))
+            Makie.poly!(scene, view_boxes, color = "rgba(255,255,255,0.3)")
+        else
+            view_boxes = Makie.@lift(map(pos -> get_box(pos, $tile_size, transform), filter(pos -> pos in tile_inds, get_grid_inds(get_agent_pos($env_node).I, get_half_size($env_node)))))
+            Makie.poly!(scene, view_boxes, color = "rgba(255,255,255,0.3)")
+        end
     end
 
     return scene
@@ -57,6 +59,7 @@ function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
     s: MoveDown
     a: MoveLeft
     d: MoveRight
+    n: NoMove
     p: PickUp
     o: Drop
     r: reset!
