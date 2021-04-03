@@ -1,5 +1,5 @@
 struct Room
-    region::CartesianIndices{2,Tuple{UnitRange{Int64},UnitRange{Int64}}}
+    region::CartesianIndices{2,Tuple{UnitRange{Int},UnitRange{Int}}}
 end
 
 Room(origin, height, width) = Room(CartesianIndices((origin.I[1] : origin.I[1] + height - 1, origin.I[2] : origin.I[2] + width - 1)))

@@ -8,7 +8,7 @@ mutable struct DoorKeyDirected{T, R} <: AbstractGridWorld
     goal_pos::CartesianIndex{2}
     door_pos::CartesianIndex{2}
     key_pos::CartesianIndex{2}
-    partition::CartesianIndices{2,Tuple{UnitRange{Int64},UnitRange{Int64}}}
+    partition::CartesianIndices{2,Tuple{UnitRange{Int},UnitRange{Int}}}
     has_key::Bool
     done::Bool
 end
@@ -25,7 +25,7 @@ mutable struct DoorKeyUndirected{T, R} <: AbstractGridWorld
     goal_pos::CartesianIndex{2}
     door_pos::CartesianIndex{2}
     key_pos::CartesianIndex{2}
-    partition::CartesianIndices{2,Tuple{UnitRange{Int64},UnitRange{Int64}}}
+    partition::CartesianIndices{2,Tuple{UnitRange{Int},UnitRange{Int}}}
     has_key::Bool
     done::Bool
 end
@@ -53,7 +53,7 @@ function DoorKeyDirected(; T = Float32, height = 8, width = 8, rng = Random.GLOB
     door_pos = CartesianIndex(2, 3)
     world[DOOR, door_pos] = true
 
-    partition = CartesianIndices((2:height-1, door_pos[2]))
+    partition = CartesianIndices((2:height-1, door_pos[2]:door_pos[2]))
     world[WALL, partition] .= true
     world[WALL, door_pos] = false
 
@@ -185,7 +185,7 @@ function DoorKeyUndirected(; T = Float32, height = 8, width = 8, rng = Random.GL
     door_pos = CartesianIndex(2, 3)
     world[DOOR, door_pos] = true
 
-    partition = CartesianIndices((2:height-1, door_pos[2]))
+    partition = CartesianIndices((2:height-1, door_pos[2]:door_pos[2]))
     world[WALL, partition] .= true
     world[WALL, door_pos] = false
 
@@ -286,14 +286,14 @@ function generate_partition(rng, height, width)
     if rand(rng) < 0.5
         # vertical partition
         door_pos = rand(rng, CartesianIndices((2:height-1, 3:width-2)))
-        partition = CartesianIndices((2:height-1, door_pos[2]))
+        partition = CartesianIndices((2:height-1, door_pos[2]:door_pos[2]))
         region1 = CartesianIndices((2:height-1, 2:door_pos[2]-1))
         region2 = CartesianIndices((2:height-1, door_pos[2]+1:width-1))
         return door_pos, partition, region1, region2
     else
         # horizontal partition
         door_pos = rand(rng, CartesianIndices((3:height-2, 2:width-1)))
-        partition = CartesianIndices((door_pos[1], 2:width-1))
+        partition = CartesianIndices((door_pos[1]:door_pos[1], 2:width-1))
         region1 = CartesianIndices((2:door_pos[1]-1, 2:width-1))
         region2 = CartesianIndices((door_pos[1]+1:height-1, 2:width-1))
         return door_pos, partition, region1, region2
