@@ -102,7 +102,7 @@ For more details, it is highly recommended that you take a look at the source co
 
     Here is an example of a textual rendering of the `SequentialRoomsDirected` environment:
 
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/textual_rendering.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/textual_rendering.png" width="300px">
 
 1. #### Graphical Rendering
 
