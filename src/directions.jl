@@ -1,9 +1,5 @@
 abstract type AbstractDirection end
 
-struct Center <: AbstractDirection end
-const CENTER = Center()
-move(::Center, pos::CartesianIndex{2}) = pos
-
 struct Up <: AbstractDirection end
 const UP = Up()
 move(::Up, pos::CartesianIndex{2}) = pos + CartesianIndex(-1, 0)

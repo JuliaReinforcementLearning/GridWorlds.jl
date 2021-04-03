@@ -1,6 +1,3 @@
-export AbstractGridWorldAction, MoveForward, TurnLeft, TurnRight, MoveUp, MoveDown, MoveLeft, MoveRight, PickUp, Drop
-export MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT, PICK_UP, DROP
-
 abstract type AbstractGridWorldAction end
 
 abstract type AbstractMoveAction <: AbstractGridWorldAction end
@@ -30,10 +27,10 @@ const MOVE_RIGHT = MoveRight()
 move(::MoveRight, pos::CartesianIndex{2}) = move(RIGHT, pos)
 move(action::MoveRight, dir::AbstractDirection, pos::CartesianIndex{2}) = move(action, pos)
 
-struct MoveCenter <: AbstractMoveAction end
-const MOVE_CENTER = MoveCenter()
-move(::MoveCenter, pos::CartesianIndex{2}) = move(CENTER, pos)
-move(action::MoveCenter, dir::AbstractDirection, pos::CartesianIndex{2}) = move(action, pos)
+struct NoMove <: AbstractMoveAction end
+const NO_MOVE = NoMove()
+move(::NoMove, pos::CartesianIndex{2}) = pos
+move(action::NoMove, dir::AbstractDirection, pos::CartesianIndex{2}) = move(action, pos)
 
 struct TurnLeft <: AbstractTurnAction end
 const TURN_LEFT = TurnLeft()

@@ -9,50 +9,61 @@ This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minig
 * [Getting Started](#getting-started)
 * [Design](#design)
   - [Reinforcement Learing API for the environments](#reinforcement-learing-api-for-the-environments)
-  - [Representation of a grid-world](#representation-of-a-grid-world)
+  - [Representation of an environment](#representation-of-an-environment)
   - [Customizing an existing environment](#customizing-an-existing-environment)
   - [Rendering](#rendering)
     1. [Terminal Rendering](#terminal-rendering)
-    1.  [Makie Rendering](#makie-rendering)
+    1. [Makie Rendering](#makie-rendering)
 * [List of Environments](#list-of-environments)
-  1. [EmptyRoom](#emptyroom)
-  1. [GridRooms](#gridrooms)
-  1. [SequentialRooms](#sequentialrooms)
-  1. [Maze](#maze)
-  1. [GoToDoor](#gotodoor)
-  1. [DoorKey](#doorkey)
-  1. [CollectGems](#collectgems)
-  1. [DynamicObstacles](#dynamicobstacles)
-  1. [Sokoban](#sokoban)
+  1. [EmptyRoomDirected](#emptyroomdirected)
+  1. [EmptyRoomUndirected](#emptyroomundirected)
+  1. [GridRoomsDirected](#gridroomsdirected)
+  1. [GridRoomsUndirected](#gridroomsundirected)
+  1. [SequentialRoomsDirected](#sequentialroomsdirected)
+  1. [SequentialRoomsUndirected](#sequentialroomsundirected)
+  1. [MazeDirected](#mazedirected)
+  1. [MazeUndirected](#mazeundirected)
+  1. [GoToTargetDirected](#gototargetdirected)
+  1. [GoToTargetUndirected](#gototargetundirected)
+  1. [DoorKeyDirected](#doorkeydirected)
+  1. [DoorKeyUndirected](#doorkeyundirected)
+  1. [CollectGemsDirected](#collectgemsdirected)
+  1. [CollectGemsUndirected](#collectgemsundirected)
+  1. [DynamicObstaclesDirected](#dynamicobstaclesdirected)
+  1. [DynamicObstaclesUndirected](#dynamicobstaclesundirected)
+  1. [SokobanDirected](#sokobandirected)
+  1. [SokobanUndirected](#sokobanundirected)
   1. [Snake](#snake)
   1. [Catcher](#catcher)
-  1. [Transport](#transport)
+  1. [TransportDirected](#transport)
+  1. [TransportUndirected](#transportundirected)
 
 ## Getting Started
 
 ```julia
-using GridWorlds
+import GridWorlds
 
-env = EmptyRoom()
+env = GridWorlds.EmptyRoomDirected()
 
-env(MOVE_FORWARD)
-env(TURN_LEFT)
-env(TURN_RIGHT)
+env(GridWorlds.MOVE_FORWARD)
+env(GridWorlds.TURN_LEFT)
+env(GridWorlds.TURN_RIGHT)
 
-using ReinforcementLearningBase
+import ReinforcementLearningBase
 
-state(env)
-action_space(env)
-reward(env)
-is_terminated(env)
-reset!(env)
+ReinforcementLearningBase.state(env)
+ReinforcementLearningBase.action_space(env)
+ReinforcementLearningBase.reward(env)
+ReinforcementLearningBase.is_terminated(env)
+ReinforcementLearningBase.reset!(env)
 
 # play interactively using Makie.jl
 # you need to first manually install Makie.jl with the following command
 # ] add Makie
 # first time plot may be slow
-using Makie
-play(env, file_name = "example.gif", frame_rate = 5)
+import Makie
+
+GridWorlds.play(env, file_name = "example.gif", frame_rate = 24)
 ```
 
 ## Design
@@ -61,93 +72,115 @@ play(env, file_name = "example.gif", frame_rate = 5)
 
 This package uses the API provided in [`ReinforcementLearningBase.jl`](https://github.com/JuliaReinforcementLearning/ReinforcementLearningBase.jl) so that it can seamlessly work with the rest of the [JuliaReinforcementLearning](https://github.com/JuliaReinforcementLearning) ecosystem.
 
-### Representation of a grid-world
+### Representation of an environment
 
-A grid-world environment instance (often named `env`) contains within it an instance of `GridWorldBase` (often named `world`), which represents the grid-world. A `world` contains a 3-D boolean array (`BitArray{3}`) (often named `grid`) of size `(num_objects, height, width)`. Each tile of the `grid` can have multiple objects in it, indicated by a multi-hot encoding along the first dimension of the `grid`. The objects in the `world` do not contain any fields. Any related information for such objects that is needed is cached separately as fields of `env`.
-
-`env` contains fields called `world` and `agent` (along with some other fields). The point here is to note that an `agent` is stored separately as a field in `env` instead of an object contained in `world`. You *can* create a custom field-less agent object and store it in the `world` if you want, but we usually store it as a field in the `env`, since an `agent` often has other information that need caching.
+An environment instance (often named `env`) contains within it an instance of `GridWorldBase` (often named `world`). A `world` contains a 3-D boolean array (which is a `BitArray{3}` and is often named `grid`) of size `(num_objects, height, width)`. Each tile of the `grid` can have multiple objects in it, as represented by a multi-hot encoding along the first dimension of the `grid`. The objects contained in the `world` do not contain any fields. Any information related to such objects that needs to be stored is cached separately as fields of `env`.
 
 ### Customizing an existing environment
 
 The behaviour of environments is easily customizable. Here are some of the things that one may typically want to customize:
 
 1. Keyword arguments allow for enough flexibility in most environments. For example, most environments allow creation of rectangular worlds.
-1. You can set the navigation style trait (for environments where it makes sense) by `GridWorlds.get_navigation_style(::Type{<:SomeEnv}) = GridWorlds.DIRECTED_NAVIGATION` or `GridWorlds.get_navigation_style(::Type{<:SomeEnv}) = GridWorlds.UNDIRECTED_NAVIGATION`.
-1. You can override specific `ReinforcementLearningBase` methods for customization. For example, the default implementation of the `ReinforcementLearingBase.reset!` method for an environment is appropriately randomized (like the goal position and agent start position in `EmptyRoom`). In case you need some custom behaviour, you can do so by simply overriding the `ReinforcementLearningBase.reset!` method, and reusing the rest of the behaviour (like what happens upon taking some action) as it is. You may also want to customize the `ReinforcementLearningBase.state` method to return the entire grid, or only the agent's view, or anything else you wish. See [RLBase API defaults](https://github.com/JuliaReinforcementLearning/GridWorlds.jl/blob/2e8975c85ce3534c2151121a0791be1ec53a8d31/src/abstract_grid_world.jl#L64) in `abstract_grid_world.jl` for examples.
+1. Of course, one can also override the `ReinforcementLearningBase` (`RLBase`) API methods directly for a greater degree of customization. For example, the default implementation of the `RLBase.reset!` method for an environment is appropriately randomized (like the goal position and agent start position in the EmptyRoom environment). In case one needs some other behaviour, one can do so by simply overriding this particular method, and reuse the rest of the behaviour as it is (like the effects of actions in this environment).
+1. Most environments offer multiple state representations. One can modify the `RLBase.StateStyle(env)` method to choose to partially observe (`RLBase.StateStyle(env)` returns `RLBase.Observation{Any}()`) or fully observe (`RLBase.StateStyle(env)` returns `RLBase.InternalState{Any}()`) the current state of an environment. During rendering, some environments display a gray shaded area surrounding the agent's character. The shaded area corresponds to the region of the `grid` that is observed via `RLBase.state(env)` in partially observable settings (when `RLBase.StateStyle(env)` is set to return `RLBase.Observation{Any}()`). In the case of fully observable environments (`RLBase.StateStyle(env)` returns `RLBase.InternalState{Any}()`), the entire `grid` is returned as part of `RLBase.state(env)`. For `Directed` environments, the direction of the agent is not encoded inside the `grid`. So when fully observing the environment using `RLBase.InternalState{Any}()`, `RLBase.state(env)` would return the direction of the agent separately.
+
+Here is the `EmptyRoomUndirected` environment with `RLBase.Observation{Any}()`:
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/observation.png" width="300px">
+
+Here is the `EmptyRoomUndirected` environment with `RLBase.InternalState{Any}()`:
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/internal_state.png" width="300px">
+
+For more details, it is highly recommended that you take a look at the source code of the particular environment that you are working with.
 
 ### Rendering
 
 `GridWorlds.jl` offers two modes of rendering:
 
-1. #### Terminal Rendering
+1. #### Textual Rendering
 
-    While rendering a gridworld environment in the terminal, we display only one character per tile. If multiple objects are present in the same tile, we go by a priority implied by the order of the corresponding objects (lower the index, higher the priority) in the `objects` attribute (which is a tuple, and hence it is ordered) of the `GridWorldBase` instance.
+    This mode can be used directly in the terminal to render an environment. In this mode, we can display only one character per tile. If multiple objects are present in the same tile, then the object with the least index in the `objects` field of `world` is chosen. For example, if `world.objects` is `(GridWorlds.Agent(), GridWorlds.Wall(), GridWorlds.Goal())` and if both `Agent` and `Goal` are present on a tile, then the character for `Agent` will be rendered for that particular tile.
 
-    For example, if the value of the `objects` attribute is `(DIRECTION_LESS_AGENT, EMPTY, WALL, DOOR)`, and if a tile contains both `DIRECTION_LESS_AGENT` and `DOOR` (say when the agent is crossing the door), then the character corresponding to the `DIRECTION_LESS_AGENT` will be displayed on the terminal for that tile.
+    Here is an example of a textual rendering of the `SequentialRoomsDirected` environment:
 
-    A rendered environment looks something like this on the terminal:
-    
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/EmptyRoom.png" width="300px">
-    
-1. #### Makie Rendering
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/textual_rendering.gif" width="300px">
 
-    If available, one can optionally use [`Makie.jl`](https://github.com/JuliaPlots/Makie.jl) in order to render an environment, play with it interactively, and save animations. See the examples given below in List of Environments.
+1. #### Graphical Rendering
+
+    If available, one can optionally use [`Makie.jl`](https://github.com/JuliaPlots/Makie.jl) in order to render an environment graphically. It is also possible to play with an environment interactively, and save animations of the same. See the examples given below in [List of Environments](#list-of-environments).
 
 ## List of Environments
 
-1. ### EmptyRoom
+1. ### EmptyRoomDirected
 
-    DirectedNavigation | UndirectedNavigation
-    ------------ | -------------
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/empty_room_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/empty_room_undirected.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/empty_room_directed.gif" width="300px">
 
-1. ### GridRooms
+1. ### EmptyRoomUndirected
 
-    DirectedNavigation | UndirectedNavigation
-    ------------ | -------------
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/grid_rooms_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/grid_rooms_undirected.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/empty_room_undirected.gif" width="300px">
 
-1. ### SequentialRooms
+1. ### GridRoomsDirected
 
-    DirectedNavigation | UndirectedNavigation
-    ------------ | -------------
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sequential_rooms_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sequential_rooms_undirected.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/grid_rooms_directed.gif" width="300px">
 
-1. ### Maze
+1. ### GridRoomsUndirected
 
-    DirectedNavigation | UndirectedNavigation
-    ------------ | -------------
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/maze_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/maze_undirected.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/grid_rooms_undirected.gif" width="300px">
 
-1. ### GoToDoor
+1. ### SequentialRoomsDirected
 
-    DirectedNavigation | UndirectedNavigation
-    ------------ | -------------
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/go_to_door_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/go_to_door_undirected.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sequential_rooms_directed.gif" width="300px">
 
-1. ### DoorKey
+1. ### SequentialRoomsUndirected
 
-    DirectedNavigation | UndirectedNavigation
-    ------------ | -------------
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/door_key_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/door_key_undirected.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sequential_rooms_undirected.gif" width="300px">
 
-1. ### CollectGems
+1. ### MazeDirected
 
-    DirectedNavigation | UndirectedNavigation
-    ------------ | -------------
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/collect_gems_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/collect_gems_undirected.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/maze_directed.gif" width="300px">
 
-1. ### DynamicObstacles
+1. ### MazeUndirected
 
-    DirectedNavigation | UndirectedNavigation
-    ------------ | -------------
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/dynamic_obstacles_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/dynamic_obstacles_undirected.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/maze_undirected.gif" width="300px">
+
+1. ### GoToTargetDirected
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/go_to_target_directed.gif" width="300px">
+
+1. ### GoToTargetUndirected
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/go_to_target_undirected.gif" width="300px">
+
+1. ### DoorKeyDirected
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/door_key_directed.gif" width="300px">
+
+1. ### DoorKeyUndirected
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/door_key_undirected.gif" width="300px">
+
+1. ### CollectGemsDirected
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/collect_gems_directed.gif" width="300px">
+
+1. ### CollectGemsUndirected
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/collect_gems_undirected.gif" width="300px">
+
+1. ### DynamicObstaclesDirected
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/dynamic_obstacles_directed.gif" width="300px">
+
+1. ### DynamicObstaclesUndirected
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/dynamic_obstacles_undirected.gif" width="300px">
  
-1. ### Sokoban
+1. ### SokobanDirected
 
-    DirectedNavigation | UndirectedNavigation
-    ------------ | -------------
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sokoban_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sokoban_undirected.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sokoban_directed.gif" width="300px">
+
+1. ### SokobanUndirected
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/sokoban_undirected.gif" width="300px">
 
 1. ### Snake
 
@@ -157,8 +190,10 @@ The behaviour of environments is easily customizable. Here are some of the thing
 
     <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/catcher.gif" width="300px">
  
-1. ### Transport
+1. ### TransportDirected
 
-    DirectedNavigation | UndirectedNavigation
-    ------------ | -------------
-    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/transport_directed.gif" width="300px"> | <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/transport_undirected.gif" width="300px">
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/transport_directed.gif" width="300px">
+
+1. ### TransportUndirected
+
+    <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/transport_undirected.gif" width="300px">

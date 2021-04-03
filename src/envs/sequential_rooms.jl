@@ -1,36 +1,67 @@
-export SequentialRooms
-
-mutable struct SequentialRooms{R} <: AbstractGridWorld
-    world::GridWorldBase{Tuple{Empty, Wall, Goal}}
-    agent::Agent
-    reward::Float64
+mutable struct SequentialRoomsDirected{T, R} <: AbstractGridWorld
+    world::GridWorldBase{Tuple{Agent, Wall, Goal}}
+    agent_pos::CartesianIndex{2}
+    agent_dir::AbstractDirection
+    reward::T
     rng::R
-    terminal_reward::Float64
+    terminal_reward::T
     num_rooms::Int
     room_length_range::UnitRange{Int}
     rooms::Array{Room, 1}
+    done::Bool
 end
 
-function SequentialRooms(; num_rooms = 3, room_length_range = 4:6, rng = Random.GLOBAL_RNG)
-    objects = (EMPTY, WALL, GOAL)
+@generate_getters(SequentialRoomsDirected)
+@generate_setters(SequentialRoomsDirected)
+
+mutable struct SequentialRoomsUndirected{T, R} <: AbstractGridWorld
+    world::GridWorldBase{Tuple{Agent, Wall, Goal}}
+    agent_pos::CartesianIndex{2}
+    reward::T
+    rng::R
+    terminal_reward::T
+    num_rooms::Int
+    room_length_range::UnitRange{Int}
+    rooms::Array{Room, 1}
+    done::Bool
+end
+
+@generate_getters(SequentialRoomsUndirected)
+@generate_setters(SequentialRoomsUndirected)
+
+#####
+# Directed
+#####
+
+function SequentialRoomsDirected(; T = Float32, num_rooms = 3, room_length_range = 4:6, rng = Random.GLOBAL_RNG)
+    objects = (AGENT, WALL, GOAL)
     big_n = 2 * num_rooms * room_length_range.stop
     world = GridWorldBase(objects, big_n, big_n)
-    agent = Agent()
-    reward = 0.0
-    terminal_reward = 1.0
+    agent_pos = CartesianIndex(2, 2)
+    agent_dir = RIGHT
+    reward = zero(T)
+    terminal_reward = one(T)
+    done = false
 
-    env = SequentialRooms(world, agent, reward, rng, terminal_reward, num_rooms, room_length_range, Room[])
+    env = SequentialRoomsDirected(world, agent_pos, agent_dir, reward, rng, terminal_reward, num_rooms, room_length_range, Room[], done)
 
     RLBase.reset!(env)
 
     return env
 end
 
-#####
-# RLBase API
-#####
+RLBase.state_space(env::SequentialRoomsDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
+const SEQUENTIAL_ROOMS_DIRECTED_LAYERS = SA.SVector(2, 3)
+RLBase.state(env::SequentialRoomsDirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_agent_dir(env), get_half_size(env), SEQUENTIAL_ROOMS_DIRECTED_LAYERS)
 
-function RLBase.reset!(env::AbstractGridWorld)
+RLBase.state_space(env::SequentialRoomsDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
+RLBase.state(env::SequentialRoomsDirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = (copy(get_grid(env)), get_agent_dir(env))
+
+RLBase.action_space(env::SequentialRoomsDirected, ::RLBase.DefaultPlayer) = DIRECTED_NAVIGATION_ACTIONS
+RLBase.reward(env::SequentialRoomsDirected, ::RLBase.DefaultPlayer) = get_reward(env)
+RLBase.is_terminated(env::SequentialRoomsDirected) = get_done(env)
+
+function RLBase.reset!(env::SequentialRoomsDirected{T}) where {T}
     big_n = 2 * env.num_rooms * env.room_length_range.stop
     world = GridWorldBase(get_objects(env), big_n, big_n)
     set_world!(env, world)
@@ -55,7 +86,6 @@ function RLBase.reset!(env::AbstractGridWorld)
 
             door_pos = rand(rng, intersect(env.rooms[end - 1].region, room.region)[2:end-1])
             world[WALL, door_pos] = false
-            world[EMPTY, door_pos] = true
         end
 
         tries += 1
@@ -73,25 +103,176 @@ function RLBase.reset!(env::AbstractGridWorld)
         goal_pos = rand(rng, get_interior(env.rooms[end]))
     end
     world[GOAL, goal_pos] = true
-    world[EMPTY, goal_pos] = false
 
     # add the agent randomly in the first room
-    agent_start_pos = get_interior(env.rooms[1])
-    agent_start_dir = get_agent_start_dir(env)
+    agent_start_pos = rand(rng, get_interior(env.rooms[1]))
+    set_agent_pos!(env, agent_start_pos)
+    world[AGENT, agent_start_pos] = true
 
-    set_agent_pos!(env, rand(rng, agent_start_pos))
-    set_agent_dir!(env, agent_start_dir)
+    set_agent_dir!(env, rand(rng, DIRECTIONS))
 
-    set_reward!(env, 0.0)
+    set_reward!(env, zero(T))
+    set_done!(env, false)
+
+    return nothing
+end
+
+function (env::SequentialRoomsDirected{T})(action::AbstractTurnAction) where {T}
+    new_dir = turn(action, get_agent_dir(env))
+    set_agent_dir!(env, new_dir)
+    world = get_world(env)
+
+    if world[GOAL, get_agent_pos(env)]
+        set_done!(env, true)
+        set_reward!(env, get_terminal_reward(env))
+    else
+        set_done!(env, false)
+        set_reward!(env, zero(T))
+    end
+
+    return nothing
+end
+
+function (env::SequentialRoomsDirected{T})(action::AbstractMoveAction) where {T}
+    world = get_world(env)
+
+    agent_pos = get_agent_pos(env)
+    dest = move(action, get_agent_dir(env), agent_pos)
+
+    if !world[WALL, dest]
+        world[AGENT, agent_pos] = false
+        set_agent_pos!(env, dest)
+        world[AGENT, dest] = true
+    end
+
+    if world[GOAL, get_agent_pos(env)]
+        set_done!(env, true)
+        set_reward!(env, get_terminal_reward(env))
+    else
+        set_done!(env, false)
+        set_reward!(env, zero(T))
+    end
+
+    return nothing
+end
+
+#####
+# Undirected
+#####
+
+function SequentialRoomsUndirected(; T = Float32, num_rooms = 3, room_length_range = 4:6, rng = Random.GLOBAL_RNG)
+    objects = (AGENT, WALL, GOAL)
+    big_n = 2 * num_rooms * room_length_range.stop
+    world = GridWorldBase(objects, big_n, big_n)
+    agent_pos = CartesianIndex(2, 2)
+    reward = zero(T)
+    terminal_reward = one(T)
+    done = false
+
+    env = SequentialRoomsUndirected(world, agent_pos, reward, rng, terminal_reward, num_rooms, room_length_range, Room[], done)
+
+    RLBase.reset!(env)
 
     return env
 end
+
+RLBase.state_space(env::SequentialRoomsUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
+const SEQUENTIAL_ROOMS_UNDIRECTED_LAYERS = SA.SVector(2, 3)
+RLBase.state(env::SequentialRoomsUndirected, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_half_size(env), SEQUENTIAL_ROOMS_UNDIRECTED_LAYERS)
+
+RLBase.state_space(env::SequentialRoomsUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
+RLBase.state(env::SequentialRoomsUndirected, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = copy(get_grid(env))
+
+RLBase.action_space(env::SequentialRoomsUndirected, player::RLBase.DefaultPlayer) = UNDIRECTED_NAVIGATION_ACTIONS
+RLBase.reward(env::SequentialRoomsUndirected, ::RLBase.DefaultPlayer) = get_reward(env)
+RLBase.is_terminated(env::SequentialRoomsUndirected) = get_done(env)
+
+function RLBase.reset!(env::SequentialRoomsUndirected{T}) where {T}
+    big_n = 2 * env.num_rooms * env.room_length_range.stop
+    world = GridWorldBase(get_objects(env), big_n, big_n)
+    set_world!(env, world)
+
+    rng = get_rng(env)
+
+    env.rooms = Room[]
+
+    room = generate_first_room(env)
+    place_room!(env, room)
+    push!(env.rooms, room)
+
+    tries = 1
+
+    while tries < env.num_rooms
+        candidate_rooms = generate_candidate_rooms(env)
+
+        if length(candidate_rooms) > 0
+            room = rand(rng, candidate_rooms)
+            place_room!(env, room)
+            push!(env.rooms, room)
+
+            door_pos = rand(rng, intersect(env.rooms[end - 1].region, room.region)[2:end-1])
+            world[WALL, door_pos] = false
+        end
+
+        tries += 1
+    end
+
+    # create a compact world
+    centered_world = get_centered_world(world)
+    shift_rooms!(env)
+    set_world!(env, centered_world)
+    world = get_world(env)
+
+    # add the GOAL randomly in the last room
+    goal_pos = rand(rng, get_interior(env.rooms[end]))
+    while goal_pos == get_agent_pos(env)
+        goal_pos = rand(rng, get_interior(env.rooms[end]))
+    end
+    world[GOAL, goal_pos] = true
+
+    # add the agent randomly in the first room
+    agent_start_pos = rand(rng, get_interior(env.rooms[1]))
+    set_agent_pos!(env, agent_start_pos)
+    world[AGENT, agent_start_pos] = true
+
+    set_reward!(env, zero(T))
+    set_done!(env, false)
+
+    return nothing
+end
+
+function (env::SequentialRoomsUndirected{T})(action::AbstractMoveAction) where {T}
+    world = get_world(env)
+
+    agent_pos = get_agent_pos(env)
+    dest = move(action, agent_pos)
+
+    if !world[WALL, dest]
+        world[AGENT, agent_pos] = false
+        set_agent_pos!(env, dest)
+        world[AGENT, dest] = true
+    end
+
+    if world[GOAL, get_agent_pos(env)]
+        set_done!(env, true)
+        set_reward!(env, get_terminal_reward(env))
+    else
+        set_done!(env, false)
+        set_reward!(env, zero(T))
+    end
+
+    return nothing
+end
+
+#####
+# Common
+#####
 
 #####
 # Room generation and placement
 #####
 
-function generate_first_room(env::AbstractGridWorld)
+function generate_first_room(env::Union{SequentialRoomsDirected, SequentialRoomsUndirected})
     big_n = get_width(env)
     rng = get_rng(env)
     origin = CartesianIndex(big_n ÷ 2 + 1, big_n ÷ 2 + 1)
@@ -101,9 +282,9 @@ function generate_first_room(env::AbstractGridWorld)
     return room
 end
 
-is_valid_room(env::SequentialRooms, room::Room) = !any(x -> is_intersecting(room, x), env.rooms)
+is_valid_room(env::Union{SequentialRoomsDirected, SequentialRoomsUndirected}, room::Room) = !any(x -> is_intersecting(room, x), env.rooms)
 
-function generate_candidate_rooms(env::SequentialRooms)
+function generate_candidate_rooms(env::Union{SequentialRoomsDirected, SequentialRoomsUndirected})
     rooms = Room[]
     for height in env.room_length_range, width in env.room_length_range, dir in DIRECTIONS
         push!(rooms, generate_candidate_rooms(env, height, width, dir)...)
@@ -111,7 +292,7 @@ function generate_candidate_rooms(env::SequentialRooms)
     return rooms
 end
 
-function generate_candidate_rooms(env::SequentialRooms, height::Int, width::Int, dir::AbstractDirection)
+function generate_candidate_rooms(env::Union{SequentialRoomsDirected, SequentialRoomsUndirected}, height::Int, width::Int, dir::AbstractDirection)
     origins = generate_candidate_origins(env.rooms[end], height, width, dir)
     rooms = map(x -> Room(x, height, width), origins)
     valid_rooms = filter(x -> is_valid_room(env, x), rooms)
@@ -168,7 +349,7 @@ function get_new_global_origin(world::GridWorldBase)
     return get_origin(bounding_region) - padding
 end
 
-function shift_rooms!(env::AbstractGridWorld)
+function shift_rooms!(env::Union{SequentialRoomsDirected, SequentialRoomsUndirected})
     world = get_world(env)
     new_global_origin = get_new_global_origin(world)
     for (i, room) in enumerate(env.rooms)

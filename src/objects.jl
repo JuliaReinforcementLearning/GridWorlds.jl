@@ -1,112 +1,46 @@
-const COLORS = (:red, :green, :blue, :magenta, :yellow, :white)
-
-#####
-# Objects
-#####
-
 abstract type AbstractObject end
 
-Base.show(io::IO, object::AbstractObject) = print(io, Crayons.Crayon(foreground = get_color(object), reset = true), get_char(object))
-
-struct Empty <: AbstractObject end
-const EMPTY = Empty()
-get_char(::Empty) = '⋅'
-get_color(::Empty) = :white
+struct Agent <: AbstractObject end
+const AGENT = Agent()
 
 struct Wall <: AbstractObject end
 const WALL = Wall()
-get_char(::Wall) = '█'
-get_color(::Wall) = :white
 
 struct Goal <: AbstractObject end
 const GOAL = Goal()
-get_char(::Goal) = '♥'
-get_color(::Goal) = :red
 
-struct Door{C} <: AbstractObject end
-Door(c) = Door{c}()
-get_char(::Door) = '⩎'
-get_color(::Door{C}) where C = C
+struct Door <: AbstractObject end
+const DOOR = Door()
 
-struct Key{C} <: AbstractObject end
-Key(c) = Key{c}()
-get_char(::Key) = '⚷'
-get_color(::Key{C}) where C = C
+struct Key <: AbstractObject end
+const KEY = Key()
 
 struct Gem <: AbstractObject end
 const GEM = Gem()
-get_char(::Gem) = '♦'
-get_color(::Gem) = :magenta
 
 struct Obstacle <: AbstractObject end
 const OBSTACLE = Obstacle()
-get_char(::Obstacle) = '⊗'
-get_color(::Obstacle) = :blue    
 
 struct Box <: AbstractObject end
 const BOX = Box()
-get_char(::Box) = '▒'
-get_color(::Box) = :yellow
 
 struct Target <: AbstractObject end
 const TARGET = Target()
-get_char(::Target) = '✖'
-get_color(::Target) = :red
+
+struct Target1 <: AbstractObject end
+const TARGET1 = Target1()
+
+struct Target2 <: AbstractObject end
+const TARGET2 = Target2()
 
 struct Body <: AbstractObject end
 const BODY = Body()
-get_char(::Body) = '█'
-get_color(::Body) = :green
 
 struct Food <: AbstractObject end
 const FOOD = Food()
-get_char(::Food) = '♦'
-get_color(::Food) = :yellow
 
 struct Basket <: AbstractObject end
 const BASKET = Basket()
-get_char(::Basket) = '⊔'
-get_color(::Basket) = :red
 
 struct Ball <: AbstractObject end
 const BALL = Ball()
-get_char(::Ball) = '∘'
-get_color(::Ball) = :yellow
-
-#####
-# Agent
-#####
-
-mutable struct Agent{I, C} <: AbstractObject
-    pos::CartesianIndex{2}
-    dir::AbstractDirection
-    inventory::I
-end
-
-function Agent(; inventory_type = Union{Nothing, AbstractObject}, color = :red, pos = CartesianIndex(2, 2), dir = RIGHT, inventory = nothing)
-    Agent{inventory_type, color}(pos, dir, inventory)
-end
-
-get_char(::Type{<:Agent}, ::Center) = '☻'
-get_char(::Type{<:Agent}, ::Up) = '↑'
-get_char(::Type{<:Agent}, ::Down) = '↓'
-get_char(::Type{<:Agent}, ::Left) = '←'
-get_char(::Type{<:Agent}, ::Right) = '→'
-get_char(agent::Agent) = get_char(typeof(agent), get_dir(agent))
-
-get_color(agent::Agent{I, C}) where {I, C} = C
-get_dir(agent::Agent) = agent.dir
-set_dir!(agent::Agent, dir::AbstractDirection) = agent.dir = dir
-get_pos(agent::Agent) = agent.pos
-set_pos!(agent::Agent, pos::CartesianIndex{2}) = agent.pos = pos
-
-get_inventory_type(agent::Agent{I}) where I = I
-get_inventory(agent::Agent) = agent.inventory
-
-function set_inventory!(agent::Agent, item)
-    if isa(item, get_inventory_type(agent))
-        agent.inventory = item
-    else
-        error("$item is not of type $(get_inventory_type(agent))")
-    end
-end
