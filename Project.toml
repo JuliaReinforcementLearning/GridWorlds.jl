@@ -18,6 +18,7 @@ DataStructures = "0.18"
 MacroTools = "0.5"
 ReinforcementLearningBase = "0.9"
 Requires = "1.1"
+StaticArrays = "1.1"
 julia = "1"
 
 [extras]
