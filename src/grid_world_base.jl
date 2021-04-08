@@ -41,11 +41,41 @@ Base.setindex!(world::GridWorldBase, value::Bool, object::AbstractObject, args..
 # methods for agent view
 #####
 
-get_grid_inds((i, j), (m, n)) = CartesianIndices((i-m÷2:i-m÷2+m-1, j-n÷2:j-n÷2+n-1))
-get_grid_inds((i, j), (m, n), ::Up) = CartesianIndices((i-m+1:i, j-(n-1)÷2:j+(n-(n-1)÷2)-1))
-get_grid_inds((i, j), (m, n), ::Down) = CartesianIndices((i:i+m-1, j-(n-1)÷2:j+(n-(n-1)÷2)-1))
-get_grid_inds((i, j), (m, n), ::Left) = CartesianIndices((i-(n-1)÷2:i+(n-(n-1)÷2)-1, j-m+1:j))
-get_grid_inds((i, j), (m, n), ::Right) = CartesianIndices((i-(n-1)÷2:i+(n-(n-1)÷2)-1, j:j+m-1))
+function get_grid_inds((i, j), (m, n))
+    temp1 = m ÷ 2
+    temp2 = i - temp1
+    temp3 = n ÷ 2
+    temp4 = j - temp3
+    return CartesianIndices((temp2 : temp2 + m - 1, temp4 : temp4 + n - 1))
+end
+
+function get_grid_inds((i, j), (m, n), ::Up)
+    temp1 = n - 1
+    temp2 = temp1 ÷ 2
+    temp3 = j - temp2
+    return CartesianIndices((i - m + 1 : i, temp3 : temp3 + temp1))
+end
+
+function get_grid_inds((i, j), (m, n), ::Down)
+    temp1 = n - 1
+    temp2 = temp1 ÷ 2
+    temp3 = j - temp2
+    return CartesianIndices((i : i + m - 1, temp3 : temp3 + temp1))
+end
+
+function get_grid_inds((i, j), (m, n), ::Left)
+    temp1 = n - 1
+    temp2 = temp1 ÷ 2
+    temp3 = i - temp2
+    return CartesianIndices((temp3 : temp3 + temp1, j - m + 1 : j))
+end
+
+function get_grid_inds((i, j), (m, n), ::Right)
+    temp1 = n - 1
+    temp2 = temp1 ÷ 2
+    temp3 = i - temp2
+    return CartesianIndices((temp3 : temp3 + temp1, j : j + m - 1))
+end
 
 map_ind((i,j), (m, n), ::Up) = (m-i+1, n-j+1)
 map_ind((i,j), (m, n), ::Down) = (i,j)
