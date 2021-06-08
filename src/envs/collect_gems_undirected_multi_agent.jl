@@ -21,6 +21,7 @@ end
 @generate_setters(CollectGemsUndirectedMultiAgent)
 get_num_agents(::CollectGemsUndirectedMultiAgent{T, R, N}) where {T, R, N} = N
 
+RLBase.StateStyle(::CollectGemsUndirectedMultiAgent) = RLBase.InternalState{Any}()
 RLBase.state_space(env::CollectGemsUndirectedMultiAgent, ::RLBase.InternalState) = nothing
 RLBase.state(env::CollectGemsUndirectedMultiAgent, ::RLBase.InternalState) = copy(get_grid(env))
 
