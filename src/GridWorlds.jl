@@ -1,5 +1,6 @@
 module GridWorlds
 
+import REPL
 import Requires
 import Crayons
 import MacroTools:@forward
