@@ -137,9 +137,12 @@ end
 ##### play
 #####
 
+const ESC = Char(0x1B)
+
 function Base.show(io::IO, ::MIME"text/plain", env::CollectGemsUndirectedMultiAgent)
     height = GW.get_height(env)
     width = GW.get_width(env)
+    num_agents = get_num_agents(env)
 
     for i in 1:height
         for j in 1:width
@@ -151,78 +154,113 @@ function Base.show(io::IO, ::MIME"text/plain", env::CollectGemsUndirectedMultiAg
         println(io)
     end
 
+    for i in 1:num_agents
+        agent = NumberedAgent{i}()
+        println(io, "player $i = ", Crayons.Crayon(foreground = get_color(agent), bold = true, reset = true), get_char(agent), Crayons.Crayon(reset = true))
+    end
+    println(io, "current_player_id = ", env.current_player_id)
+    println(io, "$(typeof(env))")
+    println(io, "reward = ", env.reward)
+    println(io, "done = ", env.done)
+
     return nothing
 end
 
-function play_repl!(terminal::REPL.Terminals.UnixTerminal, env::CollectGemsUndirectedMultiAgent{T, R, N}) where {T, R, N}
+open_maybe(file_name::AbstractString) = open(file_name, "w")
+open_maybe(::Nothing) = nothing
 
-    raw_mode_enabled = try
-        REPL.Terminals.raw!(terminal, true)
-        true
-    catch err
-        @warn("Unable to enter raw mode: $err")
-        false
-    end
+close_maybe(io::IO) = close(io)
+close_maybe(io::Nothing) = nothing
 
-    REPL.Terminals.clear(terminal)
+write_maybe(io::IO, content) = write(io, content)
+write_maybe(io::Nothing, content) = 0
+write_io1_maybe_io2(io1::IO, io2::Union{Nothing, IO}, content) = write(io1, content) + write_maybe(io2, content)
 
-    print(terminal.out_stream, "\x1b[?25l") # hide cursor
+show_maybe(io::IO, mime::MIME, content) = show(io, mime, content)
+show_maybe(io::Nothing, mime::MIME, content) = nothing
+function show_io1_maybe_io2(io1::IO, io2::Union{Nothing, IO}, mime::MIME, content)
+    show(io1, mime, content)
+    show_maybe(io2, mime, content)
+end
+
+get_string_hide_cursor() = ESC * "[?25l"
+get_string_show_cursor() = ESC * "[?25h"
+get_string_clear_screen() = ESC * "[2J"
+get_string_move_cursor_to_origin() = ESC * "[H"
+get_string_clear_screen_before_cursor() = ESC * "[1J"
+get_string_empty_screen() = get_string_clear_screen_before_cursor() * get_string_move_cursor_to_origin()
+get_string_key_bindings(env::CollectGemsUndirectedMultiAgent) = """Key bindings:
+                                                                'q': quit
+                                                                'r': RLBase.reset!(env)
+                                                                'w': env(MOVE_UP)
+                                                                's': env(MOVE_DOWN)
+                                                                'a': env(MOVE_LEFT)
+                                                                'd': env(MOVE_RIGHT)
+                                                                """
+
+function play!(terminal::REPL.Terminals.UnixTerminal, env::CollectGemsUndirectedMultiAgent; file_name::Union{Nothing, AbstractString} = nothing)
+    REPL.Terminals.raw!(terminal, true)
+
+    terminal_out = terminal.out_stream
+    terminal_in = terminal.in_stream
+    file = open_maybe(file_name)
+
+    write_io1_maybe_io2(terminal_out, file, get_string_clear_screen())
+    write_io1_maybe_io2(terminal_out, file, get_string_move_cursor_to_origin())
+    write_io1_maybe_io2(terminal_out, file, get_string_hide_cursor())
 
     try
         while true
+            write_io1_maybe_io2(terminal_out, file, get_string_key_bindings(env))
+            show_io1_maybe_io2(terminal_out, file, MIME("text/plain"), env)
 
-            println(terminal.out_stream, "$(typeof(env))")
-            println(terminal.out_stream,
-                    """Key bindings:
-                    'q': quit
-                    'r': RLBase.reset!(env)
-                    'w': env(MOVE_UP)
-                    's': env(MOVE_DOWN)
-                    'a': env(MOVE_LEFT)
-                    'd': env(MOVE_RIGHT)
-                    """,
-                   )
-            for i in 1:N
-                agent = NumberedAgent{i}()
-                println(terminal.out_stream, "player $i = ", Crayons.Crayon(foreground = get_color(agent), bold = true, reset = true), get_char(agent), Crayons.Crayon(reset = true))
-            end
-            show(terminal.out_stream, MIME("text/plain"), env)
-            println(terminal.out_stream, "reward = ", RLBase.reward(env))
-            println(terminal.out_stream, "done = ", RLBase.is_terminated(env))
-            println(terminal.out_stream, "current_player_id = ", env.current_player_id)
+            char = read(terminal_in, Char)
 
-            c = read(terminal.in_stream, Char)
+            write_io1_maybe_io2(terminal_out, file, get_string_empty_screen())
 
-            REPL.Terminals.clear(terminal)
-
-            if c == 'q'
-                if raw_mode_enabled
-                    print(terminal.out_stream, "\x1b[?25h") # unhide cursor
-                    REPL.Terminals.raw!(terminal, false)
-                end
+            if char == 'q'
+                write_io1_maybe_io2(terminal_out, file, get_string_show_cursor())
+                close_maybe(file)
+                REPL.Terminals.raw!(terminal, false)
                 return nothing
-            elseif c == 'r'
+            elseif char == 'r'
                 RLBase.reset!(env)
-            elseif c == 'w'
-                env(MOVE_UP)
-            elseif c == 's'
-                env(MOVE_DOWN)
-            elseif c == 'a'
-                env(MOVE_LEFT)
-            elseif c == 'd'
-                env(MOVE_RIGHT)
+            elseif char == 'w'
+                env(GW.MOVE_UP)
+            elseif char == 's'
+                env(GW.MOVE_DOWN)
+            elseif char == 'a'
+                env(GW.MOVE_LEFT)
+            elseif char == 'd'
+                env(GW.MOVE_RIGHT)
             else
-                println(terminal.out_stream, "You pressed $c. No keybinding exists for this key.")
+                @warn "No keybinding exists for $char"
             end
+
+            write_io1_maybe_io2(terminal_out, file, "Last character read = " * char * "\n")
         end
-    finally # always disable raw mode
-        if raw_mode_enabled
-            print(terminal.out_stream, "\x1b[?25h") # unhide cursor
-            REPL.Terminals.raw!(terminal, false)
-        end
+    finally
+        write_io1_maybe_io2(terminal_out, file, get_string_show_cursor())
+        close_maybe(file)
+        REPL.Terminals.raw!(terminal, false)
     end
 
     return nothing
 end
 
-play_repl!(env::CollectGemsUndirectedMultiAgent) = play_repl!(REPL.TerminalMenus.terminal, env)
+play!(env::CollectGemsUndirectedMultiAgent; file_name = nothing) = play!(REPL.TerminalMenus.terminal, env, file_name = file_name)
+
+function replay(terminal::REPL.Terminals.UnixTerminal, file_name::AbstractString, frame_rate)
+    terminal_out = terminal.out_stream
+    delimiter = get_string_empty_screen()
+    frames = split(read(file_name, String), delimiter)
+    for frame in frames
+        write(terminal_out, frame)
+        sleep(1 / frame_rate)
+        write(terminal_out, delimiter)
+    end
+
+    return nothing
+end
+
+replay(file_name; frame_rate = 2) = replay(REPL.TerminalMenus.terminal, file_name, frame_rate)
