@@ -166,6 +166,10 @@ For more details, it is highly recommended that you take a look at the source co
 
     <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/collect_gems_undirected.gif" width="300px">
 
+1. ### CollectGemsUndirectedMultiAgent
+
+    <img src="https://user-images.githubusercontent.com/32610387/121581827-ee0b2d80-ca4b-11eb-93ae-0cee14de5513.gif">
+
 1. ### DynamicObstaclesDirected
 
     <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/dynamic_obstacles_directed.gif" width="300px">
