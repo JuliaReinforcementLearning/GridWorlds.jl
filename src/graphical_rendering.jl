@@ -96,7 +96,6 @@ function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
     end
 
     Makie.on(scene.events.keyboardbuttons) do b
-    # GLMakie.on(scene.events.keyboardbutton) do b
         if Makie.ispressed(b, Makie.Keyboard.left)
             env(TURN_LEFT)
             env_node[] = env
