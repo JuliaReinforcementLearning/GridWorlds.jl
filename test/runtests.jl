@@ -27,6 +27,7 @@ ENVS = [GW.EmptyRoomDirected,
         GW.Catcher,
         GW.TransportDirected,
         GW.TransportUndirected,
+        GW.CollectGemsUndirectedMultiAgent,
        ]
 
 const MAX_STEPS = 3000
@@ -50,6 +51,7 @@ get_terminal_returns(env::GW.DynamicObstaclesDirected) = (env.terminal_reward, e
 get_terminal_returns(env::GW.DynamicObstaclesUndirected) = (env.terminal_reward, env.terminal_penalty)
 get_terminal_returns(env::GW.SokobanDirected{T}) where {T} = (T(length(env.box_pos)),)
 get_terminal_returns(env::GW.SokobanUndirected{T}) where {T} = (T(length(env.box_pos)),)
+get_terminal_returns(env::GW.CollectGemsUndirectedMultiAgent) = (env.num_gem_init * env.gem_reward,)
 
 get_terminal_returns_win(env::GW.Snake{T}) where {T} = GW.get_terminal_reward(env):GW.get_food_reward(env):convert(T, GW.get_terminal_reward(env) + GW.get_height(env)*GW.get_width(env)*GW.get_food_reward(env))
 get_terminal_returns_lose(env::GW.Snake{T}) where {T} = GW.get_terminal_penalty(env):GW.get_food_reward(env):convert(T, GW.get_terminal_penalty(env) + GW.get_height(env)*GW.get_width(env)*GW.get_food_reward(env))
@@ -74,8 +76,17 @@ Test.@testset "GridWorlds.jl" begin
                     env(action)
                     total_reward += RLBase.reward(env)
 
-                    Test.@test 1 ≤ GW.get_agent_pos(env)[1] ≤ GW.get_height(env)
-                    Test.@test 1 ≤ GW.get_agent_pos(env)[2] ≤ GW.get_width(env)
+
+                    if Env == GW.CollectGemsUndirectedMultiAgent
+                        for i in 1:GW.get_num_agents(env)
+                            agent_pos = env.agent_pos[i]
+                            Test.@test 1 ≤ agent_pos[1] ≤ GW.get_height(env)
+                            Test.@test 1 ≤ agent_pos[2] ≤ GW.get_width(env)
+                        end
+                    else
+                        Test.@test 1 ≤ GW.get_agent_pos(env)[1] ≤ GW.get_height(env)
+                        Test.@test 1 ≤ GW.get_agent_pos(env)[2] ≤ GW.get_width(env)
+                    end
 
                     if RLBase.is_terminated(env)
                         if Env == GW.Snake

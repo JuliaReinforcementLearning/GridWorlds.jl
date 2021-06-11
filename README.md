@@ -14,29 +14,31 @@ This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minig
   - [Rendering](#rendering)
     1. [Terminal Rendering](#terminal-rendering)
     1. [Makie Rendering](#makie-rendering)
-* [List of Environments](#list-of-environments)
-  1. [EmptyRoomDirected](#emptyroomdirected)
-  1. [EmptyRoomUndirected](#emptyroomundirected)
-  1. [GridRoomsDirected](#gridroomsdirected)
-  1. [GridRoomsUndirected](#gridroomsundirected)
-  1. [SequentialRoomsDirected](#sequentialroomsdirected)
-  1. [SequentialRoomsUndirected](#sequentialroomsundirected)
-  1. [MazeDirected](#mazedirected)
-  1. [MazeUndirected](#mazeundirected)
-  1. [GoToTargetDirected](#gototargetdirected)
-  1. [GoToTargetUndirected](#gototargetundirected)
-  1. [DoorKeyDirected](#doorkeydirected)
-  1. [DoorKeyUndirected](#doorkeyundirected)
-  1. [CollectGemsDirected](#collectgemsdirected)
-  1. [CollectGemsUndirected](#collectgemsundirected)
-  1. [DynamicObstaclesDirected](#dynamicobstaclesdirected)
-  1. [DynamicObstaclesUndirected](#dynamicobstaclesundirected)
-  1. [SokobanDirected](#sokobandirected)
-  1. [SokobanUndirected](#sokobanundirected)
-  1. [Snake](#snake)
-  1. [Catcher](#catcher)
-  1. [TransportDirected](#transport)
-  1. [TransportUndirected](#transportundirected)
+
+[List of Environments](#list-of-environments)
+1. [EmptyRoomDirected](#emptyroomdirected)
+1. [EmptyRoomUndirected](#emptyroomundirected)
+1. [GridRoomsDirected](#gridroomsdirected)
+1. [GridRoomsUndirected](#gridroomsundirected)
+1. [SequentialRoomsDirected](#sequentialroomsdirected)
+1. [SequentialRoomsUndirected](#sequentialroomsundirected)
+1. [MazeDirected](#mazedirected)
+1. [MazeUndirected](#mazeundirected)
+1. [GoToTargetDirected](#gototargetdirected)
+1. [GoToTargetUndirected](#gototargetundirected)
+1. [DoorKeyDirected](#doorkeydirected)
+1. [DoorKeyUndirected](#doorkeyundirected)
+1. [CollectGemsDirected](#collectgemsdirected)
+1. [CollectGemsUndirected](#collectgemsundirected)
+1. [CollectGemsUndirectedMultiAgent](#collectgemsundirectedmultiagent)
+1. [DynamicObstaclesDirected](#dynamicobstaclesdirected)
+1. [DynamicObstaclesUndirected](#dynamicobstaclesundirected)
+1. [SokobanDirected](#sokobandirected)
+1. [SokobanUndirected](#sokobanundirected)
+1. [Snake](#snake)
+1. [Catcher](#catcher)
+1. [TransportDirected](#transport)
+1. [TransportUndirected](#transportundirected)
 
 ## Getting Started
 
@@ -165,6 +167,10 @@ For more details, it is highly recommended that you take a look at the source co
 1. ### CollectGemsUndirected
 
     <img src="https://github.com/JuliaReinforcementLearning/GridWorlds.jl/raw/master/docs/src/assets/img/collect_gems_undirected.gif" width="300px">
+
+1. ### CollectGemsUndirectedMultiAgent
+
+    <img src="https://user-images.githubusercontent.com/32610387/121581827-ee0b2d80-ca4b-11eb-93ae-0cee14de5513.gif">
 
 1. ### DynamicObstaclesDirected
 

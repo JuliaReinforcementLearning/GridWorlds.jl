@@ -1,5 +1,6 @@
 import .Makie
-const GB = Makie.GLMakie.GeometryBasics
+import .GLMakie
+const GB = Makie.GeometryBasics
 
 get_transform(x::Int) = pos -> CartesianIndex(pos[2], x - pos[1] + 1)
 get_center(pos, tile_size, transform) = (transform(pos).I .- (0.5,0.5)) .* reverse(tile_size)
@@ -144,5 +145,5 @@ function play(env::AbstractGridWorld;file_name=nothing,frame_rate=24)
     catch
     end
     isnothing(file_name) || Makie.save(file_name, vs;framerate=frame_rate)
-    Makie.GLMakie.destroy!(Makie.GLMakie.global_gl_screen())
+    GLMakie.destroy!(GLMakie.global_gl_screen())
 end
