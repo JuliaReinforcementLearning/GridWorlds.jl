@@ -2,7 +2,9 @@ module ModuleSingleRoomUndirectedBatch
 
 import Crayons
 import ..GridWorlds as GW
+import ..Play
 import Random
+import REPL
 import ReinforcementLearningBase as RLBase
 import StatsBase as SB
 
@@ -196,5 +198,78 @@ function Base.show(io::IO, ::MIME"text/plain", env::SingleRoomUndirectedBatch)
 
     return nothing
 end
+
+get_string_key_bindings(env::GW.AbstractGridWorld) = """Key bindings:
+                                                     'q': quit
+                                                     'r': RLBase.reset!(env)
+                                                     'w': MOVE_UP
+                                                     's': MOVE_DOWN
+                                                     'a': MOVE_LEFT
+                                                     'd': MOVE_RIGHT
+                                                     """
+
+function play!(terminal::REPL.Terminals.UnixTerminal, env::SingleRoomUndirectedBatch; file_name::Union{Nothing, AbstractString} = nothing)
+    REPL.Terminals.raw!(terminal, true)
+
+    terminal_out = terminal.out_stream
+    terminal_in = terminal.in_stream
+    file = Play.open_maybe(file_name)
+
+    Play.write_io1_maybe_io2(terminal_out, file, Play.CLEAR_SCREEN)
+    Play.write_io1_maybe_io2(terminal_out, file, Play.MOVE_CURSOR_TO_ORIGIN)
+    Play.write_io1_maybe_io2(terminal_out, file, Play.HIDE_CURSOR)
+
+    num_envs = size(env.tile_map, 1)
+    chars = Array{Char}(undef, num_envs)
+
+    action_chars = ('w', 's', 'a', 'd')
+
+    char_to_action = Dict('w' => MOVE_UP,
+                          's' => MOVE_DOWN,
+                          'a' => MOVE_LEFT,
+                          'd' => MOVE_RIGHT,
+                         )
+
+    action = Array{Int}(undef, num_envs)
+
+    try
+        while true
+            Play.write_io1_maybe_io2(terminal_out, file, get_string_key_bindings(env))
+            Play.show_io1_maybe_io2(terminal_out, file, MIME("text/plain"), env)
+
+            for i in 1:num_envs
+                chars[i] = read(terminal_in, Char)
+            end
+
+            Play.write_io1_maybe_io2(terminal_out, file, Play.EMPTY_SCREEN)
+
+            if 'q' in chars
+                Play.write_io1_maybe_io2(terminal_out, file, Play.SHOW_CURSOR)
+                Play.close_maybe(file)
+                REPL.Terminals.raw!(terminal, false)
+                return nothing
+            elseif 'r' in chars
+                RLBase.reset!(env)
+            elseif all(char -> char in action_chars, chars)
+                for i in 1:num_envs
+                    action[i] = char_to_action[chars[i]]
+                end
+                env(action)
+            else
+                @warn "No procedure exists for this character sequence: $chars"
+            end
+
+            Play.write_io1_maybe_io2(terminal_out, file, "Last character sequence = $(chars)\n")
+        end
+    finally
+        Play.write_io1_maybe_io2(terminal_out, file, Play.SHOW_CURSOR)
+        Play.close_maybe(file)
+        REPL.Terminals.raw!(terminal, false)
+    end
+
+    return nothing
+end
+
+play!(env::SingleRoomUndirectedBatch; file_name = nothing) = play!(REPL.TerminalMenus.terminal, env, file_name = file_name)
 
 end # module
