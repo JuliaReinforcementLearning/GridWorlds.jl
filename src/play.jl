@@ -29,7 +29,7 @@ end
 
 function replay(terminal::REPL.Terminals.UnixTerminal, file_name::AbstractString, frame_rate)
     terminal_out = terminal.out_stream
-    delimiter = get_string_empty_screen()
+    delimiter = EMPTY_SCREEN
     frames = split(read(file_name, String), delimiter)
     for frame in frames
         write(terminal_out, frame)
