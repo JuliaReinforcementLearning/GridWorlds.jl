@@ -76,7 +76,7 @@ function SingleRoomUndirectedBatch(; I = Int32, R = Float32, num_envs = 2, heigh
 
     env = SingleRoomUndirectedBatch(tile_map, agent_position, reward, rng, done, terminal_reward, goal_position)
 
-    RLBase.reset!(env)
+    RLBase.reset!(env, force = true)
 
     return env
 end
@@ -88,7 +88,7 @@ RLBase.action_space(env::SingleRoomUndirectedBatch, player::RLBase.DefaultPlayer
 RLBase.reward(env::SingleRoomUndirectedBatch, ::RLBase.DefaultPlayer) = env.reward
 RLBase.is_terminated(env::SingleRoomUndirectedBatch) = env.done
 
-function RLBase.reset!(env::SingleRoomUndirectedBatch{I, R}) where {I, R}
+function RLBase.reset!(env::SingleRoomUndirectedBatch{I, R}; force = false) where {I, R}
     tile_map = env.tile_map
     agent_position = env.agent_position
     goal_position = env.goal_position
@@ -100,21 +100,23 @@ function RLBase.reset!(env::SingleRoomUndirectedBatch{I, R}) where {I, R}
     inner_area = CartesianIndices((2 : size(tile_map, 3) - 1, 2 : size(tile_map, 4) - 1))
 
     for env_id in 1:num_envs
-        tile_map[env_id, AGENT, agent_position[env_id, 1], agent_position[env_id, 2]] = false
-        tile_map[env_id, GOAL, goal_position[env_id, 1], goal_position[env_id, 2]] = false
+        if force || done[env_id]
+            tile_map[env_id, AGENT, agent_position[env_id, 1], agent_position[env_id, 2]] = false
+            tile_map[env_id, GOAL, goal_position[env_id, 1], goal_position[env_id, 2]] = false
 
-        random_positions = SB.sample(rng[env_id], inner_area, 2, replace = false)
+            random_positions = SB.sample(rng[env_id], inner_area, 2, replace = false)
 
-        agent_position[env_id, 1] = random_positions[1][1]
-        agent_position[env_id, 2] = random_positions[1][2]
-        tile_map[env_id, AGENT, random_positions[1]] = true
+            agent_position[env_id, 1] = random_positions[1][1]
+            agent_position[env_id, 2] = random_positions[1][2]
+            tile_map[env_id, AGENT, random_positions[1]] = true
 
-        goal_position[env_id, 1] = random_positions[2][1]
-        goal_position[env_id, 2] = random_positions[2][2]
-        tile_map[env_id, GOAL, random_positions[2]] = true
+            goal_position[env_id, 1] = random_positions[2][1]
+            goal_position[env_id, 2] = random_positions[2][2]
+            tile_map[env_id, GOAL, random_positions[2]] = true
 
-        reward[env_id] = zero(R)
-        done[env_id] = false
+            reward[env_id] = zero(R)
+            done[env_id] = false
+        end
     end
 
     return nothing
