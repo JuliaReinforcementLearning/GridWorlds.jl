@@ -240,7 +240,9 @@ function play!(terminal::REPL.Terminals.UnixTerminal, env::SingleRoomUndirectedB
             Play.show_io1_maybe_io2(terminal_out, file, MIME("text/plain"), env)
 
             for i in 1:num_envs
-                chars[i] = read(terminal_in, Char)
+                c = read(terminal_in, Char)
+                chars[i] = c
+                write(terminal_out, c)
             end
 
             Play.write_io1_maybe_io2(terminal_out, file, Play.EMPTY_SCREEN)
