@@ -56,7 +56,7 @@ function write_benchmarks(information, file)
 
         write(io, "# $(String(name))\n\n")
 
-        write(io, "#### Run uniformly random policy, NUM_RESETS = $(NUM_RESETS), STEPS_PER_RESET = $(STEPS_PER_RESET), TOTAL_STEPS = $(NUM_RESETS * STEPS_PER_RESET)\n\n")
+        write(io, "#### Run uniformly random policy, NUM_ENVS = $(NUM_ENVS), NUM_RESETS = $(NUM_RESETS), STEPS_PER_RESET = $(STEPS_PER_RESET), TOTAL_STEPS = $(NUM_RESETS * STEPS_PER_RESET)\n\n")
         for line in format_benchmark(repr("text/plain", env_benchmark[:run_random_policy]))
             write(io, line * "\n\n")
         end
