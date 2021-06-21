@@ -82,11 +82,11 @@ function SingleRoomUndirectedBatch(; I = Int32, R = Float32, num_envs = 2, heigh
 end
 
 RLBase.StateStyle(env::SingleRoomUndirectedBatch) = RLBase.InternalState{Any}()
-RLBase.state_space(env::SingleRoomUndirectedBatch, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::SingleRoomUndirectedBatch, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = env.tile_map
+RLBase.state_space(env::SingleRoomUndirectedBatch, ::RLBase.InternalState) = nothing
+RLBase.state(env::SingleRoomUndirectedBatch, ::RLBase.InternalState) = env.tile_map
 
-RLBase.action_space(env::SingleRoomUndirectedBatch, player::RLBase.DefaultPlayer) = (MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT)
-RLBase.reward(env::SingleRoomUndirectedBatch, ::RLBase.DefaultPlayer) = env.reward
+RLBase.action_space(env::SingleRoomUndirectedBatch) = (MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT)
+RLBase.reward(env::SingleRoomUndirectedBatch) = env.reward
 RLBase.is_terminated(env::SingleRoomUndirectedBatch) = env.done
 
 function RLBase.reset!(env::SingleRoomUndirectedBatch{I, R}; force = false) where {I, R}
