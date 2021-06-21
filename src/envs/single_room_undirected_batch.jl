@@ -6,6 +6,7 @@ import ..Play
 import Random
 import REPL
 import ReinforcementLearningBase as RLBase
+import StaticArrays as SA
 import StatsBase as SB
 
 const MOVE_UP = 1
@@ -20,6 +21,17 @@ const GOAL = 3
 const DUMMY_CHARACTER = '⋅'
 const CHARACTERS = ('☻', '█', '♥')
 const FOREGROUND_COLORS = (:light_red, :white, :light_red)
+
+function sample_two_positions_without_replacement(rng, region)
+    position1 = rand(rng, region)
+    position2 = rand(rng, region)
+
+    while position1 == position2
+        position2 = rand(rng, region)
+    end
+
+    return position1, position2
+end
 
 function move(action::Integer, i, j)
     if action == MOVE_UP
@@ -62,7 +74,7 @@ function SingleRoomUndirectedBatch(; I = Int32, R = Float32, num_envs = 2, heigh
         tile_map[WALL, :, 1, env_id] .= true
         tile_map[WALL, :, width, env_id] .= true
 
-        random_positions = SB.sample(rng[env_id], inner_area, 2, replace = false)
+        random_positions = sample_two_positions_without_replacement(rng[env_id], inner_area)
 
         agent_position[1, env_id] = random_positions[1][1]
         agent_position[2, env_id] = random_positions[1][2]
@@ -107,7 +119,7 @@ function RLBase.reset!(env::SingleRoomUndirectedBatch{I, R}; force = false) wher
             tile_map[AGENT, agent_position[1, env_id], agent_position[2, env_id], env_id] = false
             tile_map[GOAL, goal_position[1, env_id], goal_position[2, env_id], env_id] = false
 
-            random_positions = SB.sample(rng[env_id], inner_area, 2, replace = false)
+            random_positions = sample_two_positions_without_replacement(rng[env_id], inner_area)
 
             agent_position[1, env_id] = random_positions[1][1]
             agent_position[2, env_id] = random_positions[1][2]
