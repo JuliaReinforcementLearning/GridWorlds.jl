@@ -12,7 +12,7 @@ const information = Dict()
 ENVS = [GW.ModuleSingleRoomUndirectedBatch.SingleRoomUndirectedBatch]
 
 function run_random_policy!(env, num_resets, steps_per_reset)
-    num_envs = size(env.tile_map, 1)
+    num_envs = size(env.tile_map, 4)
     action = Array{eltype(RLBase.action_space(env))}(undef, num_envs)
     for _ in 1:num_resets
         RLBase.reset!(env, force = true)
@@ -32,7 +32,7 @@ end
 
 function format_benchmark(str::String)
     l = split(str, "\n")
-    deleteat!(l, (1, 4, 9))
+    deleteat!(l, (1, 3, 4, 5, 7, 8, 9, 10, 11))
     return strip.(l)
 end
 
@@ -140,4 +140,4 @@ for Env in ENVS
     @info "$(name) benchmark complete"
 end
 
-write_benchmarks(information, "benchmark_multi_threaded.md")
+write_benchmarks(information, "benchmark_batch.md")
