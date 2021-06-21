@@ -114,12 +114,12 @@ Test.@testset "GridWorlds.jl" begin
     Test.@testset "Batch Environments" begin
         for Env in BATCH_ENVS
             Test.@testset "$(Env)" begin
-                num_envs = 1
+                num_envs = 2
                 R = Float32
                 I = Int32
                 env = Env(I = I, R = R, num_envs = num_envs)
-                height = size(env.tile_map, 3)
-                width = size(env.tile_map, 4)
+                height = size(env.tile_map, 2)
+                width = size(env.tile_map, 3)
                 for _ in 1:NUM_RESETS
                     RLBase.reset!(env)
                     Test.@test RLBase.reward(env) == zeros(R, num_envs)
@@ -131,15 +131,19 @@ Test.@testset "GridWorlds.jl" begin
                         env(action)
                         total_reward .+= RLBase.reward(env)
 
-                        Test.@test 1 ≤ env.agent_position[1, 1] ≤ height
-                        Test.@test 1 ≤ env.agent_position[1, 2] ≤ width
-
-                        if RLBase.is_terminated(env)[1]
-                            Test.@test total_reward[1] in get_terminal_returns(env)
-                            break
+                        for env_id in 1:num_envs
+                            Test.@test 1 ≤ env.agent_position[1, env_id] ≤ height
+                            Test.@test 1 ≤ env.agent_position[2, env_id] ≤ width
                         end
 
-                        if i == MAX_STEPS
+                        for env_id in 1:num_envs
+                            if RLBase.is_terminated(env)[env_id]
+                                Test.@test total_reward[env_id] in get_terminal_returns(env)
+                                total_reward[env_id] = zero(total_reward[env_id])
+                            end
+                        end
+
+                        if i == MAX_STEPS && !any(RLBase.is_terminated(env))
                             @info "$Env not terminated after MAX_STEPS = $MAX_STEPS"
                         end
                     end
