@@ -30,6 +30,8 @@ function move(action::Integer, i, j)
         return i, j - 1
     elseif action == MOVE_RIGHT
         return i, j + 1
+    else
+        return i, j
     end
 end
 
