@@ -44,31 +44,31 @@ struct SingleRoomUndirectedBatch{I, R, RNG} <: GW.AbstractGridWorld
 end
 
 function SingleRoomUndirectedBatch(; I = Int32, R = Float32, num_envs = 2, height = 8, width = 8, rng = [Random.MersenneTwister() for i in 1:num_envs])
-    tile_map = BitArray(undef, num_envs, 3, height, width)
-    agent_position = Array{I}(undef, num_envs, 2)
+    tile_map = BitArray(undef, 3, height, width, num_envs)
+    agent_position = Array{I}(undef, 2, num_envs)
     reward = Array{R}(undef, num_envs)
     done = BitArray(undef, num_envs)
-    goal_position = Array{I}(undef, num_envs, 2)
+    goal_position = Array{I}(undef, 2, num_envs)
     terminal_reward = one(R)
 
     inner_area = CartesianIndices((2 : height - 1, 2 : width - 1))
 
     for env_id in 1:num_envs
-        tile_map[env_id, :, :, :] .= false
-        tile_map[env_id, WALL, 1, :] .= true
-        tile_map[env_id, WALL, height, :] .= true
-        tile_map[env_id, WALL, :, 1] .= true
-        tile_map[env_id, WALL, :, width] .= true
+        tile_map[:, :, :, env_id] .= false
+        tile_map[WALL, 1, :, env_id] .= true
+        tile_map[WALL, height, :, env_id] .= true
+        tile_map[WALL, :, 1, env_id] .= true
+        tile_map[WALL, :, width, env_id] .= true
 
         random_positions = SB.sample(rng[env_id], inner_area, 2, replace = false)
 
-        agent_position[env_id, 1] = random_positions[1][1]
-        agent_position[env_id, 2] = random_positions[1][2]
-        tile_map[env_id, AGENT, random_positions[1]] = true
+        agent_position[1, env_id] = random_positions[1][1]
+        agent_position[2, env_id] = random_positions[1][2]
+        tile_map[AGENT, random_positions[1], env_id] = true
 
-        goal_position[env_id, 1] = random_positions[2][1]
-        goal_position[env_id, 2] = random_positions[2][2]
-        tile_map[env_id, GOAL, random_positions[2]] = true
+        goal_position[1, env_id] = random_positions[2][1]
+        goal_position[2, env_id] = random_positions[2][2]
+        tile_map[GOAL, random_positions[2], env_id] = true
 
         reward[env_id] = zero(R)
         done[env_id] = false
@@ -97,23 +97,23 @@ function RLBase.reset!(env::SingleRoomUndirectedBatch{I, R}; force = false) wher
     done = env.done
     rng = env.rng
 
-    num_envs = size(tile_map, 1)
-    inner_area = CartesianIndices((2 : size(tile_map, 3) - 1, 2 : size(tile_map, 4) - 1))
+    num_objects, height, width, num_envs = size(tile_map)
+    inner_area = CartesianIndices((2 : height - 1, 2 : width - 1))
 
     for env_id in 1:num_envs
         if force || done[env_id]
-            tile_map[env_id, AGENT, agent_position[env_id, 1], agent_position[env_id, 2]] = false
-            tile_map[env_id, GOAL, goal_position[env_id, 1], goal_position[env_id, 2]] = false
+            tile_map[AGENT, agent_position[1, env_id], agent_position[2, env_id], env_id] = false
+            tile_map[GOAL, goal_position[1, env_id], goal_position[2, env_id], env_id] = false
 
             random_positions = SB.sample(rng[env_id], inner_area, 2, replace = false)
 
-            agent_position[env_id, 1] = random_positions[1][1]
-            agent_position[env_id, 2] = random_positions[1][2]
-            tile_map[env_id, AGENT, random_positions[1]] = true
+            agent_position[1, env_id] = random_positions[1][1]
+            agent_position[2, env_id] = random_positions[1][2]
+            tile_map[AGENT, random_positions[1], env_id] = true
 
-            goal_position[env_id, 1] = random_positions[2][1]
-            goal_position[env_id, 2] = random_positions[2][2]
-            tile_map[env_id, GOAL, random_positions[2]] = true
+            goal_position[1, env_id] = random_positions[2][1]
+            goal_position[2, env_id] = random_positions[2][2]
+            tile_map[GOAL, random_positions[2], env_id] = true
 
             reward[env_id] = zero(R)
             done[env_id] = false
@@ -132,24 +132,24 @@ function (env::SingleRoomUndirectedBatch{I, R})(action::Vector) where {I, R}
     rng = env.rng
     terminal_reward = env.terminal_reward
 
-    num_envs = size(tile_map, 1)
+    num_envs = size(tile_map, 4)
 
     for env_id in 1:num_envs
-        current_position_i = agent_position[env_id, 1]
-        current_position_j = agent_position[env_id, 2]
+        current_position_i = agent_position[1, env_id]
+        current_position_j = agent_position[2, env_id]
         next_position_i, next_position_j = move(action[env_id], current_position_i, current_position_j)
 
-        if !tile_map[env_id, WALL, next_position_i, next_position_j]
-            tile_map[env_id, AGENT, current_position_i, current_position_j] = false
-            agent_position[env_id, 1] = next_position_i
-            agent_position[env_id, 2] = next_position_j
-            tile_map[env_id, AGENT, next_position_i, next_position_j] = true
+        if !tile_map[WALL, next_position_i, next_position_j, env_id]
+            tile_map[AGENT, current_position_i, current_position_j, env_id] = false
+            agent_position[1, env_id] = next_position_i
+            agent_position[2, env_id] = next_position_j
+            tile_map[AGENT, next_position_i, next_position_j, env_id] = true
         end
 
-        new_current_position_i = agent_position[env_id, 1]
-        new_current_position_j = agent_position[env_id, 2]
+        new_current_position_i = agent_position[1, env_id]
+        new_current_position_j = agent_position[2, env_id]
 
-        if tile_map[env_id, GOAL, new_current_position_i, new_current_position_j]
+        if tile_map[GOAL, new_current_position_i, new_current_position_j, env_id]
             done[env_id] = true
             reward[env_id] = terminal_reward
         else
@@ -166,7 +166,7 @@ function Base.show(io::IO, ::MIME"text/plain", env::SingleRoomUndirectedBatch)
     reward = env.reward
     done = env.done
 
-    num_envs, num_objects, height, width = size(tile_map)
+    num_objects, height, width, num_envs = size(tile_map)
 
     print(io, "objects = ")
     for i in 1 : length(CHARACTERS)
@@ -184,7 +184,7 @@ function Base.show(io::IO, ::MIME"text/plain", env::SingleRoomUndirectedBatch)
         println(io, "env_id = ", env_id)
         for i in 1:height
             for j in 1:width
-                idx = findfirst(@view tile_map[env_id, :, i, j])
+                idx = findfirst(@view tile_map[:, i, j, env_id])
                 if isnothing(idx)
                     print(io, DUMMY_CHARACTER)
                 else
@@ -222,7 +222,7 @@ function play!(terminal::REPL.Terminals.UnixTerminal, env::SingleRoomUndirectedB
     Play.write_io1_maybe_io2(terminal_out, file, Play.MOVE_CURSOR_TO_ORIGIN)
     Play.write_io1_maybe_io2(terminal_out, file, Play.HIDE_CURSOR)
 
-    num_envs = size(env.tile_map, 1)
+    num_envs = size(env.tile_map, 4)
     chars = Array{Char}(undef, num_envs)
 
     action_chars = ('w', 's', 'a', 'd')
