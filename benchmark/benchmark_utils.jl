@@ -5,10 +5,6 @@ import GridWorlds as GW
 import ReinforcementLearningBase as RLBase
 import Statistics
 
-const STEPS_PER_RESET = 100
-const NUM_RESETS = 100
-const NUM_ENVS = 64
-
 ENVS = [GW.ModuleSingleRoomUndirected.SingleRoomUndirected]
 BATCH_ENVS = [GW.ModuleSingleRoomUndirectedBatch.SingleRoomUndirectedBatch]
 
@@ -95,7 +91,7 @@ function benchmark_batch_env(Env, num_resets, steps_per_reset, num_envs)
 
     for action in RLBase.action_space(env)
         action_name = parent_module.ACTION_NAMES[action]
-        batch_action = fill(action, NUM_ENVS)
+        batch_action = fill(action, num_envs)
         benchmark[action_name] = BT.@benchmark $(Ref(env))[]($(Ref(batch_action))[])
     end
 
