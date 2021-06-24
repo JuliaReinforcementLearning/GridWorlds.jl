@@ -1,13 +1,13 @@
+import BenchmarkTools as BT
+import DataStructures as DS
+import Dates
 import GridWorlds as GW
 import ReinforcementLearningBase as RLBase
-import BenchmarkTools as BT
-import Dates
+import Statistics
 
 const STEPS_PER_RESET = 100
 const NUM_RESETS = 100
 const NUM_ENVS = 64
-
-const information = Dict()
 
 ENVS = [GW.ModuleSingleRoomUndirectedBatch.SingleRoomUndirectedBatch]
 
@@ -30,114 +30,108 @@ function run_random_policy!(env, num_resets, steps_per_reset)
     return nothing
 end
 
-function format_benchmark(str::String)
-    l = split(str, "\n")
-    deleteat!(l, (1, 3, 4, 5, 7, 8, 9, 10, 11))
-    return strip.(l)
-end
-
-function write_benchmarks(information, file)
-    io = open(file, "w")
-
-    write(io, "Date: " * Dates.format(Dates.now(), "yyyy_mm_dd_HH_MM_SS") * "\n")
-    write(io, "# List of Environments\n")
-
-    for Env in ENVS
-        name = Env.body.body.body.name.name
-        write(io, "  1. [$(String(name))](#$(lowercase(String(name))))\n")
+function compile_envs(Envs)
+    for Env in Envs
+        env = Env(num_envs = NUM_ENVS)
+        run_random_policy!(env, NUM_RESETS, STEPS_PER_RESET)
     end
 
-    write(io, "\n")
-    write(io, "# Benchmarks\n\n")
+    @info "Compiled and ran all environments"
+
+    return nothing
+end
+
+function benchmark_batch_env(Env, num_resets, steps_per_reset, num_envs)
+    benchmark = DS.OrderedDict()
+
+    parent_module = parentmodule(Env)
+
+    env = Env(num_envs = num_envs)
+
+    benchmark[:random_policy] = BT.@benchmark run_random_policy!($(Ref(env))[], $(Ref(num_resets))[], $(Ref(steps_per_reset))[])
+    benchmark[:reset] = BT.@benchmark RLBase.reset!($(Ref(env))[], force = true)
+    benchmark[:state] = BT.@benchmark RLBase.state($(Ref(env))[])
+
+    for action in RLBase.action_space(env)
+        action_name = parent_module.ACTION_NAMES[action]
+        batch_action = fill(action, NUM_ENVS)
+        benchmark[action_name] = BT.@benchmark $(Ref(env))[]($(Ref(batch_action))[])
+    end
+
+    benchmark[:action_space] = BT.@benchmark RLBase.action_space($(Ref(env))[])
+    benchmark[:is_terminated] = BT.@benchmark RLBase.is_terminated($(Ref(env))[])
+    benchmark[:reward] = BT.@benchmark RLBase.reward($(Ref(env))[])
+
+    @info "$(nameof(Env)) benchmarked"
+
+    return benchmark
+end
+
+function benchmark_batch_envs(Envs, num_resets, steps_per_reset, num_envs)
+    benchmarks = DS.OrderedDict()
+
+    for Env in Envs
+        benchmarks[nameof(Env)] = benchmark_batch_env(Env, num_resets, steps_per_reset, num_envs)
+    end
+
+    @info "All benchmarks complete"
+
+    return benchmarks
+end
+
+function get_summary(trial::BT.Trial)
+    median_trial = BT.median(trial)
+    memory = BT.prettymemory(median_trial.memory)
+    median_time = BT.prettytime(median_trial.time)
+    return memory, median_time
+end
+
+function get_table(benchmark)
+    title = "|"
+    separator = "|"
+    data = "|"
+
+    for key in keys(benchmark)
+        title = title * String(key) * "|"
+        separator = separator * ":---:|"
+        memory, median_time = get_summary(benchmark[key])
+        data = data * "$(memory)<br>$(median_time)|"
+    end
+
+    return title, separator, data
+end
+
+function generate_benchmark_file_batch_envs(Envs, num_resets, steps_per_reset, num_envs, file_name = nothing)
+    date = Dates.format(Dates.now(), "yyyy_mm_dd_HH_MM_SS")
+
+    if isnothing(file_name)
+        file_name = date * ".md"
+    end
+
+    io = open(file_name, "w")
+
+    benchmarks = benchmark_batch_envs(Envs, num_resets, steps_per_reset, num_envs)
+
+    println(io, "Date: $(date)")
+    println(io, "## List of Environments")
 
     for Env in ENVS
-        name = Env.body.body.body.name.name
-        env_benchmark = information[name]
+        name_string = String(nameof(Env))
+        println(io, "  1. [$(name_string)](#$(lowercase(name_string)))")
+    end
 
-        write(io, "# $(String(name))\n\n")
+    println(io)
 
-        write(io, "#### Run uniformly random policy, NUM_ENVS = $(NUM_ENVS), NUM_RESETS = $(NUM_RESETS), STEPS_PER_RESET = $(STEPS_PER_RESET), TOTAL_STEPS = $(NUM_RESETS * STEPS_PER_RESET)\n\n")
-        for line in format_benchmark(repr("text/plain", env_benchmark[:run_random_policy]))
-            write(io, line * "\n\n")
-        end
-
-        write(io, "#### $(String(Symbol(Env)))()\n\n")
-        for line in format_benchmark(repr("text/plain", env_benchmark[:instantiation]))
-            write(io, line * "\n\n")
-        end
-
-        write(io, "#### RLBase.reset!(env)\n\n")
-        for line in format_benchmark(repr("text/plain", env_benchmark[:reset!]))
-            write(io, line * "\n\n")
-        end
-
-        write(io, "#### RLBase.state(env)\n\n")
-        for line in format_benchmark(repr("text/plain", env_benchmark[:state]))
-            write(io, line * "\n\n")
-        end
-
-        write(io, "#### RLBase.action_space(env)\n\n")
-        for line in format_benchmark(repr("text/plain", env_benchmark[:action_space]))
-            write(io, line * "\n\n")
-        end
-
-        write(io, "#### RLBase.is_terminated(env)\n\n")
-        for line in format_benchmark(repr("text/plain", env_benchmark[:is_terminated]))
-            write(io, line * "\n\n")
-        end
-
-        write(io, "#### RLBase.reward(env)\n\n")
-        for line in format_benchmark(repr("text/plain", env_benchmark[:reward]))
-            write(io, line * "\n\n")
-        end
-
-        for action in keys(env_benchmark[:action_info])
-            write(io, "#### env($action)\n\n")
-            for line in format_benchmark(repr("text/plain", env_benchmark[:action_info][action]))
-                write(io, line * "\n\n")
-            end
-        end
-
+    for key in keys(benchmarks)
+        println(io, "### " * String(key))
+        title, separator, data = get_table(benchmarks[key])
+        println(io, title)
+        println(io, separator)
+        println(io, data)
+        println(io)
     end
 
     close(io)
+
+    return nothing
 end
-
-# compile everything once
-for Env in ENVS
-    env = Env(num_envs = NUM_ENVS)
-    run_random_policy!(env, NUM_RESETS, STEPS_PER_RESET)
-end
-
-@info "First run (for compilation) is complete"
-
-for Env in ENVS
-
-    env = Env(num_envs = NUM_ENVS)
-
-    env_benchmark = Dict()
-
-    env_benchmark[:run_random_policy] = BT.@benchmark run_random_policy!($(Ref(env))[], $(Ref(NUM_RESETS))[], $(Ref(STEPS_PER_RESET))[])
-
-    env_benchmark[:instantiation] = BT.@benchmark $(Ref(Env))[](num_envs = $(NUM_ENVS)[])
-
-    env_benchmark[:reset!] = BT.@benchmark RLBase.reset!($(Ref(env))[], force = true)
-    env_benchmark[:state] = BT.@benchmark RLBase.state($(Ref(env))[])
-    env_benchmark[:action_space] = BT.@benchmark RLBase.action_space($(Ref(env))[])
-    env_benchmark[:is_terminated] = BT.@benchmark RLBase.is_terminated($(Ref(env))[])
-    env_benchmark[:reward] = BT.@benchmark RLBase.reward($(Ref(env))[])
-
-    action_info = Dict()
-    for action in RLBase.action_space(env)
-        actions = fill(action, NUM_ENVS)
-        action_info[Symbol(action)] = BT.@benchmark $(Ref(env))[]($(Ref(actions))[])
-    end
-    env_benchmark[:action_info] = action_info
-
-    name = Env.body.body.body.name.name
-    information[name] = env_benchmark
-
-    @info "$(name) benchmark complete"
-end
-
-write_benchmarks(information, "benchmark_batch.md")
