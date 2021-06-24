@@ -48,23 +48,18 @@ function move(action::Integer, i, j)
     end
 end
 
-struct SingleRoomUndirected{I, R, RNG} <: GW.AbstractGridWorld
+mutable struct SingleRoomUndirected{R, RNG} <: GW.AbstractGridWorld
     tile_map::BitArray{3}
-    agent_position::SA.MVector{2, I}
-    reward::Ref{R}
+    agent_position::CartesianIndex{2}
+    reward::R
     rng::RNG
-    done::Ref{Bool}
+    done::Bool
     terminal_reward::R
-    goal_position::SA.MVector{2, I}
+    goal_position::CartesianIndex{2}
 end
 
-function SingleRoomUndirected(; I = Int32, R = Float32, height = 8, width = 8, rng = Random.MersenneTwister())
+function SingleRoomUndirected(; R = Float32, height = 8, width = 8, rng = Random.MersenneTwister())
     tile_map = BitArray(undef, 3, height, width)
-    agent_position = SA.MVector{2, I}(undef)
-    reward = Ref{R}()
-    done = Ref{Bool}()
-    goal_position = SA.MVector{2, I}(undef)
-    terminal_reward = one(R)
 
     inner_area = CartesianIndices((2 : height - 1, 2 : width - 1))
 
@@ -74,18 +69,14 @@ function SingleRoomUndirected(; I = Int32, R = Float32, height = 8, width = 8, r
     tile_map[WALL, :, 1] .= true
     tile_map[WALL, :, width] .= true
 
-    random_positions = sample_two_positions_without_replacement(rng, inner_area)
+    agent_position, goal_position = sample_two_positions_without_replacement(rng, inner_area)
 
-    agent_position[1] = random_positions[1][1]
-    agent_position[2] = random_positions[1][2]
-    tile_map[AGENT, random_positions[1]] = true
+    tile_map[AGENT, agent_position] = true
+    tile_map[GOAL, goal_position] = true
 
-    goal_position[1] = random_positions[2][1]
-    goal_position[2] = random_positions[2][2]
-    tile_map[GOAL, random_positions[2]] = true
-
-    reward[] = zero(R)
-    done[] = false
+    reward = zero(R)
+    done = false
+    terminal_reward = one(R)
 
     env = SingleRoomUndirected(tile_map, agent_position, reward, rng, done, terminal_reward, goal_position)
 
@@ -102,62 +93,48 @@ RLBase.action_space(env::SingleRoomUndirected) = (MOVE_UP, MOVE_DOWN, MOVE_LEFT,
 RLBase.reward(env::SingleRoomUndirected) = env.reward[]
 RLBase.is_terminated(env::SingleRoomUndirected) = env.done[]
 
-function RLBase.reset!(env::SingleRoomUndirected{I, R}) where {I, R}
+function RLBase.reset!(env::SingleRoomUndirected{R}) where {R}
     tile_map = env.tile_map
-    agent_position = env.agent_position
-    goal_position = env.goal_position
-    reward = env.reward
-    done = env.done
     rng = env.rng
 
     num_objects, height, width = size(tile_map)
     inner_area = CartesianIndices((2 : height - 1, 2 : width - 1))
 
-    tile_map[AGENT, agent_position...] = false
-    tile_map[GOAL, goal_position...] = false
+    tile_map[AGENT, env.agent_position] = false
+    tile_map[GOAL, env.goal_position] = false
 
-    random_positions = sample_two_positions_without_replacement(rng, inner_area)
+    new_agent_position, new_goal_position = sample_two_positions_without_replacement(rng, inner_area)
 
-    agent_position[1] = random_positions[1][1]
-    agent_position[2] = random_positions[1][2]
-    tile_map[AGENT, random_positions[1]] = true
+    env.agent_position = new_agent_position
+    tile_map[AGENT, new_agent_position] = true
 
-    goal_position[1] = random_positions[2][1]
-    goal_position[2] = random_positions[2][2]
-    tile_map[GOAL, random_positions[2]] = true
+    env.goal_position = new_goal_position
+    tile_map[GOAL, new_goal_position] = true
 
-    reward[] = zero(R)
-    done[] = false
+    env.reward = zero(R)
+    env.done = false
 
     return nothing
 end
 
-function (env::SingleRoomUndirected{I, R})(action) where {I, R}
+function (env::SingleRoomUndirected{R})(action) where {R}
     tile_map = env.tile_map
     agent_position = env.agent_position
-    goal_position = env.goal_position
-    reward = env.reward
-    done = env.done
-    rng = env.rng
-    terminal_reward = env.terminal_reward
 
-    current_position_i = agent_position[1]
-    current_position_j = agent_position[2]
-    next_position_i, next_position_j = move(action, current_position_i, current_position_j)
+    new_agent_position = CartesianIndex(move(action, agent_position.I...))
 
-    if !tile_map[WALL, next_position_i, next_position_j]
-        tile_map[AGENT, current_position_i, current_position_j] = false
-        agent_position[1] = next_position_i
-        agent_position[2] = next_position_j
-        tile_map[AGENT, next_position_i, next_position_j] = true
+    if !tile_map[WALL, new_agent_position]
+        tile_map[AGENT, agent_position] = false
+        env.agent_position = new_agent_position
+        tile_map[AGENT, new_agent_position] = true
     end
 
-    if tile_map[GOAL, agent_position...]
-        reward[] = terminal_reward
-        done[] = true
+    if tile_map[GOAL, env.agent_position]
+        env.reward = env.terminal_reward
+        done = true
     else
-        reward[] = zero(R)
-        done[] = false
+        env.reward = zero(R)
+        done = false
     end
 
     return nothing
@@ -165,8 +142,6 @@ end
 
 function Base.show(io::IO, ::MIME"text/plain", env::SingleRoomUndirected)
     tile_map = env.tile_map
-    reward = env.reward
-    done = env.done
 
     num_objects, height, width = size(tile_map)
 
@@ -195,8 +170,8 @@ function Base.show(io::IO, ::MIME"text/plain", env::SingleRoomUndirected)
         println(io)
     end
 
-    println(io, "reward = ", reward[])
-    println(io, "done = ", done[])
+    println(io, "reward = ", env.reward)
+    println(io, "done = ", env.done)
 
     return nothing
 end
