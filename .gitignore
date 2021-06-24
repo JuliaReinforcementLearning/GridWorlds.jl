@@ -17,3 +17,5 @@ Manifest.toml
 *.swp
 
 /src/scratchpad.jl
+
+/benchmark/20*
