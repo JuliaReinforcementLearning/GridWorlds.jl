@@ -28,10 +28,6 @@ function show_io1_maybe_io2(io1::IO, io2::Union{Nothing, IO}, mime::MIME, conten
     show_maybe(io2, mime, content)
 end
 
-play!(terminal::REPL.Terminals.UnixTerminal, env::GW.AbstractGridWorld; file_name::Union{Nothing, AbstractString} = nothing) = error("play! method not implemented for $(typeof(env))")
-
-play!(env::GW.AbstractGridWorld; file_name = nothing) = play!(REPL.TerminalMenus.terminal, env, file_name = file_name)
-
 function replay(terminal::REPL.Terminals.UnixTerminal, file_name::AbstractString, frame_rate)
     terminal_out = terminal.out_stream
     delimiter = EMPTY_SCREEN
@@ -46,5 +42,52 @@ function replay(terminal::REPL.Terminals.UnixTerminal, file_name::AbstractString
 end
 
 replay(file_name; frame_rate = 2) = replay(REPL.TerminalMenus.terminal, file_name, frame_rate)
+
+function play!(terminal::REPL.Terminals.UnixTerminal, env::GW.AbstractGridWorld; file_name::Union{Nothing, AbstractString} = nothing)
+    REPL.Terminals.raw!(terminal, true)
+
+    terminal_out = terminal.out_stream
+    terminal_in = terminal.in_stream
+    file = Play.open_maybe(file_name)
+
+    write_io1_maybe_io2(terminal_out, file, CLEAR_SCREEN)
+    write_io1_maybe_io2(terminal_out, file, MOVE_CURSOR_TO_ORIGIN)
+    write_io1_maybe_io2(terminal_out, file, HIDE_CURSOR)
+
+    action_keys = GW.get_action_keys(env)
+    action_names = GW.get_action_names(env)
+    key_bindings = "'q': quit, 'r': reset!, $(action_keys): $(action_names)\n"
+
+    try
+        while true
+            write_io1_maybe_io2(terminal_out, file, key_bindings)
+            write_io1_maybe_io2(terminal_out, file, GW.get_show_string(env))
+
+            char = read(terminal_in, Char)
+
+            if char == 'q'
+                write_io1_maybe_io2(terminal_out, file, SHOW_CURSOR)
+                close_maybe(file)
+                REPL.Terminals.raw!(terminal, false)
+                return nothing
+            elseif char == 'r'
+                GW.reset!(env)
+            elseif char in action_keys
+                GW.act!(env, findfirst(==(char), action_keys))
+            end
+
+            write_io1_maybe_io2(terminal_out, file, EMPTY_SCREEN)
+            write_io1_maybe_io2(terminal_out, file, "Last character: $(char)\n")
+        end
+    finally
+        write_io1_maybe_io2(terminal_out, file, SHOW_CURSOR)
+        close_maybe(file)
+        REPL.Terminals.raw!(terminal, false)
+    end
+
+    return nothing
+end
+
+play!(env::GW.AbstractGridWorld; file_name = nothing) = play!(REPL.TerminalMenus.terminal, env, file_name = file_name)
 
 end # module
