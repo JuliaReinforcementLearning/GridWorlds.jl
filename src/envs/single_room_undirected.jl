@@ -125,19 +125,4 @@ function Base.show(io::IO, ::MIME"text/plain", env::SingleRoomUndirected)
     return nothing
 end
 
-#####
-##### RLBase API
-#####
-
-RLBase.StateStyle(env::SingleRoomUndirected) = RLBase.InternalState{Any}()
-RLBase.state_space(env::SingleRoomUndirected, ::RLBase.InternalState) = nothing
-RLBase.state(env::SingleRoomUndirected, ::RLBase.InternalState) = env.tile_map
-
-RLBase.action_space(env::SingleRoomUndirected) = 1:NUM_ACTIONS
-RLBase.reward(env::SingleRoomUndirected) = env.reward
-RLBase.is_terminated(env::SingleRoomUndirected) = env.done
-RLBase.reset!(env::SingleRoomUndirected{R}) where {R} = GW.reset!(env)
-
-(env::SingleRoomUndirected)(action) = GW.act!(env, action)
-
 end # module
