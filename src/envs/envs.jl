@@ -29,6 +29,17 @@ function place_room!(world::GridWorldBase, room::Room)
     world[WALL, top:bottom, right] .= true
 end
 
+function sample_two_positions_without_replacement(rng, region)
+    position1 = rand(rng, region)
+    position2 = rand(rng, region)
+
+    while position1 == position2
+        position2 = rand(rng, region)
+    end
+
+    return position1, position2
+end
+
 include("empty_room.jl")
 include("grid_rooms.jl")
 include("sequential_rooms.jl")
@@ -42,3 +53,4 @@ include("snake.jl")
 include("catcher.jl")
 include("transport.jl")
 include("collect_gems_undirected_multi_agent.jl")
+include("single_room.jl")
