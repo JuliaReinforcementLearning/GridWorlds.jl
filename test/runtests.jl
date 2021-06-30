@@ -105,3 +105,44 @@ Test.@testset "GridWorlds.jl" begin
         end
     end
 end
+
+#####
+##### AbstractGridWorldGame
+#####
+
+GW_ENVS = [GW.SingleRoomUndirectedModule.SingleRoomUndirected,
+           GW.SingleRoomDirectedModule.SingleRoomDirected,
+          ]
+
+get_terminal_returns(env::GW.RLBaseGridWorldModule.RLBaseGridWorld{E}) where {E <: GW.SingleRoomUndirectedModule.SingleRoomUndirected}= (env.env.terminal_reward,)
+get_terminal_returns(env::GW.RLBaseGridWorldModule.RLBaseGridWorld{E}) where {E <: GW.SingleRoomDirectedModule.SingleRoomDirected}= (env.env.env.terminal_reward,)
+
+Test.@testset "AbstractGridWorldGame" begin
+    for Env in GW_ENVS
+        Test.@testset "$(Env)" begin
+            R = Float32
+            env = GW.RLBaseGridWorldModule.RLBaseGridWorld(Env(R = R))
+            for _ in 1:NUM_RESETS
+                RLBase.reset!(env)
+                Test.@test RLBase.reward(env) == zero(R)
+                Test.@test RLBase.is_terminated(env) == false
+
+                total_reward = zero(R)
+                for i in 1:MAX_STEPS
+                    action = rand(RLBase.action_space(env))
+                    env(action)
+                    total_reward += RLBase.reward(env)
+
+                    if RLBase.is_terminated(env)
+                        Test.@test total_reward in get_terminal_returns(env)
+                        break
+                    end
+
+                    if i == MAX_STEPS
+                        @info "$Env not terminated after MAX_STEPS = $MAX_STEPS"
+                    end
+                end
+            end
+        end
+    end
+end
