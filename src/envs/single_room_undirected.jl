@@ -4,7 +4,7 @@ import ..GridWorlds as GW
 import Random
 import ReinforcementLearningBase as RLBase
 
-mutable struct SingleRoomUndirected{R, RNG} <: GW.AbstractGridWorld
+mutable struct SingleRoomUndirected{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
     reward::R
@@ -18,7 +18,20 @@ const NUM_OBJECTS = 3
 const AGENT = 1
 const WALL = 2
 const GOAL = 3
-GW.get_characters(env::SingleRoomUndirected) = ('☻', '█', '♥', '⋅')
+
+CHARACTERS = ('☻', '█', '♥', '⋅')
+
+GW.get_tile_map_height(env::SingleRoomUndirected) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::SingleRoomUndirected) = size(env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::SingleRoomUndirected, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
 
 const NUM_ACTIONS = 4
 GW.get_action_keys(env::SingleRoomUndirected) = ('w', 's', 'a', 'd')
@@ -55,7 +68,7 @@ function GW.reset!(env::SingleRoomUndirected)
     tile_map = env.tile_map
     rng = env.rng
 
-    num_objects, height, width = size(tile_map)
+    _, height, width = size(tile_map)
     inner_area = CartesianIndices((2 : height - 1, 2 : width - 1))
 
     tile_map[AGENT, env.agent_position] = false
@@ -102,6 +115,13 @@ function GW.act!(env::SingleRoomUndirected, action)
         env.done = false
     end
 
+    return nothing
+end
+
+function Base.show(io::IO, ::MIME"text/plain", env::SingleRoomUndirected)
+    str = GW.get_tile_map_pretty_repr(env)
+    str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
+    print(io, str)
     return nothing
 end
 
