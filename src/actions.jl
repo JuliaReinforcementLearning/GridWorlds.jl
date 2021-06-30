@@ -54,3 +54,8 @@ const DROP = Drop()
 
 const DIRECTED_NAVIGATION_ACTIONS = (MOVE_FORWARD, TURN_LEFT, TURN_RIGHT)
 const UNDIRECTED_NAVIGATION_ACTIONS = (MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT)
+
+move_up(i::Integer, j::Integer) = (i - 1, j)
+move_down(i::Integer, j::Integer) = (i + 1, j)
+move_left(i::Integer, j::Integer) = (i, j - 1)
+move_right(i::Integer, j::Integer) = (i, j + 1)
