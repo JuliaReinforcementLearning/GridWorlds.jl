@@ -46,7 +46,7 @@ function SingleRoomUndirected(; R = Float32, height = 8, width = 8, rng = Random
 
     env = SingleRoomUndirected(tile_map, agent_position, reward, rng, done, terminal_reward, goal_position)
 
-    RLBase.reset!(env)
+    GW.reset!(env)
 
     return env
 end
