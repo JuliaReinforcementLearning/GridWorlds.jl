@@ -43,7 +43,7 @@ end
 
 replay(file_name; frame_rate = 2) = replay(REPL.TerminalMenus.terminal, file_name, frame_rate)
 
-function play!(terminal::REPL.Terminals.UnixTerminal, env::GW.AbstractGridWorld; file_name::Union{Nothing, AbstractString} = nothing)
+function play!(terminal::REPL.Terminals.UnixTerminal, env::GW.AbstractGridWorldGame; file_name::Union{Nothing, AbstractString} = nothing)
     REPL.Terminals.raw!(terminal, true)
 
     terminal_out = terminal.out_stream
@@ -61,7 +61,7 @@ function play!(terminal::REPL.Terminals.UnixTerminal, env::GW.AbstractGridWorld;
     try
         while true
             write_io1_maybe_io2(terminal_out, file, key_bindings)
-            write_io1_maybe_io2(terminal_out, file, GW.get_show_string(env))
+            show_io1_maybe_io2(terminal_out, file, MIME("text/plain"), env)
 
             char = read(terminal_in, Char)
 
@@ -88,6 +88,6 @@ function play!(terminal::REPL.Terminals.UnixTerminal, env::GW.AbstractGridWorld;
     return nothing
 end
 
-play!(env::GW.AbstractGridWorld; file_name = nothing) = play!(REPL.TerminalMenus.terminal, env, file_name = file_name)
+play!(env::GW.AbstractGridWorldGame; file_name = nothing) = play!(REPL.TerminalMenus.terminal, env, file_name = file_name)
 
 end # module
