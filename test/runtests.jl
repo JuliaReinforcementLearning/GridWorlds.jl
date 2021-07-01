@@ -6,8 +6,6 @@ import ReinforcementLearningBase
 import ReinforcementLearningBase: RLBase
 
 ENVS = [
-        GW.GridRoomsDirected,
-        GW.GridRoomsUndirected,
         GW.SequentialRoomsDirected,
         GW.SequentialRoomsUndirected,
         GW.MazeDirected,
@@ -32,8 +30,6 @@ ENVS = [
 const MAX_STEPS = 3000
 const NUM_RESETS = 3
 
-get_terminal_returns(env::GW.GridRoomsDirected) = (env.terminal_reward,)
-get_terminal_returns(env::GW.GridRoomsUndirected) = (env.terminal_reward,)
 get_terminal_returns(env::GW.SequentialRoomsDirected) = (env.terminal_reward,)
 get_terminal_returns(env::GW.SequentialRoomsUndirected) = (env.terminal_reward,)
 get_terminal_returns(env::GW.MazeDirected) = (env.terminal_reward,)
