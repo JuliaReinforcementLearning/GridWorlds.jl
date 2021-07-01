@@ -39,4 +39,20 @@ RLBase.action_space(env::RLBaseGridWorld{E}) where {E <: GW.SingleRoomDirectedMo
 RLBase.reward(env::RLBaseGridWorld{E}) where {E <: GW.SingleRoomDirectedModule.SingleRoomDirected} = env.env.env.reward
 RLBase.is_terminated(env::RLBaseGridWorld{E}) where {E <: GW.SingleRoomDirectedModule.SingleRoomDirected} = env.env.env.done
 
+#####
+##### GridRoomsUndirected
+#####
+
+RLBase.StateStyle(env::RLBaseGridWorld{E}) where {E <: GW.GridRoomsUndirectedModule.GridRoomsUndirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::RLBaseGridWorld{E}, ::RLBase.InternalState) where {E <: GW.GridRoomsUndirectedModule.GridRoomsUndirected} = nothing
+RLBase.state(env::RLBaseGridWorld{E}, ::RLBase.InternalState) where {E <: GW.GridRoomsUndirectedModule.GridRoomsUndirected} = env.env.tile_map
+
+RLBase.reset!(env::RLBaseGridWorld{E}) where {E <: GW.GridRoomsUndirectedModule.GridRoomsUndirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::RLBaseGridWorld{E}) where {E <: GW.GridRoomsUndirectedModule.GridRoomsUndirected} = 1:GW.GridRoomsUndirectedModule.NUM_ACTIONS
+(env::RLBaseGridWorld{E})(action) where {E <: GW.GridRoomsUndirectedModule.GridRoomsUndirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::RLBaseGridWorld{E}) where {E <: GW.GridRoomsUndirectedModule.GridRoomsUndirected} = env.env.reward
+RLBase.is_terminated(env::RLBaseGridWorld{E}) where {E <: GW.GridRoomsUndirectedModule.GridRoomsUndirected} = env.env.done
+
 end # module
