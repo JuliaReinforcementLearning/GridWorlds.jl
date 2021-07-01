@@ -28,20 +28,55 @@ function show_io1_maybe_io2(io1::IO, io2::Union{Nothing, IO}, mime::MIME, conten
     show_maybe(io2, mime, content)
 end
 
-function replay(terminal::REPL.Terminals.UnixTerminal, file_name::AbstractString, frame_rate)
+function replay(terminal::REPL.Terminals.UnixTerminal, file_name::AbstractString; frame_rate = Union{Nothing, Real} = nothing)
     terminal_out = terminal.out_stream
     delimiter = EMPTY_SCREEN
     frames = split(read(file_name, String), delimiter)
-    for frame in frames
-        write(terminal_out, frame)
-        sleep(1 / frame_rate)
-        write(terminal_out, delimiter)
+    num_frames = length(frames)
+
+    if isnothing(frame_rate)
+        terminal_in = terminal.in_stream
+        REPL.Terminals.raw!(terminal, true)
+        current_frame = 1
+        try
+            while true
+                write(terminal_out, frames[current_frame])
+                println(terminal_out)
+                println(terminal_out, "replay key bindings: 'q': quit, 'f': go to first frame, 'n': go to next frame, 'p': go to previous frame")
+
+                char = read(terminal_in, Char)
+
+                if char == 'q'
+                    write(terminal_out, SHOW_CURSOR)
+                    REPL.Terminals.raw!(terminal, false)
+                    return nothing
+                elseif char == 'f'
+                    current_frame = 1
+                elseif char == 'n'
+                    current_frame = mod1(current_frame + 1, num_frames)
+                elseif char == 'p'
+                    current_frame = mod1(current_frame - 1, num_frames)
+                end
+
+                write(terminal_out, EMPTY_SCREEN)
+            end
+        finally
+            write(terminal_out, SHOW_CURSOR)
+            REPL.Terminals.raw!(terminal, false)
+            return nothing
+        end
+    else
+        for frame in frames
+            write(terminal_out, frame)
+            sleep(1 / frame_rate)
+            write(terminal_out, delimiter)
+        end
     end
 
     return nothing
 end
 
-replay(file_name; frame_rate = 2) = replay(REPL.TerminalMenus.terminal, file_name, frame_rate)
+replay(file_name; frame_rate = nothing) = replay(REPL.TerminalMenus.terminal, file_name, frame_rate = frame_rate)
 
 function play!(terminal::REPL.Terminals.UnixTerminal, env::GW.AbstractGridWorldGame; file_name::Union{Nothing, AbstractString} = nothing)
     REPL.Terminals.raw!(terminal, true)
@@ -56,7 +91,7 @@ function play!(terminal::REPL.Terminals.UnixTerminal, env::GW.AbstractGridWorldG
 
     action_keys = GW.get_action_keys(env)
     action_names = GW.get_action_names(env)
-    key_bindings = "'q': quit, 'r': reset!, $(action_keys): $(action_names)\n"
+    key_bindings = "play key bindings: 'q': quit, 'r': reset!, $(action_keys): $(action_names)\n"
 
     try
         while true
