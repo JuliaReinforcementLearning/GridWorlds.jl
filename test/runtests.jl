@@ -5,8 +5,7 @@ import Random
 import ReinforcementLearningBase
 import ReinforcementLearningBase: RLBase
 
-ENVS = [GW.EmptyRoomDirected,
-        GW.EmptyRoomUndirected,
+ENVS = [
         GW.GridRoomsDirected,
         GW.GridRoomsUndirected,
         GW.SequentialRoomsDirected,
@@ -33,8 +32,6 @@ ENVS = [GW.EmptyRoomDirected,
 const MAX_STEPS = 3000
 const NUM_RESETS = 3
 
-get_terminal_returns(env::GW.EmptyRoomDirected) = (env.terminal_reward,)
-get_terminal_returns(env::GW.EmptyRoomUndirected) = (env.terminal_reward,)
 get_terminal_returns(env::GW.GridRoomsDirected) = (env.terminal_reward,)
 get_terminal_returns(env::GW.GridRoomsUndirected) = (env.terminal_reward,)
 get_terminal_returns(env::GW.SequentialRoomsDirected) = (env.terminal_reward,)
