@@ -34,7 +34,7 @@ GW.Play.play!(env, file_name = "recording.txt")
 
 # replay the recording inside the terminal at given frame rate
 
-GW.Play.repay("recording.txt", frame_rate = 2)
+GW.Play.replay("recording.txt", frame_rate = 2)
 
 # manually step through the recording
 
@@ -44,16 +44,18 @@ GW.Play.replay("recording.txt", frame_rate = nothing)
 
 import ReinforcementLearningBase as RLBase
 
-RLBase.reset!(env)
-RLBase.state(env)
-RLBase.action_space(env)
-RLBase.reward(env)
-RLBase.is_terminated(env)
+rlbase_env = GW.RLBaseGridWorldModule.RLBaseGridWorld(env)
 
-env(1) # move up
-env(2) # move down
-env(3) # move left
-env(4) # move right
+RLBase.reset!(rlbase_env)
+RLBase.state(rlbase_env)
+RLBase.action_space(rlbase_env)
+RLBase.reward(rlbase_env)
+RLBase.is_terminated(rlbase_env)
+
+rlbase_env(1) # move up
+rlbase_env(2) # move down
+rlbase_env(3) # move left
+rlbase_env(4) # move right
 ```
 
 ## Playing and Recording
