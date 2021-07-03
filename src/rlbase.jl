@@ -1,6 +1,8 @@
 module RLBaseGridWorldModule
 
 import ..GridWorlds as GW
+import ..Play
+import REPL
 import ReinforcementLearningBase as RLBase
 
 struct RLBaseGridWorld{E} <: RLBase.AbstractEnv
@@ -8,6 +10,8 @@ struct RLBaseGridWorld{E} <: RLBase.AbstractEnv
 end
 
 Base.show(io::IO, mime::MIME"text/plain", env::RLBaseGridWorld{E}) where {E <: GW.AbstractGridWorldGame} = show(io, mime, env.env)
+Play.play!(terminal::REPL.Terminals.UnixTerminal, env::RLBaseGridWorld; file_name::Union{Nothing, AbstractString} = nothing) = Play.play!(terminal, env.env, file_name = file_name)
+Play.play!(env::RLBaseGridWorld; file_name = nothing) = Play.play!(REPL.TerminalMenus.terminal, env.env, file_name = file_name)
 
 #####
 ##### SingleRoomUndirected
