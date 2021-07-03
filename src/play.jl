@@ -96,7 +96,7 @@ function play!(terminal::REPL.Terminals.UnixTerminal, env::GW.AbstractGridWorldG
     try
         while true
             write_io1_maybe_io2(terminal_out, file, key_bindings)
-            show_io1_maybe_io2(terminal_out, file, MIME("text/plain"), env)
+            show_io1_maybe_io2(terminal_out, file, MIME"text/plain"(), env)
 
             char = read(terminal_in, Char)
 
