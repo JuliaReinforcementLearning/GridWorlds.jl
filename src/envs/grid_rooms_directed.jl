@@ -35,7 +35,7 @@ const NUM_ACTIONS = 4
 GW.get_action_keys(env::GridRoomsDirected) = ('w', 's', 'a', 'd')
 GW.get_action_names(env::GridRoomsDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
 
-function GridRoomsDirected(; R = Float32, grid_size = (2, 2), room_size = (5, 7), rng = Random.GLOBAL_RNG)
+function GridRoomsDirected(; R = Float32, grid_size = (2, 2), room_size = (5, 5), rng = Random.GLOBAL_RNG)
     env = GRUM.GridRoomsUndirected(R = R, grid_size = grid_size, room_size = room_size, rng = rng)
     agent_direction = rand(rng, 0:GW.NUM_DIRECTIONS-1)
     env = GridRoomsDirected(env, agent_direction)

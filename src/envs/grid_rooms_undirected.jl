@@ -37,7 +37,8 @@ const NUM_ACTIONS = 4
 GW.get_action_keys(env::GridRoomsUndirected) = ('w', 's', 'a', 'd')
 GW.get_action_names(env::GridRoomsUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
-function GridRoomsUndirected(; R = Float32, grid_size = (2, 2), room_size = (5, 7), rng = Random.GLOBAL_RNG)
+function GridRoomsUndirected(; R = Float32, grid_size = (2, 2), room_size = (5, 5), rng = Random.GLOBAL_RNG)
+    @assert all(room_size .>= (4, 4)) "each element of room_size must be >= 4"
     height_grid, width_grid = grid_size
     height_room, width_room = room_size
 
@@ -54,14 +55,14 @@ function GridRoomsUndirected(; R = Float32, grid_size = (2, 2), room_size = (5, 
         tile_map[WALL, :, j] .= true
     end
 
-    for j in width_room ÷ 2 + 1 : width_room - 1 : width_tile_map - width_room ÷ 2
-        for i in height_room : height_room - 1 : height_tile_map - height_room + 1
+    for j in width_room ÷ 2 + 1 : width_room - 1 : width_tile_map - 1
+        for i in height_room : height_room - 1 : height_tile_map - 1
             tile_map[WALL, i, j] = false
         end
     end
 
-    for j in width_room : width_room - 1 : width_tile_map - width_room + 1
-        for i in height_room ÷ 2 + 1 : height_room - 1 : height_tile_map - height_room ÷ 2
+    for j in width_room : width_room - 1 : width_tile_map - 1
+        for i in height_room ÷ 2 + 1 : height_room - 1 : height_tile_map - 1
             tile_map[WALL, i, j] = false
         end
     end
