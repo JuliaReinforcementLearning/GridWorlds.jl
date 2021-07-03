@@ -29,6 +29,23 @@ function place_room!(world::GridWorldBase, room::Room)
     world[WALL, top:bottom, right] .= true
 end
 
+function sample_empty_position(rng, tile_map, max_tries = 1024)
+    _, height, width = size(tile_map)
+    position = CartesianIndex(rand(rng, 1:height), rand(rng, 1:width))
+
+    for i in 1:1000
+        if any(@view tile_map[:, position])
+            position = CartesianIndex(rand(rng, 1:height), rand(rng, 1:width))
+        else
+            return position
+        end
+    end
+
+    @warn "Returning non-empty position: $(position)"
+
+    return position
+end
+
 function sample_two_positions_without_replacement(rng, region)
     position1 = rand(rng, region)
     position2 = rand(rng, region)
@@ -40,7 +57,6 @@ function sample_two_positions_without_replacement(rng, region)
     return position1, position2
 end
 
-include("grid_rooms.jl")
 include("sequential_rooms.jl")
 include("maze.jl")
 include("go_to_target.jl")
@@ -54,3 +70,5 @@ include("transport.jl")
 include("collect_gems_undirected_multi_agent.jl")
 include("single_room_undirected.jl")
 include("single_room_directed.jl")
+include("grid_rooms_undirected.jl")
+include("grid_rooms_directed.jl")

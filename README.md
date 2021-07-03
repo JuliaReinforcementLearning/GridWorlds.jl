@@ -14,6 +14,8 @@ This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minig
 [List of Environments](#list-of-environments)
 1. [SingleRoomUndirected](#singleroomundirected)
 1. [SingleRoomDirected](#singleroomdirected)
+1. [GridRoomsUndirected](#gridroomsundirected)
+1. [GridRoomsDirected](#gridroomsdirected)
 
 ## Getting Started
 
@@ -34,7 +36,7 @@ GW.Play.play!(env, file_name = "recording.txt")
 
 # replay the recording inside the terminal at given frame rate
 
-GW.Play.repay("recording.txt", frame_rate = 2)
+GW.Play.replay("recording.txt", frame_rate = 2)
 
 # manually step through the recording
 
@@ -44,16 +46,18 @@ GW.Play.replay("recording.txt", frame_rate = nothing)
 
 import ReinforcementLearningBase as RLBase
 
-RLBase.reset!(env)
-RLBase.state(env)
-RLBase.action_space(env)
-RLBase.reward(env)
-RLBase.is_terminated(env)
+rlbase_env = GW.RLBaseEnvModule.RLBaseEnv(env)
 
-env(1) # move up
-env(2) # move down
-env(3) # move left
-env(4) # move right
+RLBase.reset!(rlbase_env)
+RLBase.state(rlbase_env)
+RLBase.action_space(rlbase_env)
+RLBase.reward(rlbase_env)
+RLBase.is_terminated(rlbase_env)
+
+rlbase_env(1) # move up
+rlbase_env(2) # move down
+rlbase_env(3) # move left
+rlbase_env(4) # move right
 ```
 
 ## Playing and Recording
@@ -75,3 +79,11 @@ Here is an example:
 1. ### SingleRoomDirected
 
     <img src="https://user-images.githubusercontent.com/32610387/124130952-efed6d00-da9c-11eb-84fa-0caf856a2580.gif">
+
+1. ### GridRoomsUndirected
+
+    <img src="https://user-images.githubusercontent.com/32610387/124348535-1d0a5e80-dc08-11eb-9cfb-7c5f40e9c5c9.gif">
+
+1. ### GridRoomsDirected
+
+    <img src="https://user-images.githubusercontent.com/32610387/124348551-298eb700-dc08-11eb-835a-ee4b80a5b1b4.gif">

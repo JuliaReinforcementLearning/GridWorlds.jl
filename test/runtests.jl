@@ -6,8 +6,6 @@ import ReinforcementLearningBase
 import ReinforcementLearningBase: RLBase
 
 ENVS = [
-        GW.GridRoomsDirected,
-        GW.GridRoomsUndirected,
         GW.SequentialRoomsDirected,
         GW.SequentialRoomsUndirected,
         GW.MazeDirected,
@@ -32,8 +30,6 @@ ENVS = [
 const MAX_STEPS = 3000
 const NUM_RESETS = 3
 
-get_terminal_returns(env::GW.GridRoomsDirected) = (env.terminal_reward,)
-get_terminal_returns(env::GW.GridRoomsUndirected) = (env.terminal_reward,)
 get_terminal_returns(env::GW.SequentialRoomsDirected) = (env.terminal_reward,)
 get_terminal_returns(env::GW.SequentialRoomsUndirected) = (env.terminal_reward,)
 get_terminal_returns(env::GW.MazeDirected) = (env.terminal_reward,)
@@ -107,18 +103,23 @@ end
 ##### AbstractGridWorldGame
 #####
 
-GW_ENVS = [GW.SingleRoomUndirectedModule.SingleRoomUndirected,
+GW_ENVS = [
+           GW.SingleRoomUndirectedModule.SingleRoomUndirected,
            GW.SingleRoomDirectedModule.SingleRoomDirected,
+           GW.GridRoomsUndirectedModule.GridRoomsUndirected,
+           GW.GridRoomsDirectedModule.GridRoomsDirected,
           ]
 
-get_terminal_returns(env::GW.RLBaseGridWorldModule.RLBaseGridWorld{E}) where {E <: GW.SingleRoomUndirectedModule.SingleRoomUndirected}= (env.env.terminal_reward,)
-get_terminal_returns(env::GW.RLBaseGridWorldModule.RLBaseGridWorld{E}) where {E <: GW.SingleRoomDirectedModule.SingleRoomDirected}= (env.env.env.terminal_reward,)
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SingleRoomUndirectedModule.SingleRoomUndirected}= (env.env.terminal_reward,)
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SingleRoomDirectedModule.SingleRoomDirected}= (env.env.env.terminal_reward,)
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.GridRoomsUndirectedModule.GridRoomsUndirected}= (env.env.terminal_reward,)
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.GridRoomsDirectedModule.GridRoomsDirected}= (env.env.env.terminal_reward,)
 
 Test.@testset "AbstractGridWorldGame" begin
     for Env in GW_ENVS
         Test.@testset "$(Env)" begin
             R = Float32
-            env = GW.RLBaseGridWorldModule.RLBaseGridWorld(Env(R = R))
+            env = GW.RLBaseEnvModule.RLBaseEnv(Env(R = R))
             for _ in 1:NUM_RESETS
                 RLBase.reset!(env)
                 Test.@test RLBase.reward(env) == zero(R)
