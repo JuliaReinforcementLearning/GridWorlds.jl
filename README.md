@@ -14,6 +14,8 @@ This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minig
 [List of Environments](#list-of-environments)
 1. [SingleRoomUndirected](#singleroomundirected)
 1. [SingleRoomDirected](#singleroomdirected)
+1. [GridRoomsUndirected](#gridroomsundirected)
+1. [GridRoomsDirected](#gridroomsdirected)
 
 ## Getting Started
 
@@ -44,7 +46,7 @@ GW.Play.replay("recording.txt", frame_rate = nothing)
 
 import ReinforcementLearningBase as RLBase
 
-rlbase_env = GW.RLBaseGridWorldModule.RLBaseGridWorld(env)
+rlbase_env = GW.RLBaseEnvModule.RLBaseEnv(env)
 
 RLBase.reset!(rlbase_env)
 RLBase.state(rlbase_env)
@@ -77,3 +79,11 @@ Here is an example:
 1. ### SingleRoomDirected
 
     <img src="https://user-images.githubusercontent.com/32610387/124130952-efed6d00-da9c-11eb-84fa-0caf856a2580.gif">
+
+1. ### GridRoomsUndirected
+
+    <img src="https://user-images.githubusercontent.com/32610387/124348535-1d0a5e80-dc08-11eb-9cfb-7c5f40e9c5c9.gif">
+
+1. ### GridRoomsDirected
+
+    <img src="https://user-images.githubusercontent.com/32610387/124348551-298eb700-dc08-11eb-835a-ee4b80a5b1b4.gif">
