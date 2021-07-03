@@ -7,6 +7,8 @@ struct RLBaseGridWorld{E} <: RLBase.AbstractEnv
     env::E
 end
 
+Base.show(io::IO, mime::MIME"text/plain", env::RLBaseGridWorld{E}) where {E <: GW.AbstractGridWorldGame} = show(io, mime, env.env)
+
 #####
 ##### SingleRoomUndirected
 #####
