@@ -127,6 +127,7 @@ Test.@testset "AbstractGridWorldGame" begin
 
                 total_reward = zero(R)
                 for i in 1:MAX_STEPS
+                    state = RLBase.state(env)
                     action = rand(RLBase.action_space(env))
                     env(action)
                     total_reward += RLBase.reward(env)
