@@ -125,4 +125,20 @@ RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.MazeUndirectedModule.MazeU
 RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.MazeUndirectedModule.MazeUndirected} = env.env.reward
 RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.MazeUndirectedModule.MazeUndirected} = env.env.done
 
+#####
+##### MazeDirected
+#####
+
+RLBase.StateStyle(env::RLBaseEnv{E}) where {E <: GW.MazeDirectedModule.MazeDirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.MazeDirectedModule.MazeDirected} = nothing
+RLBase.state(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.MazeDirectedModule.MazeDirected} = (env.env.env.tile_map, env.env.agent_direction)
+
+RLBase.reset!(env::RLBaseEnv{E}) where {E <: GW.MazeDirectedModule.MazeDirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.MazeDirectedModule.MazeDirected} = 1:GW.MazeDirectedModule.NUM_ACTIONS
+(env::RLBaseEnv{E})(action) where {E <: GW.MazeDirectedModule.MazeDirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.MazeDirectedModule.MazeDirected} = env.env.env.reward
+RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.MazeDirectedModule.MazeDirected} = env.env.env.done
+
 end # module
