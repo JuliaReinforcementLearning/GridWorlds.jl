@@ -57,7 +57,6 @@ function sample_two_positions_without_replacement(rng, region)
     return position1, position2
 end
 
-include("maze.jl")
 include("go_to_target.jl")
 include("door_key.jl")
 include("collect_gems.jl")

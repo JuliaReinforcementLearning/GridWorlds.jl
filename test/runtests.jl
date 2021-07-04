@@ -6,8 +6,6 @@ import ReinforcementLearningBase
 import ReinforcementLearningBase: RLBase
 
 ENVS = [
-        GW.MazeDirected,
-        GW.MazeUndirected,
         GW.GoToTargetDirected,
         GW.GoToTargetUndirected,
         GW.DoorKeyDirected,
@@ -28,8 +26,6 @@ ENVS = [
 const MAX_STEPS = 3000
 const NUM_RESETS = 3
 
-get_terminal_returns(env::GW.MazeDirected) = (env.terminal_reward,)
-get_terminal_returns(env::GW.MazeUndirected) = (env.terminal_reward,)
 get_terminal_returns(env::GW.GoToTargetDirected) = (env.terminal_reward, env.terminal_penalty)
 get_terminal_returns(env::GW.GoToTargetUndirected) = (env.terminal_reward, env.terminal_penalty)
 get_terminal_returns(env::GW.DoorKeyDirected) = (env.terminal_reward,)
