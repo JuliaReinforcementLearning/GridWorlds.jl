@@ -111,25 +111,7 @@ function GW.reset!(env::SequentialRoomsUndirected)
     tile_map = env.tile_map
     rng = env.rng
 
-    _, height_tile_map, width_tile_map = size(tile_map)
-    tile_map[:, :, :] .= false
-
-    first_room = generate_first_room(env)
-    env.rooms[1] = first_room
-    place_room!(tile_map, first_room)
-
-    for i in 2:env.num_rooms
-        candidate_rooms = generate_candidate_rooms(env, i)
-
-        if length(candidate_rooms) > 0
-            room = rand(rng, candidate_rooms)
-            place_room!(tile_map, room)
-            env.rooms[i] = room
-
-            door_pos = rand(rng, intersect(env.rooms[i - 1].region, room.region)[2:end-1])
-            tile_map[WALL, door_pos] = false
-        end
-    end
+    generate_rooms!(env)
 
     tile_map[AGENT, env.agent_position] = false
     tile_map[GOAL, env.goal_position] = false
@@ -204,6 +186,47 @@ function Base.show(io::IO, ::MIME"text/plain", env::SequentialRoomsUndirected)
 
     str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
     print(io, str)
+    return nothing
+end
+
+function generate_rooms!(env::SequentialRoomsUndirected; max_tries = 512)
+    tile_map = env.tile_map
+    rng = env.rng
+    num_rooms = env.num_rooms
+
+    for num_tries in 1:max_tries
+        all_good_so_far = true
+
+        tile_map[:, :, :] .= false
+
+        first_room = generate_first_room(env)
+        env.rooms[1] = first_room
+        place_room!(tile_map, first_room)
+
+        for i in 2:num_rooms
+            candidate_rooms = generate_candidate_rooms(env, i)
+
+            if length(candidate_rooms) == 0
+                println("problem occurred")
+                all_good_so_far = false
+                break
+            else
+                room = rand(rng, candidate_rooms)
+                place_room!(tile_map, room)
+                env.rooms[i] = room
+
+                door_pos = rand(rng, intersect(env.rooms[i - 1].region, room.region)[2:end-1])
+                tile_map[WALL, door_pos] = false
+            end
+        end
+
+        if all_good_so_far
+            return nothing
+        end
+    end
+
+    error("Unable to generate a valid sequential room configuration after $(max_tries) tries. Try reducing the number of rooms.")
+
     return nothing
 end
 
