@@ -179,7 +179,29 @@ function GW.act!(env::SequentialRoomsUndirected, action)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", env::SequentialRoomsUndirected)
-    str = GW.get_tile_map_pretty_repr(env)
+    tile_map = env.tile_map
+    small_tile_map = get_small_tile_map(tile_map)
+
+    _, height_small_tile_map, width_small_tile_map = size(small_tile_map)
+
+    str = ""
+
+    for i in 1:height_small_tile_map
+        for j in 1:width_small_tile_map
+            object = findfirst(small_tile_map[:, i, j])
+            if isnothing(object)
+                char = CHARACTERS[end]
+            else
+                char = CHARACTERS[object]
+            end
+            str = str * char
+        end
+
+        if i < height_small_tile_map
+            str = str * "\n"
+        end
+    end
+
     str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
     print(io, str)
     return nothing
@@ -231,6 +253,60 @@ function generate_candidate_rooms(env::SequentialRoomsUndirected, room_id::Integ
     end
 
     return candidate_rooms
+end
+
+function get_bounding_region(tile_map)
+    _, height_tile_map, width_tile_map = size(tile_map)
+    mid_i = height_tile_map ÷ 2 + 1
+    mid_j = width_tile_map ÷ 2 + 1
+
+    min_i = mid_i
+    max_i = mid_i
+    min_j = mid_j
+    max_j = mid_j
+
+    for i in 1:height_tile_map
+        for j in 1:width_tile_map
+            if tile_map[WALL, i, j]
+                min_i = min(min_i, i)
+                max_i = max(max_i, i)
+                min_j = min(min_j, j)
+                max_j = max(max_j, j)
+            end
+        end
+    end
+
+    return CartesianIndices((min_i:max_i, min_j:max_j))
+end
+
+function get_padding(tile_map, bounding_region)
+    _, height_tile_map, width_tile_map = size(tile_map)
+
+    height_small_tile_map = height_tile_map ÷ 2
+    width_small_tile_map = width_tile_map ÷ 2
+
+    padding_i = (height_small_tile_map - size(bounding_region, 1)) ÷ 2
+    padding_j = (width_small_tile_map - size(bounding_region, 2)) ÷ 2
+
+    return padding_i, padding_j
+end
+
+function get_small_tile_map(tile_map)
+    _, height_tile_map, width_tile_map = size(tile_map)
+    height_small_tile_map = height_tile_map ÷ 2
+    width_small_tile_map = width_tile_map ÷ 2
+    bounding_region = get_bounding_region(tile_map)
+    padding_i, padding_j = get_padding(tile_map, bounding_region)
+
+    min_i_small_tile_map = bounding_region.indices[1].start - padding_i
+    max_i_small_tile_map = min_i_small_tile_map + height_small_tile_map - 1
+
+    min_j_small_tile_map = bounding_region.indices[2].start - padding_j
+    max_j_small_tile_map = min_j_small_tile_map + width_small_tile_map - 1
+
+    small_tile_map = @view tile_map[:, min_i_small_tile_map:max_i_small_tile_map, min_j_small_tile_map:max_j_small_tile_map]
+
+    return small_tile_map
 end
 
 end # module

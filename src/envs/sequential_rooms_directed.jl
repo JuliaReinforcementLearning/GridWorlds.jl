@@ -89,7 +89,31 @@ function GW.act!(env::SequentialRoomsDirected, action)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", env::SequentialRoomsDirected)
-    str = GW.get_tile_map_pretty_repr(env)
+    tile_map = env.env.tile_map
+    small_tile_map = SRUM.get_small_tile_map(tile_map)
+
+    _, height_small_tile_map, width_small_tile_map = size(small_tile_map)
+
+    str = ""
+
+    for i in 1:height_small_tile_map
+        for j in 1:width_small_tile_map
+            object = findfirst(@view small_tile_map[:, i, j])
+            if isnothing(object)
+                char = CHARACTERS[end]
+            elseif object == AGENT
+                char = CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
+            else
+                char = CHARACTERS[object]
+            end
+            str = str * char
+        end
+
+        if i < height_small_tile_map
+            str = str * "\n"
+        end
+    end
+
     str = str * "\nreward = $(env.env.reward)\ndone = $(env.env.done)"
     print(io, str)
     return nothing
