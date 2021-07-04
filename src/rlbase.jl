@@ -83,7 +83,7 @@ RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.GridRoomsDirectedModule.G
 
 RLBase.StateStyle(env::RLBaseEnv{E}) where {E <: GW.SequentialRoomsUndirectedModule.SequentialRoomsUndirected} = RLBase.InternalState{Any}()
 RLBase.state_space(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.SequentialRoomsUndirectedModule.SequentialRoomsUndirected} = nothing
-RLBase.state(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.SequentialRoomsUndirectedModule.SequentialRoomsUndirected} = env.env.tile_map
+RLBase.state(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.SequentialRoomsUndirectedModule.SequentialRoomsUndirected} = GW.SequentialRoomsUndirectedModule.get_small_tile_map(env.env.tile_map)
 
 RLBase.reset!(env::RLBaseEnv{E}) where {E <: GW.SequentialRoomsUndirectedModule.SequentialRoomsUndirected} = GW.reset!(env.env)
 
@@ -99,7 +99,7 @@ RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.SequentialRoomsUndirected
 
 RLBase.StateStyle(env::RLBaseEnv{E}) where {E <: GW.SequentialRoomsDirectedModule.SequentialRoomsDirected} = RLBase.InternalState{Any}()
 RLBase.state_space(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.SequentialRoomsDirectedModule.SequentialRoomsDirected} = nothing
-RLBase.state(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.SequentialRoomsDirectedModule.SequentialRoomsDirected} = env.env.env.tile_map
+RLBase.state(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.SequentialRoomsDirectedModule.SequentialRoomsDirected} = GW.SequentialRoomsUndirectedModule.get_small_tile_map(env.env.env.tile_map)
 
 RLBase.reset!(env::RLBaseEnv{E}) where {E <: GW.SequentialRoomsDirectedModule.SequentialRoomsDirected} = GW.reset!(env.env)
 
