@@ -108,12 +108,14 @@ GW_ENVS = [
            GW.SingleRoomDirectedModule.SingleRoomDirected,
            GW.GridRoomsUndirectedModule.GridRoomsUndirected,
            GW.GridRoomsDirectedModule.GridRoomsDirected,
+           GW.SequentialRoomsUndirectedModule.SequentialRoomsUndirected
           ]
 
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SingleRoomUndirectedModule.SingleRoomUndirected}= (env.env.terminal_reward,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SingleRoomDirectedModule.SingleRoomDirected}= (env.env.env.terminal_reward,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.GridRoomsUndirectedModule.GridRoomsUndirected}= (env.env.terminal_reward,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.GridRoomsDirectedModule.GridRoomsDirected}= (env.env.env.terminal_reward,)
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SequentialRoomsUndirectedModule.SequentialRoomsUndirected}= (env.env.terminal_reward,)
 
 Test.@testset "AbstractGridWorldGame" begin
     for Env in GW_ENVS
