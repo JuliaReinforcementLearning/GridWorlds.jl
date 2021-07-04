@@ -93,4 +93,20 @@ RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.SequentialRoomsUndirectedM
 RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.SequentialRoomsUndirectedModule.SequentialRoomsUndirected} = env.env.reward
 RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.SequentialRoomsUndirectedModule.SequentialRoomsUndirected} = env.env.done
 
+#####
+##### SequentialRoomsDirected
+#####
+
+RLBase.StateStyle(env::RLBaseEnv{E}) where {E <: GW.SequentialRoomsDirectedModule.SequentialRoomsDirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.SequentialRoomsDirectedModule.SequentialRoomsDirected} = nothing
+RLBase.state(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.SequentialRoomsDirectedModule.SequentialRoomsDirected} = env.env.env.tile_map
+
+RLBase.reset!(env::RLBaseEnv{E}) where {E <: GW.SequentialRoomsDirectedModule.SequentialRoomsDirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.SequentialRoomsDirectedModule.SequentialRoomsDirected} = 1:GW.SequentialRoomsDirectedModule.NUM_ACTIONS
+(env::RLBaseEnv{E})(action) where {E <: GW.SequentialRoomsDirectedModule.SequentialRoomsDirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.SequentialRoomsDirectedModule.SequentialRoomsDirected} = env.env.env.reward
+RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.SequentialRoomsDirectedModule.SequentialRoomsDirected} = env.env.env.done
+
 end # module
