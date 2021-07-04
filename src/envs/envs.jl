@@ -57,7 +57,6 @@ function sample_two_positions_without_replacement(rng, region)
     return position1, position2
 end
 
-include("sequential_rooms.jl")
 include("maze.jl")
 include("go_to_target.jl")
 include("door_key.jl")
@@ -72,3 +71,5 @@ include("single_room_undirected.jl")
 include("single_room_directed.jl")
 include("grid_rooms_undirected.jl")
 include("grid_rooms_directed.jl")
+include("sequential_rooms_undirected.jl")
+include("sequential_rooms_directed.jl")

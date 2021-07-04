@@ -6,8 +6,6 @@ import ReinforcementLearningBase
 import ReinforcementLearningBase: RLBase
 
 ENVS = [
-        GW.SequentialRoomsDirected,
-        GW.SequentialRoomsUndirected,
         GW.MazeDirected,
         GW.MazeUndirected,
         GW.GoToTargetDirected,
@@ -30,8 +28,6 @@ ENVS = [
 const MAX_STEPS = 3000
 const NUM_RESETS = 3
 
-get_terminal_returns(env::GW.SequentialRoomsDirected) = (env.terminal_reward,)
-get_terminal_returns(env::GW.SequentialRoomsUndirected) = (env.terminal_reward,)
 get_terminal_returns(env::GW.MazeDirected) = (env.terminal_reward,)
 get_terminal_returns(env::GW.MazeUndirected) = (env.terminal_reward,)
 get_terminal_returns(env::GW.GoToTargetDirected) = (env.terminal_reward, env.terminal_penalty)
@@ -108,12 +104,16 @@ GW_ENVS = [
            GW.SingleRoomDirectedModule.SingleRoomDirected,
            GW.GridRoomsUndirectedModule.GridRoomsUndirected,
            GW.GridRoomsDirectedModule.GridRoomsDirected,
+           GW.SequentialRoomsUndirectedModule.SequentialRoomsUndirected,
+           GW.SequentialRoomsDirectedModule.SequentialRoomsDirected,
           ]
 
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SingleRoomUndirectedModule.SingleRoomUndirected}= (env.env.terminal_reward,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SingleRoomDirectedModule.SingleRoomDirected}= (env.env.env.terminal_reward,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.GridRoomsUndirectedModule.GridRoomsUndirected}= (env.env.terminal_reward,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.GridRoomsDirectedModule.GridRoomsDirected}= (env.env.env.terminal_reward,)
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SequentialRoomsUndirectedModule.SequentialRoomsUndirected}= (env.env.terminal_reward,)
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SequentialRoomsDirectedModule.SequentialRoomsDirected}= (env.env.env.terminal_reward,)
 
 Test.@testset "AbstractGridWorldGame" begin
     for Env in GW_ENVS
@@ -127,6 +127,7 @@ Test.@testset "AbstractGridWorldGame" begin
 
                 total_reward = zero(R)
                 for i in 1:MAX_STEPS
+                    state = RLBase.state(env)
                     action = rand(RLBase.action_space(env))
                     env(action)
                     total_reward += RLBase.reward(env)
