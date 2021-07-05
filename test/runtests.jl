@@ -104,6 +104,7 @@ GW_ENVS = [
            GW.SequentialRoomsDirectedModule.SequentialRoomsDirected,
            GW.MazeUndirectedModule.MazeUndirected,
            GW.MazeDirectedModule.MazeDirected,
+           GW.GoToTargetUndirectedModule.GoToTargetUndirected,
           ]
 
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SingleRoomUndirectedModule.SingleRoomUndirected}= (env.env.terminal_reward,)
@@ -114,6 +115,7 @@ get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.Sequen
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SequentialRoomsDirectedModule.SequentialRoomsDirected}= (env.env.env.terminal_reward,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.MazeUndirectedModule.MazeUndirected}= (env.env.terminal_reward,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.MazeDirectedModule.MazeDirected}= (env.env.env.terminal_reward,)
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.GoToTargetUndirectedModule.GoToTargetUndirected}= (env.env.terminal_reward, env.env.terminal_penalty)
 
 Test.@testset "AbstractGridWorldGame" begin
     for Env in GW_ENVS

@@ -141,4 +141,20 @@ RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.MazeDirectedModule.MazeDir
 RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.MazeDirectedModule.MazeDirected} = env.env.env.reward
 RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.MazeDirectedModule.MazeDirected} = env.env.env.done
 
+#####
+##### GoToTargetUndirected
+#####
+
+RLBase.StateStyle(env::RLBaseEnv{E}) where {E <: GW.GoToTargetUndirectedModule.GoToTargetUndirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.GoToTargetUndirectedModule.GoToTargetUndirected} = nothing
+RLBase.state(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.GoToTargetUndirectedModule.GoToTargetUndirected} = (env.env.tile_map, env.env.target)
+
+RLBase.reset!(env::RLBaseEnv{E}) where {E <: GW.GoToTargetUndirectedModule.GoToTargetUndirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.GoToTargetUndirectedModule.GoToTargetUndirected} = 1:GW.GoToTargetUndirectedModule.NUM_ACTIONS
+(env::RLBaseEnv{E})(action) where {E <: GW.GoToTargetUndirectedModule.GoToTargetUndirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.GoToTargetUndirectedModule.GoToTargetUndirected} = env.env.reward
+RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.GoToTargetUndirectedModule.GoToTargetUndirected} = env.env.done
+
 end # module
