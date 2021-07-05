@@ -20,6 +20,8 @@ This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minig
 1. [SequentialRoomsDirected](#sequentialroomsdirected)
 1. [MazeUndirected](#mazeundirected)
 1. [MazeDirected](#mazedirected)
+1. [GoToTargetUndirected](#gototargetundirected)
+1. [GoToTargetDirected](#gototargetdirected)
 
 ## Getting Started
 
@@ -107,3 +109,11 @@ Here is an example:
 1. ### MazeDirected
 
     <img src="https://user-images.githubusercontent.com/32610387/124395056-a791b180-dd1f-11eb-968a-96e478861bda.gif">
+
+1. ### GoToTargetUndirected
+
+    <img src="https://user-images.githubusercontent.com/32610387/124428857-ced19880-dd8a-11eb-847c-d1be4991bcd8.gif">
+
+1. ### GoToTargetDirected
+
+    <img src="https://user-images.githubusercontent.com/32610387/124428875-d2fdb600-dd8a-11eb-826a-6802f999d237.gif">
