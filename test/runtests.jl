@@ -6,8 +6,6 @@ import ReinforcementLearningBase
 import ReinforcementLearningBase: RLBase
 
 ENVS = [
-        GW.GoToTargetDirected,
-        GW.GoToTargetUndirected,
         GW.DoorKeyDirected,
         GW.DoorKeyUndirected,
         GW.CollectGemsDirected,
@@ -26,8 +24,6 @@ ENVS = [
 const MAX_STEPS = 3000
 const NUM_RESETS = 3
 
-get_terminal_returns(env::GW.GoToTargetDirected) = (env.terminal_reward, env.terminal_penalty)
-get_terminal_returns(env::GW.GoToTargetUndirected) = (env.terminal_reward, env.terminal_penalty)
 get_terminal_returns(env::GW.DoorKeyDirected) = (env.terminal_reward,)
 get_terminal_returns(env::GW.DoorKeyUndirected) = (env.terminal_reward,)
 get_terminal_returns(env::GW.CollectGemsDirected) = (env.num_gem_init * env.gem_reward,)
@@ -104,6 +100,8 @@ GW_ENVS = [
            GW.SequentialRoomsDirectedModule.SequentialRoomsDirected,
            GW.MazeUndirectedModule.MazeUndirected,
            GW.MazeDirectedModule.MazeDirected,
+           GW.GoToTargetUndirectedModule.GoToTargetUndirected,
+           GW.GoToTargetDirectedModule.GoToTargetDirected,
           ]
 
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SingleRoomUndirectedModule.SingleRoomUndirected}= (env.env.terminal_reward,)
@@ -114,6 +112,8 @@ get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.Sequen
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SequentialRoomsDirectedModule.SequentialRoomsDirected}= (env.env.env.terminal_reward,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.MazeUndirectedModule.MazeUndirected}= (env.env.terminal_reward,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.MazeDirectedModule.MazeDirected}= (env.env.env.terminal_reward,)
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.GoToTargetUndirectedModule.GoToTargetUndirected}= (env.env.terminal_reward, env.env.terminal_penalty)
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.GoToTargetDirectedModule.GoToTargetDirected}= (env.env.env.terminal_reward, env.env.env.terminal_penalty)
 
 Test.@testset "AbstractGridWorldGame" begin
     for Env in GW_ENVS
