@@ -253,4 +253,20 @@ RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.DynamicObstaclesUndirected
 RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.DynamicObstaclesUndirectedModule.DynamicObstaclesUndirected} = env.env.reward
 RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.DynamicObstaclesUndirectedModule.DynamicObstaclesUndirected} = env.env.done
 
+#####
+##### DynamicObstaclesDirected
+#####
+
+RLBase.StateStyle(env::RLBaseEnv{E}) where {E <: GW.DynamicObstaclesDirectedModule.DynamicObstaclesDirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.DynamicObstaclesDirectedModule.DynamicObstaclesDirected} = nothing
+RLBase.state(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.DynamicObstaclesDirectedModule.DynamicObstaclesDirected} = (env.env.env.tile_map, env.env.agent_direction)
+
+RLBase.reset!(env::RLBaseEnv{E}) where {E <: GW.DynamicObstaclesDirectedModule.DynamicObstaclesDirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.DynamicObstaclesDirectedModule.DynamicObstaclesDirected} = 1:GW.DynamicObstaclesDirectedModule.NUM_ACTIONS
+(env::RLBaseEnv{E})(action) where {E <: GW.DynamicObstaclesDirectedModule.DynamicObstaclesDirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.DynamicObstaclesDirectedModule.DynamicObstaclesDirected} = env.env.env.reward
+RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.DynamicObstaclesDirectedModule.DynamicObstaclesDirected} = env.env.env.done
+
 end # module

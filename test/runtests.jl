@@ -99,6 +99,7 @@ GW_ENVS = [
            GW.CollectGemsUndirectedModule.CollectGemsUndirected,
            GW.CollectGemsDirectedModule.CollectGemsDirected,
            GW.DynamicObstaclesUndirectedModule.DynamicObstaclesUndirected,
+           GW.DynamicObstaclesDirectedModule.DynamicObstaclesDirected,
           ]
 
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SingleRoomUndirectedModule.SingleRoomUndirected}= (env.env.terminal_reward,)
@@ -116,6 +117,7 @@ get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.DoorKe
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.CollectGemsUndirectedModule.CollectGemsUndirected}= (env.env.gem_reward * env.env.num_gem_init,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.CollectGemsDirectedModule.CollectGemsDirected}= (env.env.env.gem_reward * env.env.env.num_gem_init,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.DynamicObstaclesUndirectedModule.DynamicObstaclesUndirected}= (env.env.terminal_reward, env.env.terminal_penalty)
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.DynamicObstaclesDirectedModule.DynamicObstaclesDirected}= (env.env.env.terminal_reward, env.env.env.terminal_penalty)
 
 Test.@testset "AbstractGridWorldGame" begin
     for Env in GW_ENVS
