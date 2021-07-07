@@ -24,6 +24,8 @@ This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minig
 1. [GoToTargetDirected](#gototargetdirected)
 1. [DoorKeyUndirected](#doorkeyundirected)
 1. [DoorKeyDirected](#doorkeydirected)
+1. [CollectGemsUndirected](#collectgemsundirected)
+1. [CollectGemsDirected](#collectgemsdirected)
 
 ## Getting Started
 
@@ -127,3 +129,11 @@ Here is an example:
 1. ### DoorKeyDirected
 
     <img src="https://user-images.githubusercontent.com/32610387/124733482-de3f1600-df31-11eb-81d3-688b8f289b4d.gif">
+
+1. ### CollectGemsUndirected
+
+    <img src="https://user-images.githubusercontent.com/32610387/124762000-06d60880-df50-11eb-9ce4-7ebbe7e0ce27.gif">
+
+1. ### CollectGemsDirected
+
+    <img src="https://user-images.githubusercontent.com/32610387/124762009-09d0f900-df50-11eb-96d3-9dd50f6cfaf5.gif">
