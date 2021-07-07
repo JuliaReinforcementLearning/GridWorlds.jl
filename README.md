@@ -26,6 +26,8 @@ This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minig
 1. [DoorKeyDirected](#doorkeydirected)
 1. [CollectGemsUndirected](#collectgemsundirected)
 1. [CollectGemsDirected](#collectgemsdirected)
+1. [DynamicObstaclesUndirected](#dynamicobstaclesundirected)
+1. [DynamicObstaclesDirected](#dynamicobstaclesdirected)
 
 ## Getting Started
 
@@ -137,3 +139,11 @@ Here is an example:
 1. ### CollectGemsDirected
 
     <img src="https://user-images.githubusercontent.com/32610387/124762009-09d0f900-df50-11eb-96d3-9dd50f6cfaf5.gif">
+
+1. ### DynamicObstaclesUndirected
+
+    <img src="https://user-images.githubusercontent.com/32610387/124779409-6091ff00-df5f-11eb-8546-0b719f6ba260.gif">
+
+1. ### DynamicObstaclesDirected
+
+    <img src="https://user-images.githubusercontent.com/32610387/124779434-6687e000-df5f-11eb-9cff-3e3098675c15.gif">
