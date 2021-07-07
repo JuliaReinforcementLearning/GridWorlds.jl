@@ -101,6 +101,7 @@ GW_ENVS = [
            GW.DoorKeyUndirectedModule.DoorKeyUndirected,
            GW.DoorKeyDirectedModule.DoorKeyDirected,
            GW.CollectGemsUndirectedModule.CollectGemsUndirected,
+           GW.CollectGemsDirectedModule.CollectGemsDirected,
           ]
 
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SingleRoomUndirectedModule.SingleRoomUndirected}= (env.env.terminal_reward,)
@@ -116,6 +117,7 @@ get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.GoToTa
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.DoorKeyUndirectedModule.DoorKeyUndirected}= (env.env.terminal_reward,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.DoorKeyDirectedModule.DoorKeyDirected}= (env.env.env.terminal_reward,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.CollectGemsUndirectedModule.CollectGemsUndirected}= (env.env.gem_reward * env.env.num_gem_init,)
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.CollectGemsDirectedModule.CollectGemsDirected}= (env.env.env.gem_reward * env.env.env.num_gem_init,)
 
 Test.@testset "AbstractGridWorldGame" begin
     for Env in GW_ENVS

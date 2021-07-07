@@ -221,4 +221,20 @@ RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.CollectGemsUndirectedModul
 RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.CollectGemsUndirectedModule.CollectGemsUndirected} = env.env.reward
 RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.CollectGemsUndirectedModule.CollectGemsUndirected} = env.env.done
 
+#####
+##### CollectGemsDirected
+#####
+
+RLBase.StateStyle(env::RLBaseEnv{E}) where {E <: GW.CollectGemsDirectedModule.CollectGemsDirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.CollectGemsDirectedModule.CollectGemsDirected} = nothing
+RLBase.state(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.CollectGemsDirectedModule.CollectGemsDirected} = (env.env.env.tile_map, env.env.agent_direction)
+
+RLBase.reset!(env::RLBaseEnv{E}) where {E <: GW.CollectGemsDirectedModule.CollectGemsDirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.CollectGemsDirectedModule.CollectGemsDirected} = 1:GW.CollectGemsDirectedModule.NUM_ACTIONS
+(env::RLBaseEnv{E})(action) where {E <: GW.CollectGemsDirectedModule.CollectGemsDirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.CollectGemsDirectedModule.CollectGemsDirected} = env.env.env.reward
+RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.CollectGemsDirectedModule.CollectGemsDirected} = env.env.env.done
+
 end # module
