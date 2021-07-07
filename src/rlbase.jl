@@ -173,4 +173,36 @@ RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.GoToTargetDirectedModule.G
 RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.GoToTargetDirectedModule.GoToTargetDirected} = env.env.env.reward
 RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.GoToTargetDirectedModule.GoToTargetDirected} = env.env.env.done
 
+#####
+##### DoorKeyUndirected
+#####
+
+RLBase.StateStyle(env::RLBaseEnv{E}) where {E <: GW.DoorKeyUndirectedModule.DoorKeyUndirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.DoorKeyUndirectedModule.DoorKeyUndirected} = nothing
+RLBase.state(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.DoorKeyUndirectedModule.DoorKeyUndirected} = env.env.tile_map
+
+RLBase.reset!(env::RLBaseEnv{E}) where {E <: GW.DoorKeyUndirectedModule.DoorKeyUndirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.DoorKeyUndirectedModule.DoorKeyUndirected} = 1:GW.DoorKeyUndirectedModule.NUM_ACTIONS
+(env::RLBaseEnv{E})(action) where {E <: GW.DoorKeyUndirectedModule.DoorKeyUndirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.DoorKeyUndirectedModule.DoorKeyUndirected} = env.env.reward
+RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.DoorKeyUndirectedModule.DoorKeyUndirected} = env.env.done
+
+#####
+##### DoorKeyDirected
+#####
+
+RLBase.StateStyle(env::RLBaseEnv{E}) where {E <: GW.DoorKeyDirectedModule.DoorKeyDirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.DoorKeyDirectedModule.DoorKeyDirected} = nothing
+RLBase.state(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.DoorKeyDirectedModule.DoorKeyDirected} = (env.env.env.tile_map, env.env.agent_direction)
+
+RLBase.reset!(env::RLBaseEnv{E}) where {E <: GW.DoorKeyDirectedModule.DoorKeyDirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.DoorKeyDirectedModule.DoorKeyDirected} = 1:GW.DoorKeyDirectedModule.NUM_ACTIONS
+(env::RLBaseEnv{E})(action) where {E <: GW.DoorKeyDirectedModule.DoorKeyDirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.DoorKeyDirectedModule.DoorKeyDirected} = env.env.env.reward
+RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.DoorKeyDirectedModule.DoorKeyDirected} = env.env.env.done
+
 end # module
