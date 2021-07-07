@@ -22,6 +22,8 @@ This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minig
 1. [MazeDirected](#mazedirected)
 1. [GoToTargetUndirected](#gototargetundirected)
 1. [GoToTargetDirected](#gototargetdirected)
+1. [DoorKeyUndirected](#doorkeyundirected)
+1. [DoorKeyDirected](#doorkeydirected)
 
 ## Getting Started
 
@@ -117,3 +119,11 @@ Here is an example:
 1. ### GoToTargetDirected
 
     <img src="https://user-images.githubusercontent.com/32610387/124428875-d2fdb600-dd8a-11eb-826a-6802f999d237.gif">
+
+1. ### DoorKeyUndirected
+
+    <img src="https://user-images.githubusercontent.com/32610387/124733469-daab8f00-df31-11eb-945c-ceffa4aa5384.gif">
+
+1. ### DoorKeyDirected
+
+    <img src="https://user-images.githubusercontent.com/32610387/124733482-de3f1600-df31-11eb-81d3-688b8f289b4d.gif">
