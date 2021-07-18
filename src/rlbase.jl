@@ -317,4 +317,20 @@ RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.SnakeModule.Snake} = 1:GW.
 RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.SnakeModule.Snake} = env.env.reward
 RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.SnakeModule.Snake} = env.env.done
 
+#####
+##### Catcher
+#####
+
+RLBase.StateStyle(env::RLBaseEnv{E}) where {E <: GW.CatcherModule.Catcher} = RLBase.InternalState{Any}()
+RLBase.state_space(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.CatcherModule.Catcher} = nothing
+RLBase.state(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.CatcherModule.Catcher} = env.env.tile_map
+
+RLBase.reset!(env::RLBaseEnv{E}) where {E <: GW.CatcherModule.Catcher} = GW.reset!(env.env)
+
+RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.CatcherModule.Catcher} = 1:GW.CatcherModule.NUM_ACTIONS
+(env::RLBaseEnv{E})(action) where {E <: GW.CatcherModule.Catcher} = GW.act!(env.env, action)
+
+RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.CatcherModule.Catcher} = env.env.reward
+RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.CatcherModule.Catcher} = env.env.done
+
 end # module

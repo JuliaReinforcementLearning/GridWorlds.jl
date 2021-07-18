@@ -1,131 +1,144 @@
-mutable struct Catcher{T, R} <: AbstractGridWorld
-    world::GridWorldBase{Tuple{Agent, Ball}}
-    agent_pos::CartesianIndex{2}
-    reward::T
-    rng::R
-    terminal_reward::T
-    ball_reward::T
-    ball_pos::CartesianIndex{2}
+module CatcherModule
+
+import ..GridWorlds as GW
+import Random
+import ReinforcementLearningBase as RLBase
+
+mutable struct Catcher{R, RNG} <: GW.AbstractGridWorldGame
+    tile_map::BitArray{3}
+    agent_position::CartesianIndex{2}
+    reward::R
+    rng::RNG
     done::Bool
+    gem_position::CartesianIndex{2}
+    gem_reward::R
+    terminal_penalty::R
 end
 
-@generate_getters(Catcher)
-@generate_setters(Catcher)
+const NUM_OBJECTS = 2
+const AGENT = 1
+const GEM = 2
 
-function Catcher(; T = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
-    objects = (AGENT, BALL)
-    world = GridWorldBase(objects, height, width)
+CHARACTERS = ('☻', '♦', '⋅')
 
-    ball_pos = CartesianIndex(1, 1)
-    world[BALL, ball_pos] = true
+GW.get_tile_map_height(env::Catcher) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::Catcher) = size(env.tile_map, 3)
 
-    agent_pos = CartesianIndex(height, 1)
-    world[AGENT, agent_pos] = true
+function GW.get_tile_pretty_repr(env::Catcher, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
 
-    reward = zero(T)
-    terminal_reward = -one(T)
-    ball_reward = one(T)
+const NUM_ACTIONS = 3
+GW.get_action_keys(env::Catcher) = ('a', 'd', 's')
+GW.get_action_names(env::Catcher) = (:MOVE_LEFT, :MOVE_RIGHT, :NO_MOVE)
+
+function Catcher(; R = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
+    tile_map = falses(NUM_OBJECTS, height, width)
+
+    gem_position = CartesianIndex(1, 1)
+    tile_map[GEM, gem_position] = true
+
+    agent_position = CartesianIndex(height, 1)
+    tile_map[AGENT, agent_position] = true
+
+    reward = zero(R)
     done = false
+    gem_reward = one(R)
+    terminal_penalty = -one(R)
 
-    env = Catcher(world, agent_pos, reward, rng, terminal_reward, ball_reward, ball_pos, done)
+    env = Catcher(tile_map, agent_position, reward, rng, done, gem_position, gem_reward, terminal_penalty)
 
-    RLBase.reset!(env)
+    GW.reset!(env)
 
     return env
 end
 
-RLBase.StateStyle(env::Catcher) = RLBase.InternalState{Any}()
+function GW.reset!(env::Catcher)
+    tile_map = env.tile_map
+    rng = env.rng
 
-RLBase.state_space(env::Catcher, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
-const CATCHER_LAYERS = SA.SVector(2)
-RLBase.state(env::Catcher, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_half_size(env), CATCHER_LAYERS)
+    _, height, width = size(tile_map)
 
-RLBase.state_space(env::Catcher, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = nothing
-RLBase.state(env::Catcher, ::RLBase.InternalState, ::RLBase.DefaultPlayer) = copy(get_grid(env))
+    tile_map[AGENT, env.agent_position] = false
+    tile_map[GEM, env.gem_position] = false
 
-RLBase.action_space(env::Catcher, player::RLBase.DefaultPlayer) = (MOVE_LEFT, MOVE_RIGHT, NO_MOVE)
-RLBase.reward(env::Catcher, ::RLBase.DefaultPlayer) = get_reward(env)
-RLBase.is_terminated(env::Catcher) = get_done(env)
+    new_gem_position = CartesianIndex(1, rand(rng, 1:width))
+    env.gem_position = new_gem_position
+    tile_map[GEM, new_gem_position] = true
 
-function RLBase.reset!(env::Catcher{T}) where {T}
-    world = get_world(env)
-    rng = get_rng(env)
-    height = get_height(env)
-    width = get_width(env)
+    new_agent_position = CartesianIndex(height, rand(rng, 1:width))
+    env.agent_position = new_agent_position
+    tile_map[AGENT, new_agent_position] = true
 
-    world[AGENT, get_agent_pos(env)] = false
-    world[BALL, get_ball_pos(env)] = false
-
-    new_ball_pos = CartesianIndex(1, rand(rng, 1:width))
-    set_ball_pos!(env, new_ball_pos)
-    world[BALL, new_ball_pos] = true
-
-    agent_start_pos = CartesianIndex(height, rand(rng, 1:width))
-    world[AGENT, agent_start_pos] = true
-    set_agent_pos!(env, agent_start_pos)
-
-    set_reward!(env, zero(T))
-    set_done!(env, false)
+    env.reward = zero(env.reward)
+    env.done = false
 
     return nothing
 end
 
-function (env::Catcher{T})(action::Union{MoveLeft, MoveRight, NoMove}) where {T}
-    world = get_world(env)
-    height = get_height(env)
+function GW.act!(env::Catcher, action)
+    tile_map = env.tile_map
+    rng = env.rng
+    _, height, width = size(tile_map)
 
-    old_agent_pos = get_agent_pos(env)
-    world[AGENT, old_agent_pos] = false
-    new_agent_pos = wrap_agent(env, move(action, old_agent_pos))
-    set_agent_pos!(env, new_agent_pos)
-    world[AGENT, new_agent_pos] = true
-
-    old_ball_pos = get_ball_pos(env)
-    world[BALL, old_ball_pos] = false
-    new_ball_pos = wrap_ball(env, move(DOWN, old_ball_pos))
-    set_ball_pos!(env, new_ball_pos)
-    world[BALL, new_ball_pos] = true
-
-    if new_ball_pos[1] == height
-        if new_ball_pos[2] == new_agent_pos[2]
-            set_done!(env, false)
-            set_reward!(env, env.ball_reward)
+    if action == 1
+        if env.agent_position[2] == 1
+            new_agent_position = env.agent_position
         else
-            set_done!(env, true)
-            set_reward!(env, get_terminal_reward(env))
+            new_agent_position = CartesianIndex(GW.move_left(env.agent_position.I...))
+        end
+    elseif action == 2
+        if env.agent_position[2] == width
+            new_agent_position = env.agent_position
+        else
+            new_agent_position = CartesianIndex(GW.move_right(env.agent_position.I...))
+        end
+    elseif action == 3
+        new_agent_position = env.agent_position
+    else
+        error("Invalid action $(action)")
+    end
+
+    tile_map[AGENT, env.agent_position] = false
+    env.agent_position = new_agent_position
+    tile_map[AGENT, new_agent_position] = true
+
+    if env.gem_position[1] == height
+        new_gem_position = CartesianIndex(1, rand(rng, 1 : width))
+    else
+        new_gem_position = CartesianIndex(GW.move_down(env.gem_position.I...))
+    end
+
+    tile_map[GEM, env.gem_position] = false
+    env.gem_position = new_gem_position
+    tile_map[GEM, new_gem_position] = true
+
+    if new_gem_position[1] == height
+        if new_gem_position[2] == new_agent_position[2]
+            env.done = false
+            env.reward = env.gem_reward
+        else
+            env.done = true
+            env.reward = env.terminal_penalty
         end
     else
-        set_done!(env, false)
-        set_reward!(env, zero(T))
+        env.done = false
+        env.reward = zero(env.reward)
     end
 
     return nothing
 end
 
-function wrap_ball(env::Catcher, pos::CartesianIndex{2})
-    height = get_height(env)
-    width = get_width(env)
-    rng = get_rng(env)
-    i = pos[1]
-
-    if i > height
-        return CartesianIndex(1, rand(rng, 1:width))
-    else
-        return pos
-    end
+function Base.show(io::IO, ::MIME"text/plain", env::Catcher)
+    str = GW.get_tile_map_pretty_repr(env)
+    str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
+    print(io, str)
+    return nothing
 end
 
-function wrap_agent(env::Catcher, pos::CartesianIndex{2})
-    height = get_height(env)
-    width = get_width(env)
-    i = pos[1]
-    j = pos[2]
-
-    if j < 1
-        return CartesianIndex(i, width)
-    elseif j > width
-        return CartesianIndex(i, 1)
-    else
-        return pos
-    end
-end
+end # module
