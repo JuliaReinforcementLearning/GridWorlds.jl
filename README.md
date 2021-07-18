@@ -28,6 +28,8 @@ This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minig
 1. [CollectGemsDirected](#collectgemsdirected)
 1. [DynamicObstaclesUndirected](#dynamicobstaclesundirected)
 1. [DynamicObstaclesDirected](#dynamicobstaclesdirected)
+1. [SokobanUndirected](#sokobanundirected)
+1. [SokobanDirected](#sokobandirected)
 
 ## Getting Started
 
@@ -147,3 +149,11 @@ Here is an example:
 1. ### DynamicObstaclesDirected
 
     <img src="https://user-images.githubusercontent.com/32610387/124779434-6687e000-df5f-11eb-9cff-3e3098675c15.gif">
+
+1. ### SokobanUndirected
+
+    <img src="https://user-images.githubusercontent.com/32610387/126067718-ad16a8e2-0164-4366-bbd3-371254c8b58f.gif">
+
+1. ### SokobanDirected
+
+    <img src="https://user-images.githubusercontent.com/32610387/126067805-448b19a6-b9f7-43cd-a347-67af5b929b65.gif">

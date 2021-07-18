@@ -57,7 +57,6 @@ function sample_two_positions_without_replacement(rng, region)
     return position1, position2
 end
 
-include("sokoban/sokoban.jl")
 include("snake.jl")
 include("catcher.jl")
 include("transport.jl")
@@ -78,3 +77,5 @@ include("collect_gems_undirected.jl")
 include("collect_gems_directed.jl")
 include("dynamic_obstacles_undirected.jl")
 include("dynamic_obstacles_directed.jl")
+include("sokoban/sokoban_undirected.jl")
+include("sokoban/sokoban_directed.jl")

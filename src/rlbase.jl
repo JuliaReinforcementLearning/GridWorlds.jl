@@ -269,4 +269,36 @@ RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.DynamicObstaclesDirectedMo
 RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.DynamicObstaclesDirectedModule.DynamicObstaclesDirected} = env.env.env.reward
 RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.DynamicObstaclesDirectedModule.DynamicObstaclesDirected} = env.env.env.done
 
+#####
+##### SokobanUndirected
+#####
+
+RLBase.StateStyle(env::RLBaseEnv{E}) where {E <: GW.SokobanUndirectedModule.SokobanUndirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.SokobanUndirectedModule.SokobanUndirected} = nothing
+RLBase.state(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.SokobanUndirectedModule.SokobanUndirected} = env.env.tile_map
+
+RLBase.reset!(env::RLBaseEnv{E}) where {E <: GW.SokobanUndirectedModule.SokobanUndirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.SokobanUndirectedModule.SokobanUndirected} = 1:GW.SokobanUndirectedModule.NUM_ACTIONS
+(env::RLBaseEnv{E})(action) where {E <: GW.SokobanUndirectedModule.SokobanUndirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.SokobanUndirectedModule.SokobanUndirected} = env.env.reward
+RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.SokobanUndirectedModule.SokobanUndirected} = env.env.done
+
+#####
+##### SokobanDirected
+#####
+
+RLBase.StateStyle(env::RLBaseEnv{E}) where {E <: GW.SokobanDirectedModule.SokobanDirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.SokobanDirectedModule.SokobanDirected} = nothing
+RLBase.state(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.SokobanDirectedModule.SokobanDirected} = (env.env.env.tile_map, env.env.agent_direction)
+
+RLBase.reset!(env::RLBaseEnv{E}) where {E <: GW.SokobanDirectedModule.SokobanDirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.SokobanDirectedModule.SokobanDirected} = 1:GW.SokobanDirectedModule.NUM_ACTIONS
+(env::RLBaseEnv{E})(action) where {E <: GW.SokobanDirectedModule.SokobanDirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.SokobanDirectedModule.SokobanDirected} = env.env.env.reward
+RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.SokobanDirectedModule.SokobanDirected} = env.env.env.done
+
 end # module

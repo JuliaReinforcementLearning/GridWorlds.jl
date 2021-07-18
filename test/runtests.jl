@@ -6,8 +6,6 @@ import ReinforcementLearningBase
 import ReinforcementLearningBase: RLBase
 
 ENVS = [
-        GW.SokobanDirected,
-        GW.SokobanUndirected,
         GW.Snake,
         GW.Catcher,
         GW.TransportDirected,
@@ -18,8 +16,6 @@ ENVS = [
 const MAX_STEPS = 3000
 const NUM_RESETS = 3
 
-get_terminal_returns(env::GW.SokobanDirected{T}) where {T} = (T(length(env.box_pos)),)
-get_terminal_returns(env::GW.SokobanUndirected{T}) where {T} = (T(length(env.box_pos)),)
 get_terminal_returns(env::GW.CollectGemsUndirectedMultiAgent) = (env.num_gem_init * env.gem_reward,)
 
 get_terminal_returns_win(env::GW.Snake{T}) where {T} = GW.get_terminal_reward(env):GW.get_food_reward(env):convert(T, GW.get_terminal_reward(env) + GW.get_height(env)*GW.get_width(env)*GW.get_food_reward(env))
@@ -96,6 +92,8 @@ GW_ENVS = [
            GW.CollectGemsDirectedModule.CollectGemsDirected,
            GW.DynamicObstaclesUndirectedModule.DynamicObstaclesUndirected,
            GW.DynamicObstaclesDirectedModule.DynamicObstaclesDirected,
+           GW.SokobanUndirectedModule.SokobanUndirected,
+           GW.SokobanDirectedModule.SokobanDirected,
           ]
 
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SingleRoomUndirectedModule.SingleRoomUndirected}= (env.env.terminal_reward,)
@@ -114,6 +112,8 @@ get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.Collec
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.CollectGemsDirectedModule.CollectGemsDirected}= (env.env.env.gem_reward * env.env.env.num_gem_init,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.DynamicObstaclesUndirectedModule.DynamicObstaclesUndirected}= (env.env.terminal_reward, env.env.terminal_penalty)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.DynamicObstaclesDirectedModule.DynamicObstaclesDirected}= (env.env.env.terminal_reward, env.env.env.terminal_penalty)
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SokobanUndirectedModule.SokobanUndirected} = (typeof(env.env.reward)(length(env.env.box_positions)),)
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SokobanDirectedModule.SokobanDirected}= (env.env.env.terminal_reward,)
 
 Test.@testset "AbstractGridWorldGame" begin
     for Env in GW_ENVS
