@@ -301,4 +301,20 @@ RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.SokobanDirectedModule.Soko
 RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.SokobanDirectedModule.SokobanDirected} = env.env.env.reward
 RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.SokobanDirectedModule.SokobanDirected} = env.env.env.done
 
+#####
+##### Snake
+#####
+
+RLBase.StateStyle(env::RLBaseEnv{E}) where {E <: GW.SnakeModule.Snake} = RLBase.Observation{Any}()
+RLBase.state_space(env::RLBaseEnv{E}, ::RLBase.Observation) where {E <: GW.SnakeModule.Snake} = nothing
+RLBase.state(env::RLBaseEnv{E}, ::RLBase.Observation) where {E <: GW.SnakeModule.Snake} = env.env.tile_map
+
+RLBase.reset!(env::RLBaseEnv{E}) where {E <: GW.SnakeModule.Snake} = GW.reset!(env.env)
+
+RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.SnakeModule.Snake} = 1:GW.SnakeModule.NUM_ACTIONS
+(env::RLBaseEnv{E})(action) where {E <: GW.SnakeModule.Snake} = GW.act!(env.env, action)
+
+RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.SnakeModule.Snake} = env.env.reward
+RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.SnakeModule.Snake} = env.env.done
+
 end # module

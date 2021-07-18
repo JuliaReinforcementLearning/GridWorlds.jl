@@ -30,6 +30,7 @@ This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minig
 1. [DynamicObstaclesDirected](#dynamicobstaclesdirected)
 1. [SokobanUndirected](#sokobanundirected)
 1. [SokobanDirected](#sokobandirected)
+1. [Snake](#snake)
 
 ## Getting Started
 
@@ -157,3 +158,7 @@ Here is an example:
 1. ### SokobanDirected
 
     <img src="https://user-images.githubusercontent.com/32610387/126067805-448b19a6-b9f7-43cd-a347-67af5b929b65.gif">
+
+1. ### Snake
+
+    <img src="https://user-images.githubusercontent.com/32610387/126077504-44a613a6-d941-45ca-98af-5fbb7aec678b.gif">

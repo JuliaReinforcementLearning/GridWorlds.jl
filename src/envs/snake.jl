@@ -1,135 +1,171 @@
-mutable struct Snake{T, R} <: AbstractGridWorld
-    world::GridWorldBase{Tuple{Agent, Wall, Body, Food}}
-    agent_pos::CartesianIndex{2}
-    reward::T
-    rng::R
-    body::DS.Queue{CartesianIndex{2}}
-    food_reward::T
-    food_pos::CartesianIndex{2}
-    terminal_reward::T
-    terminal_penalty::T
+module SnakeModule
+
+import DataStructures as DS
+import ..GridWorlds as GW
+import Random
+import ReinforcementLearningBase as RLBase
+
+mutable struct Snake{R, RNG} <: GW.AbstractGridWorldGame
+    tile_map::BitArray{3}
+    agent_position::CartesianIndex{2}
+    reward::R
+    rng::RNG
     done::Bool
+    terminal_reward::R
+    terminal_penalty::R
+    food_reward::R
+    food_position::CartesianIndex{2}
+    body::DS.Queue{CartesianIndex{2}}
 end
 
-@generate_getters(Snake)
-@generate_setters(Snake)
+const NUM_OBJECTS = 4
+const AGENT = 1
+const WALL = 2
+const BODY = 3
+const FOOD = 4
 
-function Snake(; T = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
-    objects = (AGENT, WALL, BODY, FOOD)
-    world = GridWorldBase(objects, height, width)
+CHARACTERS = ('☻', '█', '∘', '♦', '⋅')
 
-    room = Room(CartesianIndex(1, 1), height, width)
-    place_room!(world, room)
+GW.get_tile_map_height(env::Snake) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::Snake) = size(env.tile_map, 3)
 
-    food_pos = CartesianIndex(height - 1, width - 1)
-    world[FOOD, food_pos] = true
+function GW.get_tile_pretty_repr(env::Snake, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
 
-    agent_pos = CartesianIndex(2, 2)
-    world[AGENT, agent_pos] = true
+const NUM_ACTIONS = 4
+GW.get_action_keys(env::Snake) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::Snake) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
+function Snake(; R = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
+    tile_map = falses(NUM_OBJECTS, height, width)
+
+    tile_map[WALL, 1, :] .= true
+    tile_map[WALL, height, :] .= true
+    tile_map[WALL, :, 1] .= true
+    tile_map[WALL, :, width] .= true
+
+    agent_position = GW.sample_empty_position(rng, tile_map)
+    tile_map[AGENT, agent_position] = true
     body = DS.Queue{CartesianIndex{2}}()
-    DS.enqueue!(body, agent_pos)
-    world[BODY, agent_pos] = true
+    DS.enqueue!(body, agent_position)
+    tile_map[BODY, agent_position] = true
 
-    reward = zero(T)
-    food_reward = one(T)
-    terminal_reward = convert(T, height * width)
-    terminal_penalty = convert(T, -height * width)
+    food_position = GW.sample_empty_position(rng, tile_map)
+    tile_map[FOOD, food_position] = true
+
+    reward = zero(R)
+    food_reward = one(R)
+    terminal_reward = convert(R, height * width)
+    terminal_penalty = convert(R, -height * width)
     done = false
 
-    env = Snake(world, agent_pos, reward, rng, body, food_reward, food_pos, terminal_reward, terminal_penalty, done)
+    env = Snake(tile_map, agent_position, reward, rng, done, terminal_reward, terminal_penalty, food_reward, food_position, body)
 
-    RLBase.reset!(env)
+    GW.reset!(env)
 
     return env
 end
 
-RLBase.state_space(env::Snake, ::RLBase.Observation, ::RLBase.DefaultPlayer) = nothing
-const SNAKE_LAYERS = SA.SVector(2, 3, 4)
-RLBase.state(env::Snake, ::RLBase.Observation, ::RLBase.DefaultPlayer) = get_grid(get_world(env), get_agent_pos(env), get_half_size(env), SNAKE_LAYERS)
+function GW.reset!(env::Snake)
+    tile_map = env.tile_map
+    rng = env.rng
+    body = env.body
 
-RLBase.action_space(env::Snake, player::RLBase.DefaultPlayer) = UNDIRECTED_NAVIGATION_ACTIONS
-RLBase.reward(env::Snake, ::RLBase.DefaultPlayer) = get_reward(env)
-RLBase.is_terminated(env::Snake) = get_done(env)
-
-function RLBase.reset!(env::Snake{T}) where {T}
-    world = get_world(env)
-    rng = get_rng(env)
-    body = get_body(env)
-
-    world[AGENT, get_agent_pos(env)] = false
-    world[FOOD, get_food_pos(env)] = false
+    tile_map[AGENT, env.agent_position] = false
+    tile_map[FOOD, env.food_position] = false
 
     for i in 1:length(body)
         pos = DS.dequeue!(body)
-        world[BODY, pos] = false
+        tile_map[BODY, pos] = false
     end
 
-    new_food_pos = rand(rng, pos -> !any(@view world[:, pos]), env)
-    set_food_pos!(env, new_food_pos)
-    world[FOOD, new_food_pos] = true
+    new_agent_position = GW.sample_empty_position(rng, tile_map)
+    env.agent_position = new_agent_position
+    tile_map[AGENT, new_agent_position] = true
+    DS.enqueue!(body, new_agent_position)
+    tile_map[BODY, new_agent_position] = true
 
-    new_agent_pos = rand(rng, pos -> !any(@view world[:, pos]), env)
-    set_agent_pos!(env, new_agent_pos)
-    world[AGENT, new_agent_pos] = true
+    new_food_position = GW.sample_empty_position(rng, tile_map)
+    env.food_position = new_food_position
+    tile_map[FOOD, new_food_position] = true
 
-    DS.enqueue!(body, new_agent_pos)
-    world[BODY, new_agent_pos] = true
-
-    set_reward!(env, zero(T))
-    set_done!(env, false)
+    env.reward = zero(env.reward)
+    env.done = false
 
     return nothing
 end
 
-function (env::Snake{T})(action::AbstractMoveAction) where {T}
-    world = get_world(env)
-    height = get_height(env)
-    width = get_width(env)
-    rng = get_rng(env)
-    body = get_body(env)
+function GW.act!(env::Snake, action)
+    tile_map = env.tile_map
+    rng = env.rng
+    body = env.body
+    _, height, width = size(tile_map)
 
-    agent_pos = get_agent_pos(env)
-    dest = move(action, agent_pos)
+    if action == 1
+        dest = CartesianIndex(GW.move_up(env.agent_position.I...))
+    elseif action == 2
+        dest = CartesianIndex(GW.move_down(env.agent_position.I...))
+    elseif action == 3
+        dest = CartesianIndex(GW.move_left(env.agent_position.I...))
+    elseif action == 4
+        dest = CartesianIndex(GW.move_right(env.agent_position.I...))
+    else
+        error("Invalid action $(action)")
+    end
 
-    if (world[WALL, dest] || world[BODY, dest])
-        set_reward!(env, get_terminal_penalty(env))
-        set_done!(env, true)
-    elseif world[FOOD, dest]
-        world[AGENT, agent_pos] = false
-        set_agent_pos!(env, dest)
-        world[AGENT, dest] = true
+    if (tile_map[WALL, dest] || tile_map[BODY, dest])
+        env.reward = env.terminal_penalty
+        env.done = true
+    elseif tile_map[FOOD, dest]
+        tile_map[AGENT, env.agent_position] = false
+        env.agent_position = dest
+        tile_map[AGENT, dest] = true
 
         DS.enqueue!(body, dest)
-        world[BODY, dest] = true
+        tile_map[BODY, dest] = true
 
-        world[FOOD, dest] = false
+        tile_map[FOOD, dest] = false
 
         if length(body) == (height - 2) * (width - 2)
-            set_reward!(env, get_food_reward(env) + get_terminal_reward(env))
-            set_done!(env, true)
+            env.reward = env.food_reward + env.terminal_reward
+            env.done = true
         else
-            new_food_pos = rand(rng, pos -> !any(@view world[:, pos]), env, max_try = 100 * height * width)
-            set_food_pos!(env, new_food_pos)
-            world[FOOD, new_food_pos] = true
+            new_food_position = GW.sample_empty_position(rng, tile_map, 100 * height * width)
+            env.food_position = new_food_position
+            tile_map[FOOD, new_food_position] = true
 
-            set_reward!(env, get_food_reward(env))
-            set_done!(env, false)
+            env.reward = env.food_reward
+            env.done = false
         end
     else
-        world[AGENT, agent_pos] = false
-        set_agent_pos!(env, dest)
-        world[AGENT, dest] = true
+        tile_map[AGENT, env.agent_position] = false
+        env.agent_position = dest
+        tile_map[AGENT, dest] = true
 
         DS.enqueue!(body, dest)
-        world[BODY, dest] = true
+        tile_map[BODY, dest] = true
 
-        last_pos = DS.dequeue!(body)
-        world[BODY, last_pos] = false
+        last_position = DS.dequeue!(body)
+        tile_map[BODY, last_position] = false
 
-        set_reward!(env, zero(T))
-        set_done!(env, false)
+        env.reward = zero(env.reward)
+        env.done = false
     end
 
     return nothing
 end
+
+function Base.show(io::IO, ::MIME"text/plain", env::Snake)
+    str = GW.get_tile_map_pretty_repr(env)
+    str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
+    print(io, str)
+    return nothing
+end
+
+end # module

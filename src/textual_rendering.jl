@@ -184,6 +184,3 @@ function get_render_data(env::E, pos::CartesianIndex{2}, layer) where {E<:Abstra
 
     return background, foreground, char
 end
-
-get_render_data(env::Snake, pos::CartesianIndex{2}) = get_render_data(get_world(env), pos)
-get_render_data(env::Snake, pos::CartesianIndex{2}, layer) = get_render_data(get_world(env), pos, layer)
