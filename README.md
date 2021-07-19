@@ -32,6 +32,8 @@ This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minig
 1. [SokobanDirected](#sokobandirected)
 1. [Snake](#snake)
 1. [Catcher](#catcher)
+1. [TransportUndirected](#transportundirected)
+1. [TransportDirected](#transportdirected)
 
 ## Getting Started
 
@@ -167,3 +169,11 @@ Here is an example:
 1. ### Catcher
 
     <img src="https://user-images.githubusercontent.com/32610387/126079450-8a4df282-f17c-485e-96d3-17ab7fcfb0fc.gif">
+
+1. ### TransportUndirected
+
+    <img src="https://user-images.githubusercontent.com/32610387/126120108-86f6664e-4521-411e-b207-a40c221b9017.gif">
+
+1. ### TransportDirected
+
+    <img src="https://user-images.githubusercontent.com/32610387/126120388-556cd987-8e92-405f-8b36-341a643da372.gif">
