@@ -349,4 +349,20 @@ RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.TransportUndirectedModule.
 RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.TransportUndirectedModule.TransportUndirected} = env.env.reward
 RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.TransportUndirectedModule.TransportUndirected} = env.env.done
 
+#####
+##### TransportDirected
+#####
+
+RLBase.StateStyle(env::RLBaseEnv{E}) where {E <: GW.TransportDirectedModule.TransportDirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.TransportDirectedModule.TransportDirected} = nothing
+RLBase.state(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.TransportDirectedModule.TransportDirected} = (env.env.env.tile_map, env.env.agent_direction)
+
+RLBase.reset!(env::RLBaseEnv{E}) where {E <: GW.TransportDirectedModule.TransportDirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.TransportDirectedModule.TransportDirected} = 1:GW.TransportDirectedModule.NUM_ACTIONS
+(env::RLBaseEnv{E})(action) where {E <: GW.TransportDirectedModule.TransportDirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.TransportDirectedModule.TransportDirected} = env.env.env.reward
+RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.TransportDirectedModule.TransportDirected} = env.env.env.done
+
 end # module
