@@ -5,60 +5,8 @@ import Random
 import ReinforcementLearningBase
 import ReinforcementLearningBase: RLBase
 
-ENVS = [
-        GW.CollectGemsUndirectedMultiAgent,
-       ]
-
 const MAX_STEPS = 3000
 const NUM_RESETS = 3
-
-get_terminal_returns(env::GW.CollectGemsUndirectedMultiAgent) = (env.num_gem_init * env.gem_reward,)
-
-Test.@testset "GridWorlds.jl" begin
-    for Env in ENVS
-        Test.@testset "$(Env)" begin
-            T = Float32
-            env = Env(T = T)
-            for _ in 1:NUM_RESETS
-                RLBase.reset!(env)
-                Test.@test RLBase.reward(env) == zero(T)
-                Test.@test RLBase.is_terminated(env) == false
-
-                total_reward = zero(T)
-                for i in 1:MAX_STEPS
-                    action = rand(RLBase.action_space(env))
-                    env(action)
-                    total_reward += RLBase.reward(env)
-
-
-                    if Env == GW.CollectGemsUndirectedMultiAgent
-                        for i in 1:GW.get_num_agents(env)
-                            agent_pos = env.agent_pos[i]
-                            Test.@test 1 ≤ agent_pos[1] ≤ GW.get_height(env)
-                            Test.@test 1 ≤ agent_pos[2] ≤ GW.get_width(env)
-                        end
-                    else
-                        Test.@test 1 ≤ GW.get_agent_pos(env)[1] ≤ GW.get_height(env)
-                        Test.@test 1 ≤ GW.get_agent_pos(env)[2] ≤ GW.get_width(env)
-                    end
-
-                    if RLBase.is_terminated(env)
-                        Test.@test total_reward in get_terminal_returns(env)
-                        break
-                    end
-
-                    if i == MAX_STEPS
-                        @info "$Env not terminated after MAX_STEPS = $MAX_STEPS"
-                    end
-                end
-            end
-        end
-    end
-end
-
-#####
-##### AbstractGridWorldGame
-#####
 
 GW_ENVS = [
            GW.SingleRoomUndirectedModule.SingleRoomUndirected,
@@ -83,6 +31,7 @@ GW_ENVS = [
            GW.CatcherModule.Catcher,
            GW.TransportUndirectedModule.TransportUndirected,
            GW.TransportDirectedModule.TransportDirected,
+           GW.CollectGemsMultiAgentUndirectedModule.CollectGemsMultiAgentUndirected,
           ]
 
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SingleRoomUndirectedModule.SingleRoomUndirected}= (env.env.terminal_reward,)
@@ -106,6 +55,7 @@ get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.Sokoba
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.CatcherModule.Catcher} = env.env.terminal_penalty : env.env.gem_reward : MAX_STEPS * env.env.gem_reward
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.TransportUndirectedModule.TransportUndirected}= (env.env.terminal_reward,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.TransportDirectedModule.TransportDirected}= (env.env.env.terminal_reward,)
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.CollectGemsMultiAgentUndirectedModule.CollectGemsMultiAgentUndirected}= (env.env.num_gem_init * env.env.gem_reward,)
 
 function is_valid_terminal_return(env::GW.RLBaseEnvModule.RLBaseEnv{E}, terminal_return) where {E <: GW.SnakeModule.Snake}
     terminal_reward = env.env.terminal_reward

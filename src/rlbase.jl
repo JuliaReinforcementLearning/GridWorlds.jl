@@ -365,4 +365,20 @@ RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.TransportDirectedModule.Tr
 RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.TransportDirectedModule.TransportDirected} = env.env.env.reward
 RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.TransportDirectedModule.TransportDirected} = env.env.env.done
 
+#####
+##### CollectGemsMultiAgentUndirected
+#####
+
+RLBase.StateStyle(env::RLBaseEnv{E}) where {E <: GW.CollectGemsMultiAgentUndirectedModule.CollectGemsMultiAgentUndirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.CollectGemsMultiAgentUndirectedModule.CollectGemsMultiAgentUndirected} = nothing
+RLBase.state(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.CollectGemsMultiAgentUndirectedModule.CollectGemsMultiAgentUndirected} = env.env.tile_map
+
+RLBase.reset!(env::RLBaseEnv{E}) where {E <: GW.CollectGemsMultiAgentUndirectedModule.CollectGemsMultiAgentUndirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.CollectGemsMultiAgentUndirectedModule.CollectGemsMultiAgentUndirected} = 1:GW.CollectGemsMultiAgentUndirectedModule.NUM_ACTIONS
+(env::RLBaseEnv{E})(action) where {E <: GW.CollectGemsMultiAgentUndirectedModule.CollectGemsMultiAgentUndirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.CollectGemsMultiAgentUndirectedModule.CollectGemsMultiAgentUndirected} = env.env.reward
+RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.CollectGemsMultiAgentUndirectedModule.CollectGemsMultiAgentUndirected} = env.env.done
+
 end # module
