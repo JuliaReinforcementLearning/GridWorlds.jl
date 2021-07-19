@@ -333,4 +333,20 @@ RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.CatcherModule.Catcher} = 1
 RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.CatcherModule.Catcher} = env.env.reward
 RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.CatcherModule.Catcher} = env.env.done
 
+#####
+##### TransportUndirected
+#####
+
+RLBase.StateStyle(env::RLBaseEnv{E}) where {E <: GW.TransportUndirectedModule.TransportUndirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.TransportUndirectedModule.TransportUndirected} = nothing
+RLBase.state(env::RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GW.TransportUndirectedModule.TransportUndirected} = env.env.tile_map
+
+RLBase.reset!(env::RLBaseEnv{E}) where {E <: GW.TransportUndirectedModule.TransportUndirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::RLBaseEnv{E}) where {E <: GW.TransportUndirectedModule.TransportUndirected} = 1:GW.TransportUndirectedModule.NUM_ACTIONS
+(env::RLBaseEnv{E})(action) where {E <: GW.TransportUndirectedModule.TransportUndirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::RLBaseEnv{E}) where {E <: GW.TransportUndirectedModule.TransportUndirected} = env.env.reward
+RLBase.is_terminated(env::RLBaseEnv{E}) where {E <: GW.TransportUndirectedModule.TransportUndirected} = env.env.done
+
 end # module
