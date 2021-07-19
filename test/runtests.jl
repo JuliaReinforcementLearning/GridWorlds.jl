@@ -83,6 +83,7 @@ GW_ENVS = [
            GW.CatcherModule.Catcher,
            GW.TransportUndirectedModule.TransportUndirected,
            GW.TransportDirectedModule.TransportDirected,
+           GW.CollectGemsMultiAgentUndirectedModule.CollectGemsMultiAgentUndirected,
           ]
 
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SingleRoomUndirectedModule.SingleRoomUndirected}= (env.env.terminal_reward,)
@@ -106,6 +107,7 @@ get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.Sokoba
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.CatcherModule.Catcher} = env.env.terminal_penalty : env.env.gem_reward : MAX_STEPS * env.env.gem_reward
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.TransportUndirectedModule.TransportUndirected}= (env.env.terminal_reward,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.TransportDirectedModule.TransportDirected}= (env.env.env.terminal_reward,)
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.CollectGemsMultiAgentUndirectedModule.CollectGemsMultiAgentUndirected}= (env.env.num_gem_init * env.env.gem_reward,)
 
 function is_valid_terminal_return(env::GW.RLBaseEnvModule.RLBaseEnv{E}, terminal_return) where {E <: GW.SnakeModule.Snake}
     terminal_reward = env.env.terminal_reward
