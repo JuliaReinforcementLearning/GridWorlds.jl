@@ -1,7 +1,6 @@
 module GridWorlds
 
 import REPL
-import Crayons
 import MacroTools:@forward
 import Random
 import DataStructures
@@ -21,6 +20,5 @@ include("abstract_grid_world.jl")
 include("play.jl")
 include("envs/envs.jl")
 include("rlbase.jl")
-include("textual_rendering.jl")
 
 end
