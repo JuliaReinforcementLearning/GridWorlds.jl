@@ -6,8 +6,6 @@ import ReinforcementLearningBase
 import ReinforcementLearningBase: RLBase
 
 ENVS = [
-        GW.TransportDirected,
-        GW.TransportUndirected,
         GW.CollectGemsUndirectedMultiAgent,
        ]
 
@@ -15,9 +13,6 @@ const MAX_STEPS = 3000
 const NUM_RESETS = 3
 
 get_terminal_returns(env::GW.CollectGemsUndirectedMultiAgent) = (env.num_gem_init * env.gem_reward,)
-
-get_terminal_returns(env::GW.TransportDirected) = (GW.get_terminal_reward(env),)
-get_terminal_returns(env::GW.TransportUndirected) = (GW.get_terminal_reward(env),)
 
 Test.@testset "GridWorlds.jl" begin
     for Env in ENVS
