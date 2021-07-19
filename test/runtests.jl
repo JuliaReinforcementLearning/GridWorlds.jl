@@ -6,8 +6,6 @@ import ReinforcementLearningBase
 import ReinforcementLearningBase: RLBase
 
 ENVS = [
-        GW.TransportDirected,
-        GW.TransportUndirected,
         GW.CollectGemsUndirectedMultiAgent,
        ]
 
@@ -15,9 +13,6 @@ const MAX_STEPS = 3000
 const NUM_RESETS = 3
 
 get_terminal_returns(env::GW.CollectGemsUndirectedMultiAgent) = (env.num_gem_init * env.gem_reward,)
-
-get_terminal_returns(env::GW.TransportDirected) = (GW.get_terminal_reward(env),)
-get_terminal_returns(env::GW.TransportUndirected) = (GW.get_terminal_reward(env),)
 
 Test.@testset "GridWorlds.jl" begin
     for Env in ENVS
@@ -86,6 +81,8 @@ GW_ENVS = [
            GW.SokobanDirectedModule.SokobanDirected,
            GW.SnakeModule.Snake,
            GW.CatcherModule.Catcher,
+           GW.TransportUndirectedModule.TransportUndirected,
+           GW.TransportDirectedModule.TransportDirected,
           ]
 
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SingleRoomUndirectedModule.SingleRoomUndirected}= (env.env.terminal_reward,)
@@ -107,6 +104,8 @@ get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.Dynami
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SokobanUndirectedModule.SokobanUndirected} = (typeof(env.env.reward)(length(env.env.box_positions)),)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SokobanDirectedModule.SokobanDirected}= (env.env.env.terminal_reward,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.CatcherModule.Catcher} = env.env.terminal_penalty : env.env.gem_reward : MAX_STEPS * env.env.gem_reward
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.TransportUndirectedModule.TransportUndirected}= (env.env.terminal_reward,)
+get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.TransportDirectedModule.TransportDirected}= (env.env.env.terminal_reward,)
 
 function is_valid_terminal_return(env::GW.RLBaseEnvModule.RLBaseEnv{E}, terminal_return) where {E <: GW.SnakeModule.Snake}
     terminal_reward = env.env.terminal_reward
