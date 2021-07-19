@@ -1,14 +1,3 @@
-abstract type AbstractGridWorld <: RLBase.AbstractEnv end
-
-@forward AbstractGridWorld.world get_grid, get_objects, get_num_objects, get_height, get_width
-get_half_size(env::AbstractGridWorld) = (2 * (get_height(env) ÷ 4) + 1, 2 * (get_width(env) ÷ 4) + 1)
-
-Random.rand(rng::Random.AbstractRNG, f::Function, env::AbstractGridWorld; max_try = 1000) = rand(rng, f, get_world(env), max_try = max_try)
-
-#####
-##### AbstractGridWorldGame
-#####
-
 abstract type AbstractGridWorldGame end
 
 #####
