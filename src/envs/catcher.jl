@@ -2,7 +2,6 @@ module CatcherModule
 
 import ..GridWorlds as GW
 import Random
-import ReinforcementLearningBase as RLBase
 
 mutable struct Catcher{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}

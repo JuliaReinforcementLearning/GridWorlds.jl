@@ -2,7 +2,6 @@ module CollectGemsUndirectedModule
 
 import ..GridWorlds as GW
 import Random
-import ReinforcementLearningBase as RLBase
 
 mutable struct CollectGemsUndirected{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}

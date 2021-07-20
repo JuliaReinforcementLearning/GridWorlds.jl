@@ -1,9 +1,8 @@
 module MazeDirectedModule
 
 import ..GridWorlds as GW
-import Random
-import ReinforcementLearningBase as RLBase
 import ..MazeUndirectedModule as MUM
+import Random
 
 mutable struct MazeDirected{R, RNG} <: GW.AbstractGridWorldGame
     env::MUM.MazeUndirected{R, RNG}

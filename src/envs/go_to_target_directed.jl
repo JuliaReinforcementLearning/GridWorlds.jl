@@ -1,9 +1,8 @@
 module GoToTargetDirectedModule
 
+import ..GoToTargetUndirectedModule as GTTUM
 import ..GridWorlds as GW
 import Random
-import ReinforcementLearningBase as RLBase
-import ..GoToTargetUndirectedModule as GTTUM
 
 mutable struct GoToTargetDirected{R, RNG} <: GW.AbstractGridWorldGame
     env::GTTUM.GoToTargetUndirected{R, RNG}

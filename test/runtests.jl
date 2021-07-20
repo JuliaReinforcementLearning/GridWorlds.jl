@@ -1,9 +1,7 @@
-import GridWorlds
-import GridWorlds: GW
-import Test
+import GridWorlds as GW
 import Random
-import ReinforcementLearningBase
-import ReinforcementLearningBase: RLBase
+import ReinforcementLearningBase as RLBase
+import Test
 
 const MAX_STEPS = 3000
 const NUM_RESETS = 3

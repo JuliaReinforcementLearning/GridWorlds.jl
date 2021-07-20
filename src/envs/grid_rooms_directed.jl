@@ -1,9 +1,8 @@
 module GridRoomsDirectedModule
 
+import ..GridRoomsUndirectedModule as GRUM
 import ..GridWorlds as GW
 import Random
-import ReinforcementLearningBase as RLBase
-import ..GridRoomsUndirectedModule as GRUM
 
 mutable struct GridRoomsDirected{R, RNG} <: GW.AbstractGridWorldGame
     env::GRUM.GridRoomsUndirected{R, RNG}

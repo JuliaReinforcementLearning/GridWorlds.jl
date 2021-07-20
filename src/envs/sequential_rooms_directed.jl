@@ -2,7 +2,6 @@ module SequentialRoomsDirectedModule
 
 import ..GridWorlds as GW
 import Random
-import ReinforcementLearningBase as RLBase
 import ..SequentialRoomsUndirectedModule as SRUM
 
 mutable struct SequentialRoomsDirected{R, RNG} <: GW.AbstractGridWorldGame

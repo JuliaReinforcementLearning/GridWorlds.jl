@@ -1,16 +1,11 @@
 module GridWorlds
 
-import REPL
+import DataStructures as DS
 import MacroTools:@forward
 import Random
-import DataStructures
-const DS = DataStructures
-import ReinforcementLearningBase
-import ReinforcementLearningBase:RLBase
-import StaticArrays
-const SA = StaticArrays
-
-const GW = GridWorlds
+import REPL
+import ReinforcementLearningBase as RLBase
+import StaticArrays as SA
 
 include("directions.jl")
 include("actions.jl")

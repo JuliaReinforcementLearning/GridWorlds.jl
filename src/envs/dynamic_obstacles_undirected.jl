@@ -2,7 +2,6 @@ module DynamicObstaclesUndirectedModule
 
 import ..GridWorlds as GW
 import Random
-import ReinforcementLearningBase as RLBase
 
 mutable struct DynamicObstaclesUndirected{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}
