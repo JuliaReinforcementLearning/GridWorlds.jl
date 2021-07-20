@@ -87,7 +87,8 @@ function generate_benchmark_file(; Envs = GW.ENVS, num_resets = 100, steps_per_r
 
     benchmarks = benchmark(Envs, num_resets, steps_per_reset)
 
-    println(io, "Date: $(date)")
+    println(io, "Date: $(date) (yyyy_mm_dd_HH_MM_SS)")
+    println(io, "**Note:** The time in benchmarks is the median time")
     println(io, "## List of Environments")
 
     for Env in Envs

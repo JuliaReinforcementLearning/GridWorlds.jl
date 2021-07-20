@@ -1,4 +1,5 @@
-Date: 2021_07_20_22_36_30
+Date: 2021_07_20_22_36_30 (yyyy_mm_dd_HH_MM_SS)
+**Note:** The time in benchmarks is the median time
 ## List of Environments
   1. [SingleRoomUndirected](#singleroomundirected)
   1. [SingleRoomDirected](#singleroomdirected)
