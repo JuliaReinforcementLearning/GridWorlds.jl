@@ -5,17 +5,13 @@ version = "0.4.0"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 REPL = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 ReinforcementLearningBase = "e575027e-6cd6-5018-9292-cdc6200d2b44"
-StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 DataStructures = "0.18"
-MacroTools = "0.5"
 ReinforcementLearningBase = "0.9"
-StaticArrays = "1.1"
 julia = "1"
 
 [extras]

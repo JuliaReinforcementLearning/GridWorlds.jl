@@ -1,11 +1,9 @@
 module GridWorlds
 
 import DataStructures as DS
-import MacroTools:@forward
 import Random
 import REPL
 import ReinforcementLearningBase as RLBase
-import StaticArrays as SA
 
 include("directions.jl")
 include("actions.jl")
