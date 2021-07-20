@@ -145,9 +145,9 @@ function update_obstacles!(env::DynamicObstaclesUndirected)
     for (i, position) in enumerate(env.obstacle_positions)
         tile_map[OBSTACLE, position] = false
         neighbors = (position, CartesianIndex(position[1] - 1, position[2]), CartesianIndex(position[1], position[2] - 1), CartesianIndex(position[1], position[2] + 1), CartesianIndex(position[1] + 1, position[2]))
-        new_obstacle_position = neighbors[rand(rng, 1:5)]
-        while any(@view tile_map[:, new_obstacle_position])
-            new_obstacle_position = neighbors[rand(rng, 1:5)]
+        new_obstacle_position = rand(rng, neighbors)
+        while tile_map[WALL, new_obstacle_position] || tile_map[GOAL, new_obstacle_position] || tile_map[OBSTACLE, new_obstacle_position]
+            new_obstacle_position = rand(rng, neighbors)
         end
         env.obstacle_positions[i] = new_obstacle_position
         tile_map[OBSTACLE, new_obstacle_position] = true
