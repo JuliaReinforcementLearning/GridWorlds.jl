@@ -15,3 +15,6 @@ Manifest.toml
 # vim temporary files
 *~
 *.swp
+
+benchmark/20*
+src/scratchpad.jl

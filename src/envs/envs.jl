@@ -49,3 +49,29 @@ include("catcher.jl")
 include("transport_undirected.jl")
 include("transport_directed.jl")
 include("collect_gems_multi_agent_undirected.jl")
+
+const ENVS = [
+              SingleRoomUndirectedModule.SingleRoomUndirected,
+              SingleRoomDirectedModule.SingleRoomDirected,
+              GridRoomsUndirectedModule.GridRoomsUndirected,
+              GridRoomsDirectedModule.GridRoomsDirected,
+              SequentialRoomsUndirectedModule.SequentialRoomsUndirected,
+              SequentialRoomsDirectedModule.SequentialRoomsDirected,
+              MazeUndirectedModule.MazeUndirected,
+              MazeDirectedModule.MazeDirected,
+              GoToTargetUndirectedModule.GoToTargetUndirected,
+              GoToTargetDirectedModule.GoToTargetDirected,
+              DoorKeyUndirectedModule.DoorKeyUndirected,
+              DoorKeyDirectedModule.DoorKeyDirected,
+              CollectGemsUndirectedModule.CollectGemsUndirected,
+              CollectGemsDirectedModule.CollectGemsDirected,
+              DynamicObstaclesUndirectedModule.DynamicObstaclesUndirected,
+              DynamicObstaclesDirectedModule.DynamicObstaclesDirected,
+              SokobanUndirectedModule.SokobanUndirected,
+              SokobanDirectedModule.SokobanDirected,
+              SnakeModule.Snake,
+              CatcherModule.Catcher,
+              TransportUndirectedModule.TransportUndirected,
+              TransportDirectedModule.TransportDirected,
+              CollectGemsMultiAgentUndirectedModule.CollectGemsMultiAgentUndirected,
+             ]
