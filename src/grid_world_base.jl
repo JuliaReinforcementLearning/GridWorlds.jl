@@ -1,46 +1,3 @@
-"""
-    GridWorldBase{O} <: AbstractArray{Bool, 3}
-
-A basic representation of grid world.
-The first dimension uses multi-hot encoding to encode objects in a tile.
-The second and third dimensions correspond to the height and width of the grid respectively.
-"""
-struct GridWorldBase{O} <: AbstractArray{Bool, 3}
-    grid::BitArray{3}
-    objects::O
-end
-
-function GridWorldBase(objects::Tuple{Vararg{AbstractObject}}, height::Int, width::Int)
-    grid = falses(length(objects), height, width)
-    GridWorldBase(grid, objects)
-end
-
-get_grid(world::GridWorldBase) = world.grid
-get_objects(world::GridWorldBase) = world.objects
-
-get_num_objects(grid::AbstractArray{Bool, 3}) = size(grid, 1)
-get_height(grid::AbstractArray{Bool, 3}) = size(grid, 2)
-get_width(grid::AbstractArray{Bool, 3}) = size(grid, 3)
-
-#####
-# Indexing of GridWorldBase objects
-#####
-
-@forward GridWorldBase.grid Base.size, Base.getindex, Base.setindex!
-
-@generated function Base.to_index(::GridWorldBase{O}, object::X) where {X<:AbstractObject, O}
-    i = findfirst(X .=== O.parameters)
-    isnothing(i) && error("unknow object $object")
-    :($i)
-end
-
-Base.getindex(world::GridWorldBase, object::AbstractObject, args...) = getindex(get_grid(world), Base.to_index(world, object), args...)
-Base.setindex!(world::GridWorldBase, value::Bool, object::AbstractObject, args...) = setindex!(get_grid(world), value, Base.to_index(world, object), args...)
-
-#####
-# methods for agent view
-#####
-
 function get_grid_inds((i, j), (m, n))
     temp1 = m ÷ 2
     temp2 = i - temp1
@@ -122,24 +79,4 @@ function get_grid!(dest_grid::AbstractArray{Bool, 3}, src_grid::AbstractArray{Bo
     end
 
     return nothing
-end
-
-#####
-# utils
-#####
-
-function Random.rand(rng::Random.AbstractRNG, f::Function, inds::Union{Vector{CartesianIndex{2}}, CartesianIndices{2}}; max_try::Int = 1000)
-    for _ in 1:max_try
-        pos = rand(rng, inds)
-        if f(pos)
-            return pos
-        end
-    end
-    @warn "number of tries exceeded max_try = $max_try"
-    return inds[1]
-end
-
-function Random.rand(rng::Random.AbstractRNG, f::Function, world::GridWorldBase; max_try = 1000)
-    inds = CartesianIndices((get_height(world), get_width(world)))
-    rand(rng, f, inds, max_try = max_try)
 end

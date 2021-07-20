@@ -2,7 +2,6 @@ module SokobanUndirectedModule
 
 import ..GridWorlds as GW
 import Random
-import ReinforcementLearningBase as RLBase
 
 struct LevelDataset
     characters::Array{Char, 3}

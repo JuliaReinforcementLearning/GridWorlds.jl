@@ -3,7 +3,6 @@ module SnakeModule
 import DataStructures as DS
 import ..GridWorlds as GW
 import Random
-import ReinforcementLearningBase as RLBase
 
 mutable struct Snake{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}

@@ -1,9 +1,8 @@
 module DoorKeyDirectedModule
 
+import ..DoorKeyUndirectedModule as DKUM
 import ..GridWorlds as GW
 import Random
-import ReinforcementLearningBase as RLBase
-import ..DoorKeyUndirectedModule as DKUM
 
 mutable struct DoorKeyDirected{R, RNG} <: GW.AbstractGridWorldGame
     env::DKUM.DoorKeyUndirected{R, RNG}

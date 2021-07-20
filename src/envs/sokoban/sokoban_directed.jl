@@ -2,7 +2,6 @@ module SokobanDirectedModule
 
 import ..GridWorlds as GW
 import Random
-import ReinforcementLearningBase as RLBase
 import ..SokobanUndirectedModule as SUM
 
 mutable struct SokobanDirected{R, RNG} <: GW.AbstractGridWorldGame

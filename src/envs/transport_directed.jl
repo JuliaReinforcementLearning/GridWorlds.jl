@@ -2,7 +2,6 @@ module TransportDirectedModule
 
 import ..GridWorlds as GW
 import Random
-import ReinforcementLearningBase as RLBase
 import ..TransportUndirectedModule as TUM
 
 mutable struct TransportDirected{R, RNG} <: GW.AbstractGridWorldGame

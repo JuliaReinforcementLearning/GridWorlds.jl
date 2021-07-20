@@ -2,7 +2,6 @@ module GoToTargetUndirectedModule
 
 import ..GridWorlds as GW
 import Random
-import ReinforcementLearningBase as RLBase
 
 mutable struct GoToTargetUndirected{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}

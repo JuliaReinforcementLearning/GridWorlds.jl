@@ -2,7 +2,6 @@ module SingleRoomDirectedModule
 
 import ..GridWorlds as GW
 import Random
-import ReinforcementLearningBase as RLBase
 import ..SingleRoomUndirectedModule as SRUM
 
 mutable struct SingleRoomDirected{R, RNG} <: GW.AbstractGridWorldGame

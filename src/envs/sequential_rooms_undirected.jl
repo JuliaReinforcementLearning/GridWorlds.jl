@@ -2,7 +2,6 @@ module SequentialRoomsUndirectedModule
 
 import ..GridWorlds as GW
 import Random
-import ReinforcementLearningBase as RLBase
 
 struct Room{I}
     region::CartesianIndices{2,Tuple{UnitRange{I},UnitRange{I}}}

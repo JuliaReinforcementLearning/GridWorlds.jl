@@ -1,9 +1,8 @@
 module DynamicObstaclesDirectedModule
 
+import ..DynamicObstaclesUndirectedModule as DOUM
 import ..GridWorlds as GW
 import Random
-import ReinforcementLearningBase as RLBase
-import ..DynamicObstaclesUndirectedModule as DOUM
 
 mutable struct DynamicObstaclesDirected{R, RNG} <: GW.AbstractGridWorldGame
     env::DOUM.DynamicObstaclesUndirected{R, RNG}

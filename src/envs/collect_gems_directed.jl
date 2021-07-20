@@ -1,9 +1,8 @@
 module CollectGemsDirectedModule
 
+import ..CollectGemsUndirectedModule as CGUM
 import ..GridWorlds as GW
 import Random
-import ReinforcementLearningBase as RLBase
-import ..CollectGemsUndirectedModule as CGUM
 
 mutable struct CollectGemsDirected{R, RNG} <: GW.AbstractGridWorldGame
     env::CGUM.CollectGemsUndirected{R, RNG}
