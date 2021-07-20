@@ -6,32 +6,6 @@ import Test
 const MAX_STEPS = 3000
 const NUM_RESETS = 3
 
-GW_ENVS = [
-           GW.SingleRoomUndirectedModule.SingleRoomUndirected,
-           GW.SingleRoomDirectedModule.SingleRoomDirected,
-           GW.GridRoomsUndirectedModule.GridRoomsUndirected,
-           GW.GridRoomsDirectedModule.GridRoomsDirected,
-           GW.SequentialRoomsUndirectedModule.SequentialRoomsUndirected,
-           GW.SequentialRoomsDirectedModule.SequentialRoomsDirected,
-           GW.MazeUndirectedModule.MazeUndirected,
-           GW.MazeDirectedModule.MazeDirected,
-           GW.GoToTargetUndirectedModule.GoToTargetUndirected,
-           GW.GoToTargetDirectedModule.GoToTargetDirected,
-           GW.DoorKeyUndirectedModule.DoorKeyUndirected,
-           GW.DoorKeyDirectedModule.DoorKeyDirected,
-           GW.CollectGemsUndirectedModule.CollectGemsUndirected,
-           GW.CollectGemsDirectedModule.CollectGemsDirected,
-           GW.DynamicObstaclesUndirectedModule.DynamicObstaclesUndirected,
-           GW.DynamicObstaclesDirectedModule.DynamicObstaclesDirected,
-           GW.SokobanUndirectedModule.SokobanUndirected,
-           GW.SokobanDirectedModule.SokobanDirected,
-           GW.SnakeModule.Snake,
-           GW.CatcherModule.Catcher,
-           GW.TransportUndirectedModule.TransportUndirected,
-           GW.TransportDirectedModule.TransportDirected,
-           GW.CollectGemsMultiAgentUndirectedModule.CollectGemsMultiAgentUndirected,
-          ]
-
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SingleRoomUndirectedModule.SingleRoomUndirected}= (env.env.terminal_reward,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.SingleRoomDirectedModule.SingleRoomDirected}= (env.env.env.terminal_reward,)
 get_terminal_returns(env::GW.RLBaseEnvModule.RLBaseEnv{E}) where {E <: GW.GridRoomsUndirectedModule.GridRoomsUndirected}= (env.env.terminal_reward,)
@@ -74,7 +48,7 @@ function is_valid_terminal_return(env::GW.RLBaseEnvModule.RLBaseEnv{E}, terminal
 end
 
 Test.@testset "AbstractGridWorldGame" begin
-    for Env in GW_ENVS
+    for Env in GW.ENVS
         Test.@testset "$(Env)" begin
             R = Float32
             env = GW.RLBaseEnvModule.RLBaseEnv(Env(R = R))
