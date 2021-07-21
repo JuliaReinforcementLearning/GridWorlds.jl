@@ -4,36 +4,21 @@ import ..GoToTargetUndirectedModule as GTTUM
 import ..GridWorlds as GW
 import Random
 
-mutable struct GoToTargetDirected{R, RNG} <: GW.AbstractGridWorldGame
-    env::GTTUM.GoToTargetUndirected{R, RNG}
-    agent_direction::Int
-end
+#####
+##### game logic
+#####
 
 const NUM_OBJECTS = GTTUM.NUM_OBJECTS
 const AGENT = GTTUM.AGENT
 const WALL = GTTUM.WALL
 const TARGET1 = GTTUM.TARGET1
 const TARGET2 = GTTUM.TARGET2
-
-CHARACTERS = ('☻', '█', '✖', '♦', '→', '↑', '←', '↓', '⋅')
-
-GW.get_tile_map_height(env::GoToTargetDirected) = size(env.env.tile_map, 2)
-GW.get_tile_map_width(env::GoToTargetDirected) = size(env.env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::GoToTargetDirected, i::Integer, j::Integer)
-    object = findfirst(@view env.env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    elseif object == AGENT
-        return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
-    else
-        return CHARACTERS[object]
-    end
-end
-
 const NUM_ACTIONS = 4
-GW.get_action_keys(env::GoToTargetDirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::GoToTargetDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
+
+mutable struct GoToTargetDirected{R, RNG} <: GW.AbstractGridWorldGame
+    env::GTTUM.GoToTargetUndirected{R, RNG}
+    agent_direction::Int
+end
 
 function GoToTargetDirected(; R = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     env = GTTUM.GoToTargetUndirected(R = R, height = height, width = width, rng = rng)
@@ -89,16 +74,32 @@ function GW.act!(env::GoToTargetDirected, action)
         inner_env.done = false
         inner_env.reward = zero(inner_env.reward)
     end
-    # if tile_map[GOAL, inner_env.agent_position]
-        # inner_env.reward = inner_env.terminal_reward
-        # inner_env.done = true
-    # else
-        # inner_env.reward = zero(inner_env.reward)
-        # inner_env.done = false
-    # end
 
     return nothing
 end
+
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '✖', '♦', '→', '↑', '←', '↓', '⋅')
+
+GW.get_tile_map_height(env::GoToTargetDirected) = size(env.env.tile_map, 2)
+GW.get_tile_map_width(env::GoToTargetDirected) = size(env.env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::GoToTargetDirected, i::Integer, j::Integer)
+    object = findfirst(@view env.env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    elseif object == AGENT
+        return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::GoToTargetDirected) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::GoToTargetDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
 
 function Base.show(io::IO, ::MIME"text/plain", env::GoToTargetDirected)
     str = GW.get_tile_map_pretty_repr(env)
