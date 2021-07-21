@@ -3,6 +3,18 @@ module DoorKeyUndirectedModule
 import ..GridWorlds as GW
 import Random
 
+#####
+##### game logic
+#####
+
+const NUM_OBJECTS = 5
+const AGENT = 1
+const WALL = 2
+const GOAL = 3
+const DOOR = 4
+const KEY = 5
+const NUM_ACTIONS = 5
+
 mutable struct DoorKeyUndirected{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
@@ -16,31 +28,6 @@ mutable struct DoorKeyUndirected{R, RNG} <: GW.AbstractGridWorldGame
     partition_dimension::Int
     has_key::Bool
 end
-
-const NUM_OBJECTS = 5
-const AGENT = 1
-const WALL = 2
-const GOAL = 3
-const DOOR = 4
-const KEY = 5
-
-CHARACTERS = ('☻', '█', '♥', '▒', '⚷', '⋅')
-
-GW.get_tile_map_height(env::DoorKeyUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::DoorKeyUndirected) = size(env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::DoorKeyUndirected, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-const NUM_ACTIONS = 5
-GW.get_action_keys(env::DoorKeyUndirected) = ('w', 's', 'a', 'd', 'p')
-GW.get_action_names(env::DoorKeyUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT, :PICK_UP)
 
 function DoorKeyUndirected(; R = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     tile_map = falses(NUM_OBJECTS, height, width)
@@ -187,6 +174,27 @@ function GW.act!(env::DoorKeyUndirected, action)
 
     return nothing
 end
+
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '♥', '▒', '⚷', '⋅')
+
+GW.get_tile_map_height(env::DoorKeyUndirected) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::DoorKeyUndirected) = size(env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::DoorKeyUndirected, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::DoorKeyUndirected) = ('w', 's', 'a', 'd', 'p')
+GW.get_action_names(env::DoorKeyUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT, :PICK_UP)
 
 function Base.show(io::IO, ::MIME"text/plain", env::DoorKeyUndirected)
     str = GW.get_tile_map_pretty_repr(env)
