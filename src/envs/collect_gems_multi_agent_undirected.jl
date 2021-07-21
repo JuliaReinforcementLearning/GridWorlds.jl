@@ -3,6 +3,12 @@ module CollectGemsMultiAgentUndirectedModule
 import ..GridWorlds as GW
 import Random
 
+#####
+##### game logic
+#####
+
+const NUM_ACTIONS = 4
+
 mutable struct CollectGemsMultiAgentUndirected{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}
     agent_positions::Vector{CartesianIndex{2}}
@@ -15,29 +21,6 @@ mutable struct CollectGemsMultiAgentUndirected{R, RNG} <: GW.AbstractGridWorldGa
     gem_reward::R
     gem_positions::Vector{CartesianIndex{2}}
 end
-
-GW.get_tile_map_height(env::CollectGemsMultiAgentUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::CollectGemsMultiAgentUndirected) = size(env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::CollectGemsMultiAgentUndirected, i::Integer, j::Integer)
-    tile_map = env.tile_map
-    object = findfirst(@view tile_map[:, i, j])
-    num_agents = size(tile_map, 1) - 2
-
-    if isnothing(object)
-        return "⋅"
-    elseif object in 1 : num_agents
-        return "$(object)"
-    elseif object == num_agents + 1
-        return "█"
-    else
-        return "♦"
-    end
-end
-
-const NUM_ACTIONS = 4
-GW.get_action_keys(env::CollectGemsMultiAgentUndirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::CollectGemsMultiAgentUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function CollectGemsMultiAgentUndirected(; R = Float32, height = 8, width = 8, num_gem_init = floor(Int, sqrt(height * width)), num_agents = 4, rng = Random.GLOBAL_RNG)
     tile_map = falses(num_agents + 2, height, width)
@@ -159,6 +142,32 @@ function GW.act!(env::CollectGemsMultiAgentUndirected, action)
 
     return nothing
 end
+
+#####
+##### miscellaneous
+#####
+
+GW.get_tile_map_height(env::CollectGemsMultiAgentUndirected) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::CollectGemsMultiAgentUndirected) = size(env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::CollectGemsMultiAgentUndirected, i::Integer, j::Integer)
+    tile_map = env.tile_map
+    object = findfirst(@view tile_map[:, i, j])
+    num_agents = size(tile_map, 1) - 2
+
+    if isnothing(object)
+        return "⋅"
+    elseif object in 1 : num_agents
+        return "$(object)"
+    elseif object == num_agents + 1
+        return "█"
+    else
+        return "♦"
+    end
+end
+
+GW.get_action_keys(env::CollectGemsMultiAgentUndirected) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::CollectGemsMultiAgentUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function Base.show(io::IO, ::MIME"text/plain", env::CollectGemsMultiAgentUndirected)
     str = GW.get_tile_map_pretty_repr(env)

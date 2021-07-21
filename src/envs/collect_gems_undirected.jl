@@ -3,6 +3,16 @@ module CollectGemsUndirectedModule
 import ..GridWorlds as GW
 import Random
 
+#####
+##### game logic
+#####
+
+const NUM_OBJECTS = 3
+const AGENT = 1
+const WALL = 2
+const GEM = 3
+const NUM_ACTIONS = 4
+
 mutable struct CollectGemsUndirected{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
@@ -14,29 +24,6 @@ mutable struct CollectGemsUndirected{R, RNG} <: GW.AbstractGridWorldGame
     gem_reward::R
     init_gem_positions::Vector{CartesianIndex{2}}
 end
-
-const NUM_OBJECTS = 3
-const AGENT = 1
-const WALL = 2
-const GEM = 3
-
-CHARACTERS = ('☻', '█', '♦', '⋅')
-
-GW.get_tile_map_height(env::CollectGemsUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::CollectGemsUndirected) = size(env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::CollectGemsUndirected, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-const NUM_ACTIONS = 4
-GW.get_action_keys(env::CollectGemsUndirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::CollectGemsUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function CollectGemsUndirected(; R = Float32, height = 8, width = 8, num_gem_init = floor(Int, sqrt(height * width)), rng = Random.GLOBAL_RNG)
     tile_map = falses(NUM_OBJECTS, height, width)
@@ -126,6 +113,27 @@ function GW.act!(env::CollectGemsUndirected, action)
 
     return nothing
 end
+
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '♦', '⋅')
+
+GW.get_tile_map_height(env::CollectGemsUndirected) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::CollectGemsUndirected) = size(env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::CollectGemsUndirected, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::CollectGemsUndirected) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::CollectGemsUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function Base.show(io::IO, ::MIME"text/plain", env::CollectGemsUndirected)
     str = GW.get_tile_map_pretty_repr(env)

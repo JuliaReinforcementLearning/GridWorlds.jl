@@ -4,35 +4,20 @@ import ..CollectGemsUndirectedModule as CGUM
 import ..GridWorlds as GW
 import Random
 
-mutable struct CollectGemsDirected{R, RNG} <: GW.AbstractGridWorldGame
-    env::CGUM.CollectGemsUndirected{R, RNG}
-    agent_direction::Int
-end
+#####
+##### game logic
+#####
 
 const NUM_OBJECTS = CGUM.NUM_OBJECTS
 const AGENT = CGUM.AGENT
 const WALL = CGUM.WALL
 const GEM = CGUM.GEM
-
-CHARACTERS = ('☻', '█', '♦', '→', '↑', '←', '↓', '⋅')
-
-GW.get_tile_map_height(env::CollectGemsDirected) = size(env.env.tile_map, 2)
-GW.get_tile_map_width(env::CollectGemsDirected) = size(env.env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::CollectGemsDirected, i::Integer, j::Integer)
-    object = findfirst(@view env.env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    elseif object == AGENT
-        return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
-    else
-        return CHARACTERS[object]
-    end
-end
-
 const NUM_ACTIONS = 4
-GW.get_action_keys(env::CollectGemsDirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::CollectGemsDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
+
+mutable struct CollectGemsDirected{R, RNG} <: GW.AbstractGridWorldGame
+    env::CGUM.CollectGemsUndirected{R, RNG}
+    agent_direction::Int
+end
 
 function CollectGemsDirected(; R = Float32, height = 8, width = 8, num_gem_init = floor(Int, sqrt(height * width)), rng = Random.GLOBAL_RNG)
     env = CGUM.CollectGemsUndirected(R = R, height = height, width = width, num_gem_init = num_gem_init, rng = rng)
@@ -87,6 +72,29 @@ function GW.act!(env::CollectGemsDirected, action)
 
     return nothing
 end
+
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '♦', '→', '↑', '←', '↓', '⋅')
+
+GW.get_tile_map_height(env::CollectGemsDirected) = size(env.env.tile_map, 2)
+GW.get_tile_map_width(env::CollectGemsDirected) = size(env.env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::CollectGemsDirected, i::Integer, j::Integer)
+    object = findfirst(@view env.env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    elseif object == AGENT
+        return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::CollectGemsDirected) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::CollectGemsDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
 
 function Base.show(io::IO, ::MIME"text/plain", env::CollectGemsDirected)
     str = GW.get_tile_map_pretty_repr(env)
