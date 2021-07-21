@@ -3,6 +3,15 @@ module CatcherModule
 import ..GridWorlds as GW
 import Random
 
+#####
+##### game logic
+#####
+
+const NUM_OBJECTS = 2
+const AGENT = 1
+const GEM = 2
+const NUM_ACTIONS = 3
+
 mutable struct Catcher{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
@@ -13,28 +22,6 @@ mutable struct Catcher{R, RNG} <: GW.AbstractGridWorldGame
     gem_reward::R
     terminal_penalty::R
 end
-
-const NUM_OBJECTS = 2
-const AGENT = 1
-const GEM = 2
-
-CHARACTERS = ('☻', '♦', '⋅')
-
-GW.get_tile_map_height(env::Catcher) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::Catcher) = size(env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::Catcher, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-const NUM_ACTIONS = 3
-GW.get_action_keys(env::Catcher) = ('a', 'd', 's')
-GW.get_action_names(env::Catcher) = (:MOVE_LEFT, :MOVE_RIGHT, :NO_MOVE)
 
 function Catcher(; R = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     tile_map = falses(NUM_OBJECTS, height, width)
@@ -132,6 +119,27 @@ function GW.act!(env::Catcher, action)
 
     return nothing
 end
+
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '♦', '⋅')
+
+GW.get_tile_map_height(env::Catcher) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::Catcher) = size(env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::Catcher, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::Catcher) = ('a', 'd', 's')
+GW.get_action_names(env::Catcher) = (:MOVE_LEFT, :MOVE_RIGHT, :NO_MOVE)
 
 function Base.show(io::IO, ::MIME"text/plain", env::Catcher)
     str = GW.get_tile_map_pretty_repr(env)
