@@ -32,6 +32,20 @@ function GW.get_tile_pretty_repr(env::SingleRoomUndirected, i::Integer, j::Integ
     end
 end
 
+function GW.get_sub_tile_map_pretty_repr(env::SingleRoomUndirected, window_size, position::CartesianIndex{2})
+    tile_map = env.tile_map
+    agent_position = env.agent_position
+
+    sub_tile_map = GW.get_sub_tile_map(tile_map, agent_position, window_size)
+
+    object = findfirst(@view sub_tile_map[:, position])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
+
 const NUM_ACTIONS = 4
 GW.get_action_keys(env::SingleRoomUndirected) = ('w', 's', 'a', 'd')
 GW.get_action_names(env::SingleRoomUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
@@ -118,7 +132,10 @@ function GW.act!(env::SingleRoomUndirected, action)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", env::SingleRoomUndirected)
-    str = GW.get_tile_map_pretty_repr(env)
+    str = "tile_map:\n"
+    str = str * GW.get_tile_map_pretty_repr(env)
+    str = str * "\nsub_tile_map:\n"
+    str = str * GW.get_sub_tile_map_pretty_repr(env, GW.get_window_size(env))
     str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
     print(io, str)
     return nothing
