@@ -4,6 +4,17 @@ import DataStructures as DS
 import ..GridWorlds as GW
 import Random
 
+#####
+##### game logic
+#####
+
+const NUM_OBJECTS = 4
+const AGENT = 1
+const WALL = 2
+const BODY = 3
+const FOOD = 4
+const NUM_ACTIONS = 4
+
 mutable struct Snake{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
@@ -16,30 +27,6 @@ mutable struct Snake{R, RNG} <: GW.AbstractGridWorldGame
     food_position::CartesianIndex{2}
     body::DS.Queue{CartesianIndex{2}}
 end
-
-const NUM_OBJECTS = 4
-const AGENT = 1
-const WALL = 2
-const BODY = 3
-const FOOD = 4
-
-CHARACTERS = ('☻', '█', '∘', '♦', '⋅')
-
-GW.get_tile_map_height(env::Snake) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::Snake) = size(env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::Snake, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-const NUM_ACTIONS = 4
-GW.get_action_keys(env::Snake) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::Snake) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function Snake(; R = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     tile_map = falses(NUM_OBJECTS, height, width)
@@ -159,6 +146,27 @@ function GW.act!(env::Snake, action)
 
     return nothing
 end
+
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '∘', '♦', '⋅')
+
+GW.get_tile_map_height(env::Snake) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::Snake) = size(env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::Snake, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::Snake) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::Snake) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function Base.show(io::IO, ::MIME"text/plain", env::Snake)
     str = GW.get_tile_map_pretty_repr(env)
