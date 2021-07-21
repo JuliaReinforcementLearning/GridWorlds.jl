@@ -3,6 +3,17 @@ module DynamicObstaclesUndirectedModule
 import ..GridWorlds as GW
 import Random
 
+#####
+##### game logic
+#####
+
+const NUM_OBJECTS = 4
+const AGENT = 1
+const WALL = 2
+const GOAL = 3
+const OBSTACLE = 4
+const NUM_ACTIONS = 4
+
 mutable struct DynamicObstaclesUndirected{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
@@ -15,30 +26,6 @@ mutable struct DynamicObstaclesUndirected{R, RNG} <: GW.AbstractGridWorldGame
     num_obstacles::Int
     obstacle_positions::Vector{CartesianIndex{2}}
 end
-
-const NUM_OBJECTS = 4
-const AGENT = 1
-const WALL = 2
-const GOAL = 3
-const OBSTACLE = 4
-
-CHARACTERS = ('☻', '█', '♥', '⊗', '⋅')
-
-GW.get_tile_map_height(env::DynamicObstaclesUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::DynamicObstaclesUndirected) = size(env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::DynamicObstaclesUndirected, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-const NUM_ACTIONS = 4
-GW.get_action_keys(env::DynamicObstaclesUndirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::DynamicObstaclesUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function DynamicObstaclesUndirected(; R = Float32, height = 8, width = 8, num_obstacles = floor(Int, sqrt(height * width) / 2), rng = Random.GLOBAL_RNG)
     tile_map = falses(NUM_OBJECTS, height, width)
@@ -155,6 +142,27 @@ function update_obstacles!(env::DynamicObstaclesUndirected)
     
     return nothing
 end
+
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '♥', '⊗', '⋅')
+
+GW.get_tile_map_height(env::DynamicObstaclesUndirected) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::DynamicObstaclesUndirected) = size(env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::DynamicObstaclesUndirected, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::DynamicObstaclesUndirected) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::DynamicObstaclesUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function Base.show(io::IO, ::MIME"text/plain", env::DynamicObstaclesUndirected)
     str = GW.get_tile_map_pretty_repr(env)
