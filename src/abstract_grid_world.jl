@@ -37,7 +37,8 @@ function get_tile_map_pretty_repr(env::AbstractGridWorldGame)
 end
 
 function get_window_size(env::AbstractGridWorldGame)
-    _, height, width = size(env.tile_map)
+    height = get_tile_map_height(env)
+    width = get_tile_map_width(env)
     return (2 * (height ÷ 4) + 1, 2 * (width ÷ 4) + 1)
 end
 
@@ -89,6 +90,66 @@ function get_sub_tile_map!(sub_tile_map, tile_map, position, window_size)
         pos = window_region[key]
         if pos in valid_region
             sub_tile_map[:, key] .= tile_map[:, pos]
+        end
+    end
+
+    return nothing
+end
+
+function get_window_region((i, j), (m, n), direction)
+    if direction == RIGHT_DIRECTION
+        temp1 = n - 1
+        temp2 = temp1 ÷ 2
+        temp3 = i - temp2
+        return CartesianIndices((temp3 : temp3 + temp1, j : j + m - 1))
+    elseif direction == UP_DIRECTION
+        temp1 = n - 1
+        temp2 = temp1 ÷ 2
+        temp3 = j - temp2
+        return CartesianIndices((i - m + 1 : i, temp3 : temp3 + temp1))
+    elseif direction == LEFT_DIRECTION
+        temp1 = n - 1
+        temp2 = temp1 ÷ 2
+        temp3 = i - temp2
+        return CartesianIndices((temp3 : temp3 + temp1, j - m + 1 : j))
+    else
+        temp1 = n - 1
+        temp2 = temp1 ÷ 2
+        temp3 = j - temp2
+        return CartesianIndices((i : i + m - 1, temp3 : temp3 + temp1))
+    end
+end
+
+function map_index((i,j), (m, n), direction)
+    if direction == RIGHT_DIRECTION
+        return (j, n-i+1)
+    elseif direction == UP_DIRECTION
+        return (m-i+1, n-j+1)
+    elseif direction == LEFT_DIRECTION
+        return (m-j+1, i)
+    else
+        return (i,j)
+    end
+end
+
+function get_sub_tile_map(tile_map, position, window_size, direction)
+    num_objects = size(tile_map, 1)
+    sub_tile_map = falses(num_objects, window_size...)
+    get_sub_tile_map!(sub_tile_map, tile_map, position, window_size, direction)
+    return sub_tile_map
+end
+
+function get_sub_tile_map!(sub_tile_map, tile_map, position, window_size, direction)
+    _, height, width = size(tile_map)
+
+    window_region = get_window_region(position.I, window_size, direction)
+
+    valid_region = CartesianIndices((1 : height, 1 : width))
+
+    @views for key in keys(window_region)
+        pos = window_region[key]
+        if pos in valid_region
+            sub_tile_map[:, map_index(key.I, window_size, direction)...] .= tile_map[:, pos]
         end
     end
 
