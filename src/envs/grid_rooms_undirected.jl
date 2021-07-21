@@ -3,6 +3,16 @@ module GridRoomsUndirectedModule
 import ..GridWorlds as GW
 import Random
 
+#####
+##### game logic
+#####
+
+const NUM_OBJECTS = 3
+const AGENT = 1
+const WALL = 2
+const GOAL = 3
+const NUM_ACTIONS = 4
+
 mutable struct GridRoomsUndirected{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
@@ -12,29 +22,6 @@ mutable struct GridRoomsUndirected{R, RNG} <: GW.AbstractGridWorldGame
     terminal_reward::R
     goal_position::CartesianIndex{2}
 end
-
-const NUM_OBJECTS = 3
-const AGENT = 1
-const WALL = 2
-const GOAL = 3
-
-CHARACTERS = ('☻', '█', '♥', '⋅')
-
-GW.get_tile_map_height(env::GridRoomsUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::GridRoomsUndirected) = size(env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::GridRoomsUndirected, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-const NUM_ACTIONS = 4
-GW.get_action_keys(env::GridRoomsUndirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::GridRoomsUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function GridRoomsUndirected(; R = Float32, grid_size = (2, 2), room_size = (5, 5), rng = Random.GLOBAL_RNG)
     @assert all(room_size .>= (4, 4)) "each element of room_size must be >= 4"
@@ -135,6 +122,27 @@ function GW.act!(env::GridRoomsUndirected, action)
 
     return nothing
 end
+
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '♥', '⋅')
+
+GW.get_tile_map_height(env::GridRoomsUndirected) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::GridRoomsUndirected) = size(env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::GridRoomsUndirected, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::GridRoomsUndirected) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::GridRoomsUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function Base.show(io::IO, ::MIME"text/plain", env::GridRoomsUndirected)
     str = GW.get_tile_map_pretty_repr(env)
