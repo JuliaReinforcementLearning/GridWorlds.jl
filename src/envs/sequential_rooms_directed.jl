@@ -4,35 +4,20 @@ import ..GridWorlds as GW
 import Random
 import ..SequentialRoomsUndirectedModule as SRUM
 
-mutable struct SequentialRoomsDirected{R, RNG} <: GW.AbstractGridWorldGame
-    env::SRUM.SequentialRoomsUndirected{R, RNG}
-    agent_direction::Int
-end
+#####
+##### game logic
+#####
 
 const NUM_OBJECTS = SRUM.NUM_OBJECTS
 const AGENT = SRUM.AGENT
 const WALL = SRUM.WALL
 const GOAL = SRUM.GOAL
-
-CHARACTERS = ('☻', '█', '♥', '→', '↑', '←', '↓', '⋅')
-
-GW.get_tile_map_height(env::SequentialRoomsDirected) = size(env.env.tile_map, 2)
-GW.get_tile_map_width(env::SequentialRoomsDirected) = size(env.env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::SequentialRoomsDirected, i::Integer, j::Integer)
-    object = findfirst(@view env.env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    elseif object == AGENT
-        return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
-    else
-        return CHARACTERS[object]
-    end
-end
-
 const NUM_ACTIONS = 4
-GW.get_action_keys(env::SequentialRoomsDirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::SequentialRoomsDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
+
+mutable struct SequentialRoomsDirected{R, RNG} <: GW.AbstractGridWorldGame
+    env::SRUM.SequentialRoomsUndirected{R, RNG}
+    agent_direction::Int
+end
 
 function SequentialRoomsDirected(; R = Float32, num_rooms = 3, range_height_room = 4:6, range_width_room = 7:9, rng = Random.GLOBAL_RNG)
     env = SRUM.SequentialRoomsUndirected(R = R, num_rooms = num_rooms, range_height_room = range_height_room, range_width_room = range_width_room, rng = rng)
@@ -86,6 +71,29 @@ function GW.act!(env::SequentialRoomsDirected, action)
 
     return nothing
 end
+
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '♥', '→', '↑', '←', '↓', '⋅')
+
+GW.get_tile_map_height(env::SequentialRoomsDirected) = size(env.env.tile_map, 2)
+GW.get_tile_map_width(env::SequentialRoomsDirected) = size(env.env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::SequentialRoomsDirected, i::Integer, j::Integer)
+    object = findfirst(@view env.env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    elseif object == AGENT
+        return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::SequentialRoomsDirected) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::SequentialRoomsDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
 
 function Base.show(io::IO, ::MIME"text/plain", env::SequentialRoomsDirected)
     tile_map = env.env.tile_map

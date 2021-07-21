@@ -3,50 +3,21 @@ module SequentialRoomsUndirectedModule
 import ..GridWorlds as GW
 import Random
 
+#####
+##### game logic
+#####
+
+const NUM_OBJECTS = 3
+const AGENT = 1
+const WALL = 2
+const GOAL = 3
+const NUM_ACTIONS = 4
+
 struct Room{I}
     region::CartesianIndices{2,Tuple{UnitRange{I},UnitRange{I}}}
 end
 
 Room(top_left, height, width) = Room(CartesianIndices((top_left.I[1] : top_left.I[1] + height - 1, top_left.I[2] : top_left.I[2] + width - 1)))
-
-get_top_left(region::CartesianIndices{2}) = region[1, 1]
-get_top_left(room::Room) = get_top_left(room.region)
-
-get_bottom_right(region::CartesianIndices{2}) = region[1, 1]
-get_bottom_right(room::Room) = get_bottom_right(room.region)
-
-get_interior(room::Room) = CartesianIndices((room.region.indices[1].start + 1 : room.region.indices[1].stop - 1,
-                                             room.region.indices[2].start + 1 : room.region.indices[2].stop - 1))
-
-function is_separate(region1::CartesianIndices, region2::CartesianIndices)
-    top_left_region1 = region1[1, 1]
-    min_i_region1, min_j_region1 = top_left_region1.I
-    bottom_right_region1 = region1[end, end]
-    max_i_region1, max_j_region1 = bottom_right_region1.I
-
-    top_left_region2 = region2[1, 1]
-    min_i_region2, min_j_region2 = top_left_region2.I
-    bottom_right_region2 = region2[end, end]
-    max_i_region2, max_j_region2 = bottom_right_region2.I
-
-    return (max_i_region1 < min_i_region2) || (max_i_region2 < min_i_region1) || (max_j_region1 < min_j_region2) || (max_j_region2 < min_j_region1)
-end
-
-is_separate(room1::Room, room2::Room) = is_separate(get_interior(room1), room2.region)
-
-function place_room!(tile_map, room::Room)
-    top = room.region.indices[1].start
-    bottom = room.region.indices[1].stop
-    left = room.region.indices[2].start
-    right = room.region.indices[2].stop
-
-    tile_map[WALL, top, left:right] .= true
-    tile_map[WALL, bottom, left:right] .= true
-    tile_map[WALL, top:bottom, left] .= true
-    tile_map[WALL, top:bottom, right] .= true
-
-    return nothing
-end
 
 mutable struct SequentialRoomsUndirected{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}
@@ -61,29 +32,6 @@ mutable struct SequentialRoomsUndirected{R, RNG} <: GW.AbstractGridWorldGame
     num_rooms::Int
     rooms::Array{Room{Int}, 1}
 end
-
-const NUM_OBJECTS = 3
-const AGENT = 1
-const WALL = 2
-const GOAL = 3
-
-CHARACTERS = ('☻', '█', '♥', '⋅')
-
-GW.get_tile_map_height(env::SequentialRoomsUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::SequentialRoomsUndirected) = size(env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::SequentialRoomsUndirected, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-const NUM_ACTIONS = 4
-GW.get_action_keys(env::SequentialRoomsUndirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::SequentialRoomsUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function SequentialRoomsUndirected(; R = Float32, num_rooms = 3, range_height_room = 4:6, range_width_room = 7:9, rng = Random.GLOBAL_RNG)
     height_tile_map = 2 * num_rooms * range_height_room.stop
@@ -159,32 +107,42 @@ function GW.act!(env::SequentialRoomsUndirected, action)
     return nothing
 end
 
-function Base.show(io::IO, ::MIME"text/plain", env::SequentialRoomsUndirected)
-    tile_map = env.tile_map
-    small_tile_map = get_small_tile_map(tile_map)
+get_top_left(region::CartesianIndices{2}) = region[1, 1]
+get_top_left(room::Room) = get_top_left(room.region)
 
-    _, height_small_tile_map, width_small_tile_map = size(small_tile_map)
+get_bottom_right(region::CartesianIndices{2}) = region[1, 1]
+get_bottom_right(room::Room) = get_bottom_right(room.region)
 
-    str = ""
+get_interior(room::Room) = CartesianIndices((room.region.indices[1].start + 1 : room.region.indices[1].stop - 1,
+                                             room.region.indices[2].start + 1 : room.region.indices[2].stop - 1))
 
-    for i in 1:height_small_tile_map
-        for j in 1:width_small_tile_map
-            object = findfirst(small_tile_map[:, i, j])
-            if isnothing(object)
-                char = CHARACTERS[end]
-            else
-                char = CHARACTERS[object]
-            end
-            str = str * char
-        end
+function is_separate(region1::CartesianIndices, region2::CartesianIndices)
+    top_left_region1 = region1[1, 1]
+    min_i_region1, min_j_region1 = top_left_region1.I
+    bottom_right_region1 = region1[end, end]
+    max_i_region1, max_j_region1 = bottom_right_region1.I
 
-        if i < height_small_tile_map
-            str = str * "\n"
-        end
-    end
+    top_left_region2 = region2[1, 1]
+    min_i_region2, min_j_region2 = top_left_region2.I
+    bottom_right_region2 = region2[end, end]
+    max_i_region2, max_j_region2 = bottom_right_region2.I
 
-    str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
-    print(io, str)
+    return (max_i_region1 < min_i_region2) || (max_i_region2 < min_i_region1) || (max_j_region1 < min_j_region2) || (max_j_region2 < min_j_region1)
+end
+
+is_separate(room1::Room, room2::Room) = is_separate(get_interior(room1), room2.region)
+
+function place_room!(tile_map, room::Room)
+    top = room.region.indices[1].start
+    bottom = room.region.indices[1].stop
+    left = room.region.indices[2].start
+    right = room.region.indices[2].stop
+
+    tile_map[WALL, top, left:right] .= true
+    tile_map[WALL, bottom, left:right] .= true
+    tile_map[WALL, top:bottom, left] .= true
+    tile_map[WALL, top:bottom, right] .= true
+
     return nothing
 end
 
@@ -329,6 +287,56 @@ function get_small_tile_map(tile_map)
     small_tile_map = @view tile_map[:, min_i_small_tile_map:max_i_small_tile_map, min_j_small_tile_map:max_j_small_tile_map]
 
     return small_tile_map
+end
+
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '♥', '⋅')
+
+GW.get_tile_map_height(env::SequentialRoomsUndirected) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::SequentialRoomsUndirected) = size(env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::SequentialRoomsUndirected, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::SequentialRoomsUndirected) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::SequentialRoomsUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
+
+function Base.show(io::IO, ::MIME"text/plain", env::SequentialRoomsUndirected)
+    tile_map = env.tile_map
+    small_tile_map = get_small_tile_map(tile_map)
+
+    _, height_small_tile_map, width_small_tile_map = size(small_tile_map)
+
+    str = ""
+
+    for i in 1:height_small_tile_map
+        for j in 1:width_small_tile_map
+            object = findfirst(small_tile_map[:, i, j])
+            if isnothing(object)
+                char = CHARACTERS[end]
+            else
+                char = CHARACTERS[object]
+            end
+            str = str * char
+        end
+
+        if i < height_small_tile_map
+            str = str * "\n"
+        end
+    end
+
+    str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
+    print(io, str)
+    return nothing
 end
 
 end # module
