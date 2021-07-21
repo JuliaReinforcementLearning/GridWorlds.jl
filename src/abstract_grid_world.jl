@@ -59,7 +59,6 @@ function get_sub_tile_map_pretty_repr(env::AbstractGridWorldGame, window_size)
     return str
 end
 
-
 #####
 ##### Sub tile map
 #####
@@ -154,4 +153,36 @@ function get_sub_tile_map!(sub_tile_map, tile_map, position, window_size, direct
     end
 
     return nothing
+end
+
+#####
+##### sampling tile map positions
+#####
+
+function sample_empty_position(rng, tile_map, max_tries = 1024)
+    _, height, width = size(tile_map)
+    position = CartesianIndex(rand(rng, 1:height), rand(rng, 1:width))
+
+    for i in 1:1000
+        if any(@view tile_map[:, position])
+            position = CartesianIndex(rand(rng, 1:height), rand(rng, 1:width))
+        else
+            return position
+        end
+    end
+
+    @warn "Returning non-empty position: $(position)"
+
+    return position
+end
+
+function sample_two_positions_without_replacement(rng, region)
+    position1 = rand(rng, region)
+    position2 = rand(rng, region)
+
+    while position1 == position2
+        position2 = rand(rng, region)
+    end
+
+    return position1, position2
 end

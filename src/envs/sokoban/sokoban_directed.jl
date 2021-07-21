@@ -2,38 +2,24 @@ module SokobanDirectedModule
 
 import ..GridWorlds as GW
 import Random
+import ReinforcementLearningBase as RLBase
 import ..SokobanUndirectedModule as SUM
 
-mutable struct SokobanDirected{R, RNG} <: GW.AbstractGridWorldGame
-    env::SUM.SokobanUndirected{R, RNG}
-    agent_direction::Int
-end
+#####
+##### game logic
+#####
 
 const NUM_OBJECTS = SUM.NUM_OBJECTS
 const AGENT = SUM.AGENT
 const WALL = SUM.WALL
 const BOX = SUM.BOX
 const TARGET = SUM.TARGET
-
-CHARACTERS = ('☻', '█', '▒', '✖', '→', '↑', '←', '↓', '⋅')
-
-GW.get_tile_map_height(env::SokobanDirected) = size(env.env.tile_map, 2)
-GW.get_tile_map_width(env::SokobanDirected) = size(env.env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::SokobanDirected, i::Integer, j::Integer)
-    object = findfirst(@view env.env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    elseif object == AGENT
-        return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
-    else
-        return CHARACTERS[object]
-    end
-end
-
 const NUM_ACTIONS = 4
-GW.get_action_keys(env::SokobanDirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::SokobanDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
+
+mutable struct SokobanDirected{R, RNG} <: GW.AbstractGridWorldGame
+    env::SUM.SokobanUndirected{R, RNG}
+    agent_direction::Int
+end
 
 function SokobanDirected(; R = Float32, file = joinpath(dirname(functionloc(GW.eval)[1]), "envs/sokoban/boxoban-levels/medium/train/000.txt"), rng = Random.GLOBAL_RNG)
     env = SUM.SokobanUndirected(R = R, file = file, rng = rng)
@@ -102,11 +88,50 @@ function GW.act!(env::SokobanDirected, action)
     return nothing
 end
 
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '▒', '✖', '→', '↑', '←', '↓', '⋅')
+
+GW.get_tile_map_height(env::SokobanDirected) = size(env.env.tile_map, 2)
+GW.get_tile_map_width(env::SokobanDirected) = size(env.env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::SokobanDirected, i::Integer, j::Integer)
+    object = findfirst(@view env.env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    elseif object == AGENT
+        return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::SokobanDirected) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::SokobanDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
+
 function Base.show(io::IO, ::MIME"text/plain", env::SokobanDirected)
     str = GW.get_tile_map_pretty_repr(env)
     str = str * "\nreward = $(env.env.reward)\ndone = $(env.env.done)\nlevel_number = $(env.env.level_number)"
     print(io, str)
     return nothing
 end
+
+#####
+##### RLBase API
+#####
+
+RLBase.StateStyle(env::GW.RLBaseEnv{E}) where {E <: SokobanDirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: SokobanDirected} = nothing
+RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: SokobanDirected} = (env.env.env.tile_map, env.env.agent_direction)
+
+RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: SokobanDirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: SokobanDirected} = 1:NUM_ACTIONS
+(env::GW.RLBaseEnv{E})(action) where {E <: SokobanDirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: SokobanDirected} = env.env.env.reward
+RLBase.is_terminated(env::GW.RLBaseEnv{E}) where {E <: SokobanDirected} = env.env.env.done
 
 end # module

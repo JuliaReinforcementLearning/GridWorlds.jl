@@ -2,6 +2,16 @@ module CatcherModule
 
 import ..GridWorlds as GW
 import Random
+import ReinforcementLearningBase as RLBase
+
+#####
+##### game logic
+#####
+
+const NUM_OBJECTS = 2
+const AGENT = 1
+const GEM = 2
+const NUM_ACTIONS = 3
 
 mutable struct Catcher{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}
@@ -13,28 +23,6 @@ mutable struct Catcher{R, RNG} <: GW.AbstractGridWorldGame
     gem_reward::R
     terminal_penalty::R
 end
-
-const NUM_OBJECTS = 2
-const AGENT = 1
-const GEM = 2
-
-CHARACTERS = ('☻', '♦', '⋅')
-
-GW.get_tile_map_height(env::Catcher) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::Catcher) = size(env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::Catcher, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-const NUM_ACTIONS = 3
-GW.get_action_keys(env::Catcher) = ('a', 'd', 's')
-GW.get_action_names(env::Catcher) = (:MOVE_LEFT, :MOVE_RIGHT, :NO_MOVE)
 
 function Catcher(; R = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     tile_map = falses(NUM_OBJECTS, height, width)
@@ -133,11 +121,48 @@ function GW.act!(env::Catcher, action)
     return nothing
 end
 
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '♦', '⋅')
+
+GW.get_tile_map_height(env::Catcher) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::Catcher) = size(env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::Catcher, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::Catcher) = ('a', 'd', 's')
+GW.get_action_names(env::Catcher) = (:MOVE_LEFT, :MOVE_RIGHT, :NO_MOVE)
+
 function Base.show(io::IO, ::MIME"text/plain", env::Catcher)
     str = GW.get_tile_map_pretty_repr(env)
     str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
     print(io, str)
     return nothing
 end
+
+#####
+##### RLBase API
+#####
+
+RLBase.StateStyle(env::GW.RLBaseEnv{E}) where {E <: Catcher} = RLBase.InternalState{Any}()
+RLBase.state_space(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: Catcher} = nothing
+RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: Catcher} = env.env.tile_map
+
+RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: Catcher} = GW.reset!(env.env)
+
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: Catcher} = 1:NUM_ACTIONS
+(env::GW.RLBaseEnv{E})(action) where {E <: Catcher} = GW.act!(env.env, action)
+
+RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: Catcher} = env.env.reward
+RLBase.is_terminated(env::GW.RLBaseEnv{E}) where {E <: Catcher} = env.env.done
 
 end # module

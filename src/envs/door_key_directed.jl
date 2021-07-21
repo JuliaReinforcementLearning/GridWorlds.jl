@@ -3,11 +3,11 @@ module DoorKeyDirectedModule
 import ..DoorKeyUndirectedModule as DKUM
 import ..GridWorlds as GW
 import Random
+import ReinforcementLearningBase as RLBase
 
-mutable struct DoorKeyDirected{R, RNG} <: GW.AbstractGridWorldGame
-    env::DKUM.DoorKeyUndirected{R, RNG}
-    agent_direction::Int
-end
+#####
+##### game logic
+#####
 
 const NUM_OBJECTS = DKUM.NUM_OBJECTS
 const AGENT = DKUM.AGENT
@@ -15,26 +15,12 @@ const WALL = DKUM.WALL
 const GOAL = DKUM.GOAL
 const DOOR = DKUM.DOOR
 const KEY = DKUM.KEY
-
-CHARACTERS = ('☻', '█', '♥', '▒', '⚷', '→', '↑', '←', '↓', '⋅')
-
-GW.get_tile_map_height(env::DoorKeyDirected) = size(env.env.tile_map, 2)
-GW.get_tile_map_width(env::DoorKeyDirected) = size(env.env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::DoorKeyDirected, i::Integer, j::Integer)
-    object = findfirst(@view env.env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    elseif object == AGENT
-        return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
-    else
-        return CHARACTERS[object]
-    end
-end
-
 const NUM_ACTIONS = 5
-GW.get_action_keys(env::DoorKeyDirected) = ('w', 's', 'a', 'd', 'p')
-GW.get_action_names(env::DoorKeyDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT, :PICK_UP)
+
+mutable struct DoorKeyDirected{R, RNG} <: GW.AbstractGridWorldGame
+    env::DKUM.DoorKeyUndirected{R, RNG}
+    agent_direction::Int
+end
 
 function DoorKeyDirected(; R = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     env = DKUM.DoorKeyUndirected(R = R, height = height, width = width, rng = rng)
@@ -94,11 +80,50 @@ function GW.act!(env::DoorKeyDirected, action)
     return nothing
 end
 
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '♥', '▒', '⚷', '→', '↑', '←', '↓', '⋅')
+
+GW.get_tile_map_height(env::DoorKeyDirected) = size(env.env.tile_map, 2)
+GW.get_tile_map_width(env::DoorKeyDirected) = size(env.env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::DoorKeyDirected, i::Integer, j::Integer)
+    object = findfirst(@view env.env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    elseif object == AGENT
+        return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::DoorKeyDirected) = ('w', 's', 'a', 'd', 'p')
+GW.get_action_names(env::DoorKeyDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT, :PICK_UP)
+
 function Base.show(io::IO, ::MIME"text/plain", env::DoorKeyDirected)
     str = GW.get_tile_map_pretty_repr(env)
     str = str * "\nreward = $(env.env.reward)\ndone = $(env.env.done)"
     print(io, str)
     return nothing
 end
+
+#####
+##### RLBase API
+#####
+
+RLBase.StateStyle(env::GW.RLBaseEnv{E}) where {E <: DoorKeyDirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: DoorKeyDirected} = nothing
+RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: DoorKeyDirected} = (env.env.env.tile_map, env.env.agent_direction)
+
+RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: DoorKeyDirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: DoorKeyDirected} = 1:NUM_ACTIONS
+(env::GW.RLBaseEnv{E})(action) where {E <: DoorKeyDirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: DoorKeyDirected} = env.env.env.reward
+RLBase.is_terminated(env::GW.RLBaseEnv{E}) where {E <: DoorKeyDirected} = env.env.env.done
 
 end # module

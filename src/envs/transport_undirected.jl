@@ -2,6 +2,18 @@ module TransportUndirectedModule
 
 import ..GridWorlds as GW
 import Random
+import ReinforcementLearningBase as RLBase
+
+#####
+##### game logic
+#####
+
+const NUM_OBJECTS = 4
+const AGENT = 1
+const WALL = 2
+const GEM = 3
+const TARGET = 4
+const NUM_ACTIONS = 6
 
 mutable struct TransportUndirected{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}
@@ -14,30 +26,6 @@ mutable struct TransportUndirected{R, RNG} <: GW.AbstractGridWorldGame
     target_position::CartesianIndex{2}
     has_gem::Bool
 end
-
-const NUM_OBJECTS = 4
-const AGENT = 1
-const WALL = 2
-const GEM = 3
-const TARGET = 4
-
-CHARACTERS = ('☻', '█', '♦', '✖', '⋅')
-
-GW.get_tile_map_height(env::TransportUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::TransportUndirected) = size(env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::TransportUndirected, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-const NUM_ACTIONS = 6
-GW.get_action_keys(env::TransportUndirected) = ('w', 's', 'a', 'd', 'p', 'l')
-GW.get_action_names(env::TransportUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT, :PICK_UP, :DROP)
 
 function TransportUndirected(; R = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     tile_map = falses(NUM_OBJECTS, height, width)
@@ -137,11 +125,48 @@ function GW.act!(env::TransportUndirected, action)
     return nothing
 end
 
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '♦', '✖', '⋅')
+
+GW.get_tile_map_height(env::TransportUndirected) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::TransportUndirected) = size(env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::TransportUndirected, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::TransportUndirected) = ('w', 's', 'a', 'd', 'p', 'l')
+GW.get_action_names(env::TransportUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT, :PICK_UP, :DROP)
+
 function Base.show(io::IO, ::MIME"text/plain", env::TransportUndirected)
     str = GW.get_tile_map_pretty_repr(env)
     str = str * "\nreward = $(env.reward)\ndone = $(env.done)\nhas_gem = $(env.has_gem)"
     print(io, str)
     return nothing
 end
+
+#####
+##### RLBase API
+#####
+
+RLBase.StateStyle(env::GW.RLBaseEnv{E}) where {E <: TransportUndirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: TransportUndirected} = nothing
+RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: TransportUndirected} = env.env.tile_map
+
+RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: TransportUndirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: TransportUndirected} = 1:NUM_ACTIONS
+(env::GW.RLBaseEnv{E})(action) where {E <: TransportUndirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: TransportUndirected} = env.env.reward
+RLBase.is_terminated(env::GW.RLBaseEnv{E}) where {E <: TransportUndirected} = env.env.done
 
 end # module

@@ -2,6 +2,18 @@ module DynamicObstaclesUndirectedModule
 
 import ..GridWorlds as GW
 import Random
+import ReinforcementLearningBase as RLBase
+
+#####
+##### game logic
+#####
+
+const NUM_OBJECTS = 4
+const AGENT = 1
+const WALL = 2
+const GOAL = 3
+const OBSTACLE = 4
+const NUM_ACTIONS = 4
 
 mutable struct DynamicObstaclesUndirected{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}
@@ -15,30 +27,6 @@ mutable struct DynamicObstaclesUndirected{R, RNG} <: GW.AbstractGridWorldGame
     num_obstacles::Int
     obstacle_positions::Vector{CartesianIndex{2}}
 end
-
-const NUM_OBJECTS = 4
-const AGENT = 1
-const WALL = 2
-const GOAL = 3
-const OBSTACLE = 4
-
-CHARACTERS = ('☻', '█', '♥', '⊗', '⋅')
-
-GW.get_tile_map_height(env::DynamicObstaclesUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::DynamicObstaclesUndirected) = size(env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::DynamicObstaclesUndirected, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-const NUM_ACTIONS = 4
-GW.get_action_keys(env::DynamicObstaclesUndirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::DynamicObstaclesUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function DynamicObstaclesUndirected(; R = Float32, height = 8, width = 8, num_obstacles = floor(Int, sqrt(height * width) / 2), rng = Random.GLOBAL_RNG)
     tile_map = falses(NUM_OBJECTS, height, width)
@@ -156,11 +144,48 @@ function update_obstacles!(env::DynamicObstaclesUndirected)
     return nothing
 end
 
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '♥', '⊗', '⋅')
+
+GW.get_tile_map_height(env::DynamicObstaclesUndirected) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::DynamicObstaclesUndirected) = size(env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::DynamicObstaclesUndirected, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::DynamicObstaclesUndirected) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::DynamicObstaclesUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
+
 function Base.show(io::IO, ::MIME"text/plain", env::DynamicObstaclesUndirected)
     str = GW.get_tile_map_pretty_repr(env)
     str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
     print(io, str)
     return nothing
 end
+
+#####
+##### DynamicObstaclesUndirected
+#####
+
+RLBase.StateStyle(env::GW.RLBaseEnv{E}) where {E <: DynamicObstaclesUndirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: DynamicObstaclesUndirected} = nothing
+RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: DynamicObstaclesUndirected} = env.env.tile_map
+
+RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: DynamicObstaclesUndirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: DynamicObstaclesUndirected} = 1:NUM_ACTIONS
+(env::GW.RLBaseEnv{E})(action) where {E <: DynamicObstaclesUndirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: DynamicObstaclesUndirected} = env.env.reward
+RLBase.is_terminated(env::GW.RLBaseEnv{E}) where {E <: DynamicObstaclesUndirected} = env.env.done
 
 end # module

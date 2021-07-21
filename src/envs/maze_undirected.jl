@@ -2,6 +2,17 @@ module MazeUndirectedModule
 
 import ..GridWorlds as GW
 import Random
+import ReinforcementLearningBase as RLBase
+
+#####
+##### game logic
+#####
+
+const NUM_OBJECTS = 3
+const AGENT = 1
+const WALL = 2
+const GOAL = 3
+const NUM_ACTIONS = 4
 
 mutable struct MazeUndirected{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}
@@ -12,29 +23,6 @@ mutable struct MazeUndirected{R, RNG} <: GW.AbstractGridWorldGame
     terminal_reward::R
     goal_position::CartesianIndex{2}
 end
-
-const NUM_OBJECTS = 3
-const AGENT = 1
-const WALL = 2
-const GOAL = 3
-
-CHARACTERS = ('☻', '█', '♥', '⋅')
-
-GW.get_tile_map_height(env::MazeUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::MazeUndirected) = size(env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::MazeUndirected, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-const NUM_ACTIONS = 4
-GW.get_action_keys(env::MazeUndirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::MazeUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function MazeUndirected(; R = Float32, height = 9, width = 9, rng = Random.GLOBAL_RNG)
     @assert isodd(height) && isodd(width) "height and width must be odd numbers"
@@ -126,13 +114,6 @@ function GW.act!(env::MazeUndirected, action)
     return nothing
 end
 
-function Base.show(io::IO, ::MIME"text/plain", env::MazeUndirected)
-    str = GW.get_tile_map_pretty_repr(env)
-    str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
-    print(io, str)
-    return nothing
-end
-
 function generate_maze!(env::MazeUndirected)
     tile_map = env.tile_map
     rng = env.rng
@@ -178,5 +159,49 @@ function generate_maze!(env::MazeUndirected)
 
     return nothing
 end
+
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '♥', '⋅')
+
+GW.get_tile_map_height(env::MazeUndirected) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::MazeUndirected) = size(env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::MazeUndirected, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::MazeUndirected) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::MazeUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
+
+function Base.show(io::IO, ::MIME"text/plain", env::MazeUndirected)
+    str = GW.get_tile_map_pretty_repr(env)
+    str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
+    print(io, str)
+    return nothing
+end
+
+#####
+##### RLBase API
+#####
+
+RLBase.StateStyle(env::GW.RLBaseEnv{E}) where {E <: MazeUndirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: MazeUndirected} = nothing
+RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: MazeUndirected} = env.env.tile_map
+
+RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: MazeUndirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: MazeUndirected} = 1:NUM_ACTIONS
+(env::GW.RLBaseEnv{E})(action) where {E <: MazeUndirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: MazeUndirected} = env.env.reward
+RLBase.is_terminated(env::GW.RLBaseEnv{E}) where {E <: MazeUndirected} = env.env.done
 
 end # module

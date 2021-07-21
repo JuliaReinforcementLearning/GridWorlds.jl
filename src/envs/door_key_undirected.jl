@@ -2,6 +2,19 @@ module DoorKeyUndirectedModule
 
 import ..GridWorlds as GW
 import Random
+import ReinforcementLearningBase as RLBase
+
+#####
+##### game logic
+#####
+
+const NUM_OBJECTS = 5
+const AGENT = 1
+const WALL = 2
+const GOAL = 3
+const DOOR = 4
+const KEY = 5
+const NUM_ACTIONS = 5
 
 mutable struct DoorKeyUndirected{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}
@@ -16,31 +29,6 @@ mutable struct DoorKeyUndirected{R, RNG} <: GW.AbstractGridWorldGame
     partition_dimension::Int
     has_key::Bool
 end
-
-const NUM_OBJECTS = 5
-const AGENT = 1
-const WALL = 2
-const GOAL = 3
-const DOOR = 4
-const KEY = 5
-
-CHARACTERS = ('☻', '█', '♥', '▒', '⚷', '⋅')
-
-GW.get_tile_map_height(env::DoorKeyUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::DoorKeyUndirected) = size(env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::DoorKeyUndirected, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-const NUM_ACTIONS = 5
-GW.get_action_keys(env::DoorKeyUndirected) = ('w', 's', 'a', 'd', 'p')
-GW.get_action_names(env::DoorKeyUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT, :PICK_UP)
 
 function DoorKeyUndirected(; R = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     tile_map = falses(NUM_OBJECTS, height, width)
@@ -188,11 +176,48 @@ function GW.act!(env::DoorKeyUndirected, action)
     return nothing
 end
 
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '♥', '▒', '⚷', '⋅')
+
+GW.get_tile_map_height(env::DoorKeyUndirected) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::DoorKeyUndirected) = size(env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::DoorKeyUndirected, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::DoorKeyUndirected) = ('w', 's', 'a', 'd', 'p')
+GW.get_action_names(env::DoorKeyUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT, :PICK_UP)
+
 function Base.show(io::IO, ::MIME"text/plain", env::DoorKeyUndirected)
     str = GW.get_tile_map_pretty_repr(env)
     str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
     print(io, str)
     return nothing
 end
+
+#####
+##### RLBase API
+#####
+
+RLBase.StateStyle(env::GW.RLBaseEnv{E}) where {E <: DoorKeyUndirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: DoorKeyUndirected} = nothing
+RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: DoorKeyUndirected} = env.env.tile_map
+
+RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: DoorKeyUndirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: DoorKeyUndirected} = 1:NUM_ACTIONS
+(env::GW.RLBaseEnv{E})(action) where {E <: DoorKeyUndirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: DoorKeyUndirected} = env.env.reward
+RLBase.is_terminated(env::GW.RLBaseEnv{E}) where {E <: DoorKeyUndirected} = env.env.done
 
 end # module

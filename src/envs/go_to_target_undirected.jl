@@ -2,6 +2,18 @@ module GoToTargetUndirectedModule
 
 import ..GridWorlds as GW
 import Random
+import ReinforcementLearningBase as RLBase
+
+#####
+##### game logic
+#####
+
+const NUM_OBJECTS = 4
+const AGENT = 1
+const WALL = 2
+const TARGET1 = 3
+const TARGET2 = 4
+const NUM_ACTIONS = 4
 
 mutable struct GoToTargetUndirected{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}
@@ -15,30 +27,6 @@ mutable struct GoToTargetUndirected{R, RNG} <: GW.AbstractGridWorldGame
     target1_position::CartesianIndex{2}
     target2_position::CartesianIndex{2}
 end
-
-const NUM_OBJECTS = 4
-const AGENT = 1
-const WALL = 2
-const TARGET1 = 3
-const TARGET2 = 4
-
-CHARACTERS = ('☻', '█', '✖', '♦', '⋅')
-
-GW.get_tile_map_height(env::GoToTargetUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::GoToTargetUndirected) = size(env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::GoToTargetUndirected, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-const NUM_ACTIONS = 4
-GW.get_action_keys(env::GoToTargetUndirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::GoToTargetUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function GoToTargetUndirected(; R = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     tile_map = falses(NUM_OBJECTS, height, width)
@@ -134,11 +122,48 @@ function GW.act!(env::GoToTargetUndirected, action)
     return nothing
 end
 
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '✖', '♦', '⋅')
+
+GW.get_tile_map_height(env::GoToTargetUndirected) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::GoToTargetUndirected) = size(env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::GoToTargetUndirected, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::GoToTargetUndirected) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::GoToTargetUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
+
 function Base.show(io::IO, ::MIME"text/plain", env::GoToTargetUndirected)
     str = GW.get_tile_map_pretty_repr(env)
     str = str * "\nreward = $(env.reward)\ndone = $(env.done)\ntarget = $(env.target) ($(CHARACTERS[2 + env.target]))"
     print(io, str)
     return nothing
 end
+
+#####
+##### RLBase API
+#####
+
+RLBase.StateStyle(env::GW.RLBaseEnv{E}) where {E <: GoToTargetUndirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GoToTargetUndirected} = nothing
+RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: GoToTargetUndirected} = (env.env.tile_map, env.env.target)
+
+RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: GoToTargetUndirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: GoToTargetUndirected} = 1:NUM_ACTIONS
+(env::GW.RLBaseEnv{E})(action) where {E <: GoToTargetUndirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: GoToTargetUndirected} = env.env.reward
+RLBase.is_terminated(env::GW.RLBaseEnv{E}) where {E <: GoToTargetUndirected} = env.env.done
 
 end # module

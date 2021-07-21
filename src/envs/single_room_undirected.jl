@@ -2,6 +2,17 @@ module SingleRoomUndirectedModule
 
 import ..GridWorlds as GW
 import Random
+import ReinforcementLearningBase as RLBase
+
+#####
+##### game logic
+#####
+
+const NUM_OBJECTS = 3
+const AGENT = 1
+const WALL = 2
+const GOAL = 3
+const NUM_ACTIONS = 4
 
 mutable struct SingleRoomUndirected{R, RNG} <: GW.AbstractGridWorldGame
     tile_map::BitArray{3}
@@ -12,43 +23,6 @@ mutable struct SingleRoomUndirected{R, RNG} <: GW.AbstractGridWorldGame
     terminal_reward::R
     goal_position::CartesianIndex{2}
 end
-
-const NUM_OBJECTS = 3
-const AGENT = 1
-const WALL = 2
-const GOAL = 3
-
-CHARACTERS = ('☻', '█', '♥', '⋅')
-
-GW.get_tile_map_height(env::SingleRoomUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::SingleRoomUndirected) = size(env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::SingleRoomUndirected, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-function GW.get_sub_tile_map_pretty_repr(env::SingleRoomUndirected, window_size, position::CartesianIndex{2})
-    tile_map = env.tile_map
-    agent_position = env.agent_position
-
-    sub_tile_map = GW.get_sub_tile_map(tile_map, agent_position, window_size)
-
-    object = findfirst(@view sub_tile_map[:, position])
-    if isnothing(object)
-        return CHARACTERS[end]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-const NUM_ACTIONS = 4
-GW.get_action_keys(env::SingleRoomUndirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::SingleRoomUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function SingleRoomUndirected(; R = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     tile_map = BitArray(undef, NUM_OBJECTS, height, width)
@@ -131,6 +105,41 @@ function GW.act!(env::SingleRoomUndirected, action)
     return nothing
 end
 
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '♥', '⋅')
+
+GW.get_tile_map_height(env::SingleRoomUndirected) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::SingleRoomUndirected) = size(env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::SingleRoomUndirected, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+function GW.get_sub_tile_map_pretty_repr(env::SingleRoomUndirected, window_size, position::CartesianIndex{2})
+    tile_map = env.tile_map
+    agent_position = env.agent_position
+
+    sub_tile_map = GW.get_sub_tile_map(tile_map, agent_position, window_size)
+
+    object = findfirst(@view sub_tile_map[:, position])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::SingleRoomUndirected) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::SingleRoomUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
+
 function Base.show(io::IO, ::MIME"text/plain", env::SingleRoomUndirected)
     str = "tile_map:\n"
     str = str * GW.get_tile_map_pretty_repr(env)
@@ -140,5 +149,21 @@ function Base.show(io::IO, ::MIME"text/plain", env::SingleRoomUndirected)
     print(io, str)
     return nothing
 end
+
+#####
+##### RLBase API
+#####
+
+RLBase.StateStyle(env::GW.RLBaseEnv{E}) where {E <: SingleRoomUndirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: SingleRoomUndirected} = nothing
+RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: SingleRoomUndirected} = env.env.tile_map
+
+RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: SingleRoomUndirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: SingleRoomUndirected} = 1:NUM_ACTIONS
+(env::GW.RLBaseEnv{E})(action) where {E <: SingleRoomUndirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: SingleRoomUndirected} = env.env.reward
+RLBase.is_terminated(env::GW.RLBaseEnv{E}) where {E <: SingleRoomUndirected} = env.env.done
 
 end # module
