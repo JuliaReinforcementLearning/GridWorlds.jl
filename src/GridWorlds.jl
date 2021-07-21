@@ -7,7 +7,6 @@ import ReinforcementLearningBase as RLBase
 
 include("directions.jl")
 include("actions.jl")
-include("objects.jl")
 include("abstract_grid_world.jl")
 include("play.jl")
 include("envs/envs.jl")
