@@ -186,4 +186,3 @@ function sample_two_positions_without_replacement(rng, region)
 
     return position1, position2
 end
-
