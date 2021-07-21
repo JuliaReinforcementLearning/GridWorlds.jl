@@ -3,6 +3,17 @@ module SokobanUndirectedModule
 import ..GridWorlds as GW
 import Random
 
+#####
+##### game logic
+#####
+
+const NUM_OBJECTS = 4
+const AGENT = 1
+const WALL = 2
+const BOX = 3
+const TARGET = 4
+const NUM_ACTIONS = 4
+
 struct LevelDataset
     characters::Array{Char, 3}
 end
@@ -59,30 +70,6 @@ mutable struct SokobanUndirected{R, RNG} <: GW.AbstractGridWorldGame
     level_number::Int
     dataset::LevelDataset
 end
-
-const NUM_OBJECTS = 4
-const AGENT = 1
-const WALL = 2
-const BOX = 3
-const TARGET = 4
-
-CHARACTERS = ('☻', '█', '▒', '✖', '⋅')
-
-GW.get_tile_map_height(env::SokobanUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::SokobanUndirected) = size(env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::SokobanUndirected, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-const NUM_ACTIONS = 4
-GW.get_action_keys(env::SokobanUndirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::SokobanUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function SokobanUndirected(; R = Float32, file = joinpath(dirname(functionloc(GW.eval)[1]), "envs/sokoban/boxoban-levels/medium/train/000.txt"), rng = Random.GLOBAL_RNG)
     dataset = LevelDataset(file)
@@ -199,6 +186,27 @@ function set_level!(env::SokobanUndirected, level_number::Int)
 
     return nothing
 end
+
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '▒', '✖', '⋅')
+
+GW.get_tile_map_height(env::SokobanUndirected) = size(env.tile_map, 2)
+GW.get_tile_map_width(env::SokobanUndirected) = size(env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::SokobanUndirected, i::Integer, j::Integer)
+    object = findfirst(@view env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::SokobanUndirected) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::SokobanUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function Base.show(io::IO, ::MIME"text/plain", env::SokobanUndirected)
     str = GW.get_tile_map_pretty_repr(env)
