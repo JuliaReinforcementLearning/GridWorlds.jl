@@ -5,13 +5,13 @@ move_right(i::Integer, j::Integer) = (i, j + 1)
 no_move(i::Integer, j::Integer) = (i, j)
 
 function move_forward(dir::Integer, i::Integer, j::Integer)
-    if dir == UP_DIRECTION
+    if dir == UP
         return move_up(i, j)
-    elseif dir == DOWN_DIRECTION
+    elseif dir == DOWN
         return move_down(i, j)
-    elseif dir == LEFT_DIRECTION
+    elseif dir == LEFT
         return move_left(i, j)
-    elseif dir == RIGHT_DIRECTION
+    elseif dir == RIGHT
         return move_right(i, j)
     else
         return no_move(i, j)
@@ -19,13 +19,13 @@ function move_forward(dir::Integer, i::Integer, j::Integer)
 end
 
 function move_backward(dir::Integer, i::Integer, j::Integer)
-    if dir == UP_DIRECTION
+    if dir == UP
         return move_down(i, j)
-    elseif dir == DOWN_DIRECTION
+    elseif dir == DOWN
         return move_up(i, j)
-    elseif dir == LEFT_DIRECTION
+    elseif dir == LEFT
         return move_right(i, j)
-    elseif dir == RIGHT_DIRECTION
+    elseif dir == RIGHT
         return move_left(i, j)
     else
         return no_move(i, j)

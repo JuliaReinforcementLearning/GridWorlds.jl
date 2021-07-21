@@ -97,17 +97,17 @@ function get_sub_tile_map!(sub_tile_map, tile_map, position, window_size)
 end
 
 function get_window_region((i, j), (m, n), direction)
-    if direction == RIGHT_DIRECTION
+    if direction == RIGHT
         temp1 = n - 1
         temp2 = temp1 ÷ 2
         temp3 = i - temp2
         return CartesianIndices((temp3 : temp3 + temp1, j : j + m - 1))
-    elseif direction == UP_DIRECTION
+    elseif direction == UP
         temp1 = n - 1
         temp2 = temp1 ÷ 2
         temp3 = j - temp2
         return CartesianIndices((i - m + 1 : i, temp3 : temp3 + temp1))
-    elseif direction == LEFT_DIRECTION
+    elseif direction == LEFT
         temp1 = n - 1
         temp2 = temp1 ÷ 2
         temp3 = i - temp2
@@ -121,11 +121,11 @@ function get_window_region((i, j), (m, n), direction)
 end
 
 function map_index((i,j), (m, n), direction)
-    if direction == RIGHT_DIRECTION
+    if direction == RIGHT
         return (j, n-i+1)
-    elseif direction == UP_DIRECTION
+    elseif direction == UP
         return (m-i+1, n-j+1)
-    elseif direction == LEFT_DIRECTION
+    elseif direction == LEFT
         return (m-j+1, i)
     else
         return (i,j)
