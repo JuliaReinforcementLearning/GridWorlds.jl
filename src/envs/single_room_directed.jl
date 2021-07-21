@@ -4,52 +4,20 @@ import ..GridWorlds as GW
 import Random
 import ..SingleRoomUndirectedModule as SRUM
 
-mutable struct SingleRoomDirected{R, RNG} <: GW.AbstractGridWorldGame
-    env::SRUM.SingleRoomUndirected{R, RNG}
-    agent_direction::Int
-end
+#####
+##### game logic
+#####
 
 const NUM_OBJECTS = SRUM.NUM_OBJECTS
 const AGENT = SRUM.AGENT
 const WALL = SRUM.WALL
 const GOAL = SRUM.GOAL
-
-CHARACTERS = ('☻', '█', '♥', '→', '↑', '←', '↓', '⋅')
-
-GW.get_tile_map_height(env::SingleRoomDirected) = size(env.env.tile_map, 2)
-GW.get_tile_map_width(env::SingleRoomDirected) = size(env.env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::SingleRoomDirected, i::Integer, j::Integer)
-    object = findfirst(@view env.env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    elseif object == AGENT
-        return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-function GW.get_sub_tile_map_pretty_repr(env::SingleRoomDirected, window_size, position::CartesianIndex{2})
-    tile_map = env.env.tile_map
-    agent_position = env.env.agent_position
-    agent_direction = env.agent_direction
-
-    sub_tile_map = GW.get_sub_tile_map(tile_map, agent_position, window_size, agent_direction)
-
-    object = findfirst(@view sub_tile_map[:, position])
-    if isnothing(object)
-        return CHARACTERS[end]
-    elseif object == AGENT
-        return '↓'
-    else
-        return CHARACTERS[object]
-    end
-end
-
 const NUM_ACTIONS = 4
-GW.get_action_keys(env::SingleRoomDirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::SingleRoomDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
+
+mutable struct SingleRoomDirected{R, RNG} <: GW.AbstractGridWorldGame
+    env::SRUM.SingleRoomUndirected{R, RNG}
+    agent_direction::Int
+end
 
 function SingleRoomDirected(; R = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
     env = SRUM.SingleRoomUndirected(R = R, height = height, width = width, rng = rng)
@@ -103,6 +71,46 @@ function GW.act!(env::SingleRoomDirected, action)
 
     return nothing
 end
+
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '♥', '→', '↑', '←', '↓', '⋅')
+
+GW.get_tile_map_height(env::SingleRoomDirected) = size(env.env.tile_map, 2)
+GW.get_tile_map_width(env::SingleRoomDirected) = size(env.env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::SingleRoomDirected, i::Integer, j::Integer)
+    object = findfirst(@view env.env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    elseif object == AGENT
+        return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+function GW.get_sub_tile_map_pretty_repr(env::SingleRoomDirected, window_size, position::CartesianIndex{2})
+    tile_map = env.env.tile_map
+    agent_position = env.env.agent_position
+    agent_direction = env.agent_direction
+
+    sub_tile_map = GW.get_sub_tile_map(tile_map, agent_position, window_size, agent_direction)
+
+    object = findfirst(@view sub_tile_map[:, position])
+    if isnothing(object)
+        return CHARACTERS[end]
+    elseif object == AGENT
+        return '↓'
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::SingleRoomDirected) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::SingleRoomDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
 
 function Base.show(io::IO, ::MIME"text/plain", env::SingleRoomDirected)
     str = "tile_map:\n"
