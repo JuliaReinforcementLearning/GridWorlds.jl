@@ -245,19 +245,19 @@ function generate_candidate_rooms(env::SequentialRoomsUndirected, room_id::Integ
         for width in env.range_width_room
             for direction in 0:GW.NUM_DIRECTIONS-1
 
-                if direction == GW.UP_DIRECTION
+                if direction == GW.UP
                     i = base_room.region.indices[1].start - height + 1
                     jj = base_room.region.indices[2].start - width + 3 : base_room.region.indices[2].stop - 2
                     origins = CartesianIndices((i:i, jj))
-                elseif direction == GW.DOWN_DIRECTION
+                elseif direction == GW.DOWN
                     i = base_room.region.indices[1].stop
                     jj = base_room.region.indices[2].start - width + 3 : base_room.region.indices[2].stop - 2
                     origins = CartesianIndices((i:i, jj))
-                elseif direction == GW.LEFT_DIRECTION
+                elseif direction == GW.LEFT
                     ii = base_room.region.indices[1].start - height + 3 : base_room.region.indices[1].stop - 2
                     j = base_room.region.indices[2].start - width + 1
                     origins = CartesianIndices((ii, j:j))
-                else direction == GW.RIGHT_DIRECTION
+                else
                     ii = base_room.region.indices[1].start - height + 3 : base_room.region.indices[1].stop - 2
                     j = base_room.region.indices[2].stop
                     origins = CartesianIndices((ii, j:j))
