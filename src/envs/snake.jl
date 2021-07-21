@@ -3,6 +3,7 @@ module SnakeModule
 import DataStructures as DS
 import ..GridWorlds as GW
 import Random
+import ReinforcementLearningBase as RLBase
 
 #####
 ##### game logic
@@ -174,5 +175,21 @@ function Base.show(io::IO, ::MIME"text/plain", env::Snake)
     print(io, str)
     return nothing
 end
+
+#####
+##### RLBase API
+#####
+
+RLBase.StateStyle(env::GW.RLBaseEnv{E}) where {E <: Snake} = RLBase.Observation{Any}()
+RLBase.state_space(env::GW.RLBaseEnv{E}, ::RLBase.Observation) where {E <: Snake} = nothing
+RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.Observation) where {E <: Snake} = env.env.tile_map
+
+RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: Snake} = GW.reset!(env.env)
+
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: Snake} = 1:NUM_ACTIONS
+(env::GW.RLBaseEnv{E})(action) where {E <: Snake} = GW.act!(env.env, action)
+
+RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: Snake} = env.env.reward
+RLBase.is_terminated(env::GW.RLBaseEnv{E}) where {E <: Snake} = env.env.done
 
 end # module

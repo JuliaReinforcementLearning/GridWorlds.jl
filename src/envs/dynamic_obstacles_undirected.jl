@@ -2,6 +2,7 @@ module DynamicObstaclesUndirectedModule
 
 import ..GridWorlds as GW
 import Random
+import ReinforcementLearningBase as RLBase
 
 #####
 ##### game logic
@@ -170,5 +171,21 @@ function Base.show(io::IO, ::MIME"text/plain", env::DynamicObstaclesUndirected)
     print(io, str)
     return nothing
 end
+
+#####
+##### DynamicObstaclesUndirected
+#####
+
+RLBase.StateStyle(env::GW.RLBaseEnv{E}) where {E <: DynamicObstaclesUndirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: DynamicObstaclesUndirected} = nothing
+RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: DynamicObstaclesUndirected} = env.env.tile_map
+
+RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: DynamicObstaclesUndirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: DynamicObstaclesUndirected} = 1:NUM_ACTIONS
+(env::GW.RLBaseEnv{E})(action) where {E <: DynamicObstaclesUndirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: DynamicObstaclesUndirected} = env.env.reward
+RLBase.is_terminated(env::GW.RLBaseEnv{E}) where {E <: DynamicObstaclesUndirected} = env.env.done
 
 end # module

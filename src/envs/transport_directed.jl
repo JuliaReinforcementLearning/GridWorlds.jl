@@ -2,6 +2,7 @@ module TransportDirectedModule
 
 import ..GridWorlds as GW
 import Random
+import ReinforcementLearningBase as RLBase
 import ..TransportUndirectedModule as TUM
 
 #####
@@ -107,5 +108,21 @@ function Base.show(io::IO, ::MIME"text/plain", env::TransportDirected)
     print(io, str)
     return nothing
 end
+
+#####
+##### RLBase API
+#####
+
+RLBase.StateStyle(env::GW.RLBaseEnv{E}) where {E <: TransportDirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: TransportDirected} = nothing
+RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: TransportDirected} = (env.env.env.tile_map, env.env.agent_direction)
+
+RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: TransportDirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: TransportDirected} = 1:NUM_ACTIONS
+(env::GW.RLBaseEnv{E})(action) where {E <: TransportDirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: TransportDirected} = env.env.env.reward
+RLBase.is_terminated(env::GW.RLBaseEnv{E}) where {E <: TransportDirected} = env.env.env.done
 
 end # module

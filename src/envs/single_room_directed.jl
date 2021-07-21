@@ -2,6 +2,7 @@ module SingleRoomDirectedModule
 
 import ..GridWorlds as GW
 import Random
+import ReinforcementLearningBase as RLBase
 import ..SingleRoomUndirectedModule as SRUM
 
 #####
@@ -121,5 +122,21 @@ function Base.show(io::IO, ::MIME"text/plain", env::SingleRoomDirected)
     print(io, str)
     return nothing
 end
+
+#####
+##### RLBase API
+#####
+
+RLBase.StateStyle(env::GW.RLBaseEnv{E}) where {E <: SingleRoomDirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: SingleRoomDirected} = nothing
+RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: SingleRoomDirected} = (env.env.env.tile_map, env.env.agent_direction)
+
+RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: SingleRoomDirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: SingleRoomDirected} = 1:NUM_ACTIONS
+(env::GW.RLBaseEnv{E})(action) where {E <: SingleRoomDirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: SingleRoomDirected} = env.env.env.reward
+RLBase.is_terminated(env::GW.RLBaseEnv{E}) where {E <: SingleRoomDirected} = env.env.env.done
 
 end # module

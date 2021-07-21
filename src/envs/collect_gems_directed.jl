@@ -3,6 +3,7 @@ module CollectGemsDirectedModule
 import ..CollectGemsUndirectedModule as CGUM
 import ..GridWorlds as GW
 import Random
+import ReinforcementLearningBase as RLBase
 
 #####
 ##### game logic
@@ -102,5 +103,21 @@ function Base.show(io::IO, ::MIME"text/plain", env::CollectGemsDirected)
     print(io, str)
     return nothing
 end
+
+#####
+##### RLBase API
+#####
+
+RLBase.StateStyle(env::GW.RLBaseEnv{E}) where {E <: CollectGemsDirected} = RLBase.InternalState{Any}()
+RLBase.state_space(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: CollectGemsDirected} = nothing
+RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: CollectGemsDirected} = (env.env.env.tile_map, env.env.agent_direction)
+
+RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: CollectGemsDirected} = GW.reset!(env.env)
+
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: CollectGemsDirected} = 1:NUM_ACTIONS
+(env::GW.RLBaseEnv{E})(action) where {E <: CollectGemsDirected} = GW.act!(env.env, action)
+
+RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: CollectGemsDirected} = env.env.env.reward
+RLBase.is_terminated(env::GW.RLBaseEnv{E}) where {E <: CollectGemsDirected} = env.env.env.done
 
 end # module

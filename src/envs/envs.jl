@@ -12,6 +12,7 @@ include("door_key_undirected.jl")
 include("door_key_directed.jl")
 include("collect_gems_undirected.jl")
 include("collect_gems_directed.jl")
+include("collect_gems_multi_agent_undirected.jl")
 include("dynamic_obstacles_undirected.jl")
 include("dynamic_obstacles_directed.jl")
 include("sokoban/sokoban_undirected.jl")
@@ -20,7 +21,6 @@ include("snake.jl")
 include("catcher.jl")
 include("transport_undirected.jl")
 include("transport_directed.jl")
-include("collect_gems_multi_agent_undirected.jl")
 
 const ENVS = [
               SingleRoomUndirectedModule.SingleRoomUndirected,
@@ -37,6 +37,7 @@ const ENVS = [
               DoorKeyDirectedModule.DoorKeyDirected,
               CollectGemsUndirectedModule.CollectGemsUndirected,
               CollectGemsDirectedModule.CollectGemsDirected,
+              CollectGemsMultiAgentUndirectedModule.CollectGemsMultiAgentUndirected,
               DynamicObstaclesUndirectedModule.DynamicObstaclesUndirected,
               DynamicObstaclesDirectedModule.DynamicObstaclesDirected,
               SokobanUndirectedModule.SokobanUndirected,
@@ -45,5 +46,4 @@ const ENVS = [
               CatcherModule.Catcher,
               TransportUndirectedModule.TransportUndirected,
               TransportDirectedModule.TransportDirected,
-              CollectGemsMultiAgentUndirectedModule.CollectGemsMultiAgentUndirected,
              ]

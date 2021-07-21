@@ -8,7 +8,8 @@ import ReinforcementLearningBase as RLBase
 include("navigation.jl")
 include("abstract_grid_world.jl")
 include("play.jl")
-include("envs/envs.jl")
 include("rlbase.jl")
+include("envs/envs.jl")
+# include("rlbase.jl")
 
 end
