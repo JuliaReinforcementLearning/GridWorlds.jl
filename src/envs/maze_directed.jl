@@ -4,35 +4,20 @@ import ..GridWorlds as GW
 import ..MazeUndirectedModule as MUM
 import Random
 
-mutable struct MazeDirected{R, RNG} <: GW.AbstractGridWorldGame
-    env::MUM.MazeUndirected{R, RNG}
-    agent_direction::Int
-end
+#####
+##### game logic
+#####
 
 const NUM_OBJECTS = MUM.NUM_OBJECTS
 const AGENT = MUM.AGENT
 const WALL = MUM.WALL
 const GOAL = MUM.GOAL
-
-CHARACTERS = ('☻', '█', '♥', '→', '↑', '←', '↓', '⋅')
-
-GW.get_tile_map_height(env::MazeDirected) = size(env.env.tile_map, 2)
-GW.get_tile_map_width(env::MazeDirected) = size(env.env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::MazeDirected, i::Integer, j::Integer)
-    object = findfirst(@view env.env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    elseif object == AGENT
-        return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
-    else
-        return CHARACTERS[object]
-    end
-end
-
 const NUM_ACTIONS = 4
-GW.get_action_keys(env::MazeDirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::MazeDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
+
+mutable struct MazeDirected{R, RNG} <: GW.AbstractGridWorldGame
+    env::MUM.MazeUndirected{R, RNG}
+    agent_direction::Int
+end
 
 function MazeDirected(; R = Float32, height = 9, width = 9, rng = Random.GLOBAL_RNG)
     env = MUM.MazeUndirected(R = R, height = height, width = width, rng = rng)
@@ -86,6 +71,29 @@ function GW.act!(env::MazeDirected, action)
 
     return nothing
 end
+
+#####
+##### miscellaneous
+#####
+
+CHARACTERS = ('☻', '█', '♥', '→', '↑', '←', '↓', '⋅')
+
+GW.get_tile_map_height(env::MazeDirected) = size(env.env.tile_map, 2)
+GW.get_tile_map_width(env::MazeDirected) = size(env.env.tile_map, 3)
+
+function GW.get_tile_pretty_repr(env::MazeDirected, i::Integer, j::Integer)
+    object = findfirst(@view env.env.tile_map[:, i, j])
+    if isnothing(object)
+        return CHARACTERS[end]
+    elseif object == AGENT
+        return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
+    else
+        return CHARACTERS[object]
+    end
+end
+
+GW.get_action_keys(env::MazeDirected) = ('w', 's', 'a', 'd')
+GW.get_action_names(env::MazeDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
 
 function Base.show(io::IO, ::MIME"text/plain", env::MazeDirected)
     str = GW.get_tile_map_pretty_repr(env)
