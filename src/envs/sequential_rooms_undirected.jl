@@ -350,7 +350,7 @@ RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: Sequentia
 
 RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: SequentialRoomsUndirected} = GW.reset!(env.env)
 
-RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: SequentialRoomsUndirected} = 1:NUM_ACTIONS
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: SequentialRoomsUndirected} = Base.OneTo(NUM_ACTIONS)
 (env::GW.RLBaseEnv{E})(action) where {E <: SequentialRoomsUndirected} = GW.act!(env.env, action)
 
 RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: SequentialRoomsUndirected} = env.env.reward

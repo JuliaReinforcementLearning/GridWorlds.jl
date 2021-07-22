@@ -36,7 +36,7 @@ function GW.reset!(env::TransportDirected)
 end
 
 function GW.act!(env::TransportDirected, action)
-    @assert action in 1:NUM_ACTIONS "Invalid action $(action)"
+    @assert action in Base.OneTo(NUM_ACTIONS) "Invalid action $(action)"
 
     inner_env = env.env
     tile_map = inner_env.tile_map
@@ -119,7 +119,7 @@ RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: Transport
 
 RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: TransportDirected} = GW.reset!(env.env)
 
-RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: TransportDirected} = 1:NUM_ACTIONS
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: TransportDirected} = Base.OneTo(NUM_ACTIONS)
 (env::GW.RLBaseEnv{E})(action) where {E <: TransportDirected} = GW.act!(env.env, action)
 
 RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: TransportDirected} = env.env.env.reward

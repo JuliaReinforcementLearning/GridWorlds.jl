@@ -97,7 +97,7 @@ function GW.reset!(env::CollectGemsMultiAgentUndirected)
 end
 
 function GW.act!(env::CollectGemsMultiAgentUndirected, action)
-    @assert action in 1:NUM_ACTIONS "Invalid action $(action)"
+    @assert action in Base.OneTo(NUM_ACTIONS) "Invalid action $(action)"
 
     tile_map = env.tile_map
     agent_positions = env.agent_positions
@@ -187,7 +187,7 @@ RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: CollectGe
 
 RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: CollectGemsMultiAgentUndirected} = GW.reset!(env.env)
 
-RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: CollectGemsMultiAgentUndirected} = 1:NUM_ACTIONS
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: CollectGemsMultiAgentUndirected} = Base.OneTo(NUM_ACTIONS)
 (env::GW.RLBaseEnv{E})(action) where {E <: CollectGemsMultiAgentUndirected} = GW.act!(env.env, action)
 
 RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: CollectGemsMultiAgentUndirected} = env.env.reward
