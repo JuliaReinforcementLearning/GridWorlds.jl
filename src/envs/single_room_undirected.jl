@@ -109,17 +109,20 @@ end
 ##### miscellaneous
 #####
 
-CHARACTERS = ('☻', '█', '♥', '⋅')
-
 GW.get_height(env::SingleRoomUndirected) = size(env.tile_map, 2)
 GW.get_width(env::SingleRoomUndirected) = size(env.tile_map, 3)
 
-function GW.get_pretty_tile_map(env::SingleRoomUndirected, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
+GW.get_action_names(env::SingleRoomUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
+GW.get_object_names(env::SingleRoomUndirected) = (:AGENT, :WALL, :GOAL)
+
+function GW.get_pretty_tile_map(env::SingleRoomUndirected, position::CartesianIndex{2})
+    characters = ('☻', '█', '♥', '⋅')
+
+    object = findfirst(@view env.tile_map[:, position])
     if isnothing(object)
-        return CHARACTERS[end]
+        return characters[end]
     else
-        return CHARACTERS[object]
+        return characters[object]
     end
 end
 
@@ -127,28 +130,32 @@ function GW.get_pretty_sub_tile_map(env::SingleRoomUndirected, window_size, posi
     tile_map = env.tile_map
     agent_position = env.agent_position
 
+    characters = ('☻', '█', '♥', '⋅')
+
     sub_tile_map = GW.get_sub_tile_map(tile_map, agent_position, window_size)
 
     object = findfirst(@view sub_tile_map[:, position])
     if isnothing(object)
-        return CHARACTERS[end]
+        return characters[end]
     else
-        return CHARACTERS[object]
+        return characters[object]
     end
 end
-
-GW.get_action_keys(env::SingleRoomUndirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::SingleRoomUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function Base.show(io::IO, ::MIME"text/plain", env::SingleRoomUndirected)
     str = "tile_map:\n"
     str = str * GW.get_pretty_tile_map(env)
     str = str * "\nsub_tile_map:\n"
     str = str * GW.get_pretty_sub_tile_map(env, GW.get_window_size(env))
-    str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
+    str = str * "\nreward: $(env.reward)"
+    str = str * "\ndone: $(env.done)"
+    str = str * "\naction_names: $(GW.get_action_names(env))"
+    str = str * "\nobject_names: $(GW.get_object_names(env))"
     print(io, str)
     return nothing
 end
+
+GW.get_action_keys(env::SingleRoomUndirected) = ('w', 's', 'a', 'd')
 
 #####
 ##### RLBase API
