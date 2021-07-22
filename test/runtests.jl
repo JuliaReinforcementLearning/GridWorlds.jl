@@ -57,7 +57,7 @@ function is_valid_terminal_return(env::GW.RLBaseEnv{E}, terminal_return) where {
     end
 end
 
-Test.@testset "AbstractGridWorldGame" begin
+Test.@testset "GridWorlds.jl" begin
     for Env in GW.ENVS
         Test.@testset "$(Env)" begin
             R = Float32

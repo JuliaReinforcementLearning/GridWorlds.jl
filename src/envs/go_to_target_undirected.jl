@@ -15,7 +15,7 @@ const TARGET1 = 3
 const TARGET2 = 4
 const NUM_ACTIONS = 4
 
-mutable struct GoToTargetUndirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct GoToTargetUndirected{R, RNG} <: GW.AbstractGridWorld
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
     reward::R

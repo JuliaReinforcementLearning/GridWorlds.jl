@@ -15,7 +15,7 @@ const WALL = MUM.WALL
 const GOAL = MUM.GOAL
 const NUM_ACTIONS = 4
 
-mutable struct MazeDirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct MazeDirected{R, RNG} <: GW.AbstractGridWorld
     env::MUM.MazeUndirected{R, RNG}
     agent_direction::Int
 end

@@ -16,7 +16,7 @@ const GOAL = DOUM.GOAL
 const OBSTACLE = DOUM.OBSTACLE
 const NUM_ACTIONS = 4
 
-mutable struct DynamicObstaclesDirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct DynamicObstaclesDirected{R, RNG} <: GW.AbstractGridWorld
     env::DOUM.DynamicObstaclesUndirected{R, RNG}
     agent_direction::Int
 end

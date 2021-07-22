@@ -17,7 +17,7 @@ const DOOR = DKUM.DOOR
 const KEY = DKUM.KEY
 const NUM_ACTIONS = 5
 
-mutable struct DoorKeyDirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct DoorKeyDirected{R, RNG} <: GW.AbstractGridWorld
     env::DKUM.DoorKeyUndirected{R, RNG}
     agent_direction::Int
 end

@@ -14,7 +14,7 @@ const WALL = 2
 const GEM = 3
 const NUM_ACTIONS = 4
 
-mutable struct CollectGemsUndirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct CollectGemsUndirected{R, RNG} <: GW.AbstractGridWorld
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
     reward::R

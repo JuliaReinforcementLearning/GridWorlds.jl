@@ -15,7 +15,7 @@ const WALL = CGUM.WALL
 const GEM = CGUM.GEM
 const NUM_ACTIONS = 4
 
-mutable struct CollectGemsDirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct CollectGemsDirected{R, RNG} <: GW.AbstractGridWorld
     env::CGUM.CollectGemsUndirected{R, RNG}
     agent_direction::Int
 end

@@ -16,7 +16,7 @@ const TARGET1 = GTTUM.TARGET1
 const TARGET2 = GTTUM.TARGET2
 const NUM_ACTIONS = 4
 
-mutable struct GoToTargetDirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct GoToTargetDirected{R, RNG} <: GW.AbstractGridWorld
     env::GTTUM.GoToTargetUndirected{R, RNG}
     agent_direction::Int
 end

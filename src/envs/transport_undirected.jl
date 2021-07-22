@@ -15,7 +15,7 @@ const GEM = 3
 const TARGET = 4
 const NUM_ACTIONS = 6
 
-mutable struct TransportUndirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct TransportUndirected{R, RNG} <: GW.AbstractGridWorld
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
     reward::R

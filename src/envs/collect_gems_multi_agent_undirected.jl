@@ -10,7 +10,7 @@ import ReinforcementLearningBase as RLBase
 
 const NUM_ACTIONS = 4
 
-mutable struct CollectGemsMultiAgentUndirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct CollectGemsMultiAgentUndirected{R, RNG} <: GW.AbstractGridWorld
     tile_map::BitArray{3}
     agent_positions::Vector{CartesianIndex{2}}
     current_agent::Int

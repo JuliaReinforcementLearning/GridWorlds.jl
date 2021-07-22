@@ -16,7 +16,7 @@ const BODY = 3
 const FOOD = 4
 const NUM_ACTIONS = 4
 
-mutable struct Snake{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct Snake{R, RNG} <: GW.AbstractGridWorld
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
     reward::R

@@ -16,7 +16,7 @@ const GEM = TUM.GEM
 const TARGET = TUM.TARGET
 const NUM_ACTIONS = 6
 
-mutable struct TransportDirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct TransportDirected{R, RNG} <: GW.AbstractGridWorld
     env::TUM.TransportUndirected{R, RNG}
     agent_direction::Int
 end

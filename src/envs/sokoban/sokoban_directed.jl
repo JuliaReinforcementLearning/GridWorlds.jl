@@ -16,7 +16,7 @@ const BOX = SUM.BOX
 const TARGET = SUM.TARGET
 const NUM_ACTIONS = 4
 
-mutable struct SokobanDirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct SokobanDirected{R, RNG} <: GW.AbstractGridWorld
     env::SUM.SokobanUndirected{R, RNG}
     agent_direction::Int
 end

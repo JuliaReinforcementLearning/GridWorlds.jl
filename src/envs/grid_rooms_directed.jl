@@ -15,7 +15,7 @@ const WALL = GRUM.WALL
 const GOAL = GRUM.GOAL
 const NUM_ACTIONS = 4
 
-mutable struct GridRoomsDirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct GridRoomsDirected{R, RNG} <: GW.AbstractGridWorld
     env::GRUM.GridRoomsUndirected{R, RNG}
     agent_direction::Int
 end

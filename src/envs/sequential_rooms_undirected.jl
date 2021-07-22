@@ -20,7 +20,7 @@ end
 
 Room(top_left, height, width) = Room(CartesianIndices((top_left.I[1] : top_left.I[1] + height - 1, top_left.I[2] : top_left.I[2] + width - 1)))
 
-mutable struct SequentialRoomsUndirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct SequentialRoomsUndirected{R, RNG} <: GW.AbstractGridWorld
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
     reward::R

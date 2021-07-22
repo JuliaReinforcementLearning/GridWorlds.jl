@@ -15,7 +15,7 @@ const GOAL = 3
 const OBSTACLE = 4
 const NUM_ACTIONS = 4
 
-mutable struct DynamicObstaclesUndirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct DynamicObstaclesUndirected{R, RNG} <: GW.AbstractGridWorld
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
     reward::R

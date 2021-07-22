@@ -16,7 +16,7 @@ const DOOR = 4
 const KEY = 5
 const NUM_ACTIONS = 5
 
-mutable struct DoorKeyUndirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct DoorKeyUndirected{R, RNG} <: GW.AbstractGridWorld
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
     reward::R

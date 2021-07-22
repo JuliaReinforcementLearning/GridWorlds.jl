@@ -15,7 +15,7 @@ const WALL = SRUM.WALL
 const GOAL = SRUM.GOAL
 const NUM_ACTIONS = 4
 
-mutable struct SingleRoomDirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct SingleRoomDirected{R, RNG} <: GW.AbstractGridWorld
     env::SRUM.SingleRoomUndirected{R, RNG}
     agent_direction::Int
 end

@@ -13,7 +13,7 @@ const AGENT = 1
 const GEM = 2
 const NUM_ACTIONS = 3
 
-mutable struct Catcher{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct Catcher{R, RNG} <: GW.AbstractGridWorld
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
     reward::R

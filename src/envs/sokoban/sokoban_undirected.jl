@@ -60,7 +60,7 @@ howpublished= {https://github.com/deepmind/boxoban-levels/},
 year = "2018",
 }
 """
-mutable struct SokobanUndirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct SokobanUndirected{R, RNG} <: GW.AbstractGridWorld
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
     reward::R
