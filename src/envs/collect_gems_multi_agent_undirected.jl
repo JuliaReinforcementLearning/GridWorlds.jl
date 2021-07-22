@@ -151,9 +151,23 @@ end
 GW.get_height(env::CollectGemsMultiAgentUndirected) = size(env.tile_map, 2)
 GW.get_width(env::CollectGemsMultiAgentUndirected) = size(env.tile_map, 3)
 
-function GW.get_pretty_tile_map(env::CollectGemsMultiAgentUndirected, i::Integer, j::Integer)
+GW.get_action_names(env::CollectGemsMultiAgentUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
+
+function GW.get_object_names(env::CollectGemsMultiAgentUndirected)
+    num_agents = length(env.agent_positions)
+    object_names = Array{Symbol}(undef, num_agents + 2)
+    for i in 1:num_agents
+        object_names[i] = Symbol("AGENT", "$(i)")
+    end
+    object_names[end - 1] = :WALL
+    object_names[end] = :GEM
+
+    return object_names
+end
+
+function GW.get_pretty_tile_map(env::CollectGemsMultiAgentUndirected, position::CartesianIndex{2})
     tile_map = env.tile_map
-    object = findfirst(@view tile_map[:, i, j])
+    object = findfirst(@view tile_map[:, position])
     num_agents = size(tile_map, 1) - 2
 
     if isnothing(object)
@@ -167,15 +181,39 @@ function GW.get_pretty_tile_map(env::CollectGemsMultiAgentUndirected, i::Integer
     end
 end
 
-GW.get_action_keys(env::CollectGemsMultiAgentUndirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::CollectGemsMultiAgentUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
+function GW.get_pretty_sub_tile_map(env::CollectGemsMultiAgentUndirected, window_size, position::CartesianIndex{2})
+    tile_map = env.tile_map
+    agent_positions = env.agent_positions
+    agent_position = agent_positions[env.current_agent]
+    num_agents = length(agent_positions)
+
+    sub_tile_map = GW.get_sub_tile_map(tile_map, agent_position, window_size)
+
+    object = findfirst(@view sub_tile_map[:, position])
+    if isnothing(object)
+        return "⋅"
+    elseif object in 1 : num_agents
+        return "$(object)"
+    elseif object == num_agents + 1
+        return "█"
+    else
+        return "♦"
+    end
+end
 
 function Base.show(io::IO, ::MIME"text/plain", env::CollectGemsMultiAgentUndirected)
-    str = GW.get_pretty_tile_map(env)
-    str = str * "\nreward = $(env.reward)\ndone = $(env.done)\ncurrent_agent = $(env.current_agent)"
+    str = "tile_map:\n"
+    str = str * GW.get_pretty_tile_map(env)
+    str = str * "\nsub_tile_map:\n"
+    str = str * GW.get_pretty_sub_tile_map(env, GW.get_window_size(env))
+    str = str * "\nreward: $(env.reward)\ndone: $(env.done)\ncurrent_agent = $(env.current_agent)"
+    str = str * "\naction_names: $(GW.get_action_names(env))"
+    str = str * "\nobject_names: $(GW.get_object_names(env))"
     print(io, str)
     return nothing
 end
+
+GW.get_action_keys(env::CollectGemsMultiAgentUndirected) = ('w', 's', 'a', 'd')
 
 #####
 ##### RLBase API
