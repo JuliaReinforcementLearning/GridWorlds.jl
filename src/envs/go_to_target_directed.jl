@@ -83,31 +83,62 @@ end
 ##### miscellaneous
 #####
 
-CHARACTERS = ('☻', '█', '✖', '♦', '→', '↑', '←', '↓', '⋅')
 
-GW.get_height(env::GoToTargetDirected) = size(env.env.tile_map, 2)
-GW.get_width(env::GoToTargetDirected) = size(env.env.tile_map, 3)
+GW.get_height(env::GoToTargetDirected) = GW.get_height(env.env)
+GW.get_width(env::GoToTargetDirected) = GW.get_width(env.env)
 
-function GW.get_pretty_tile_map(env::GoToTargetDirected, i::Integer, j::Integer)
-    object = findfirst(@view env.env.tile_map[:, i, j])
+GW.get_action_names(env::GoToTargetDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
+GW.get_object_names(env::GoToTargetDirected) = GW.get_object_names(env.env)
+
+function GW.get_pretty_tile_map(env::GoToTargetDirected, position::CartesianIndex{2})
+    characters = ('☻', '█', '✖', '♦', '→', '↑', '←', '↓', '⋅')
+
+    object = findfirst(@view env.env.tile_map[:, position])
     if isnothing(object)
-        return CHARACTERS[end]
+        return characters[end]
     elseif object == AGENT
-        return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
+        return characters[NUM_OBJECTS + 1 + env.agent_direction]
     else
-        return CHARACTERS[object]
+        return characters[object]
     end
 end
 
-GW.get_action_keys(env::GoToTargetDirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::GoToTargetDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
+function GW.get_pretty_sub_tile_map(env::GoToTargetDirected, window_size, position::CartesianIndex{2})
+    tile_map = env.env.tile_map
+    agent_position = env.env.agent_position
+    agent_direction = env.agent_direction
+
+    characters = ('☻', '█', '✖', '♦', '→', '↑', '←', '↓', '⋅')
+
+    sub_tile_map = GW.get_sub_tile_map(tile_map, agent_position, window_size, agent_direction)
+
+    object = findfirst(@view sub_tile_map[:, position])
+    if isnothing(object)
+        return characters[end]
+    elseif object == AGENT
+        return '↓'
+    else
+        return characters[object]
+    end
+end
 
 function Base.show(io::IO, ::MIME"text/plain", env::GoToTargetDirected)
-    str = GW.get_pretty_tile_map(env)
-    str = str * "\nreward = $(env.env.reward)\ndone = $(env.env.done)\ntarget = $(env.env.target) ($(CHARACTERS[2 + env.env.target]))"
+    characters = ('☻', '█', '✖', '♦', '→', '↑', '←', '↓', '⋅')
+
+    str = "tile_map:\n"
+    str = str * GW.get_pretty_tile_map(env)
+    str = str * "\nsub_tile_map:\n"
+    str = str * GW.get_pretty_sub_tile_map(env, GW.get_window_size(env))
+    str = str * "\nreward: $(env.env.reward)"
+    str = str * "\ndone: $(env.env.done)"
+    str = str * "\ntarget = $(env.env.target) ($(characters[2 + env.env.target]))"
+    str = str * "\naction_names: $(GW.get_action_names(env))"
+    str = str * "\nobject_names: $(GW.get_object_names(env))"
     print(io, str)
     return nothing
 end
+
+GW.get_action_keys(env::GoToTargetDirected) = ('w', 's', 'a', 'd')
 
 #####
 ##### RLBase API

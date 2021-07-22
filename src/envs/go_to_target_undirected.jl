@@ -126,29 +126,56 @@ end
 ##### miscellaneous
 #####
 
-CHARACTERS = ('☻', '█', '✖', '♦', '⋅')
-
 GW.get_height(env::GoToTargetUndirected) = size(env.tile_map, 2)
 GW.get_width(env::GoToTargetUndirected) = size(env.tile_map, 3)
 
-function GW.get_pretty_tile_map(env::GoToTargetUndirected, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
+GW.get_action_names(env::GoToTargetUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
+GW.get_object_names(env::GoToTargetUndirected) = (:AGENT, :WALL, :TARGET1, :TARGET2)
+
+function GW.get_pretty_tile_map(env::GoToTargetUndirected, position::CartesianIndex{2})
+    characters = ('☻', '█', '✖', '♦', '⋅')
+
+    object = findfirst(@view env.tile_map[:, position])
     if isnothing(object)
-        return CHARACTERS[end]
+        return characters[end]
     else
-        return CHARACTERS[object]
+        return characters[object]
     end
 end
 
-GW.get_action_keys(env::GoToTargetUndirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::GoToTargetUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
+function GW.get_pretty_sub_tile_map(env::GoToTargetUndirected, window_size, position::CartesianIndex{2})
+    tile_map = env.tile_map
+    agent_position = env.agent_position
+
+    characters = ('☻', '█', '✖', '♦', '⋅')
+
+    sub_tile_map = GW.get_sub_tile_map(tile_map, agent_position, window_size)
+
+    object = findfirst(@view sub_tile_map[:, position])
+    if isnothing(object)
+        return characters[end]
+    else
+        return characters[object]
+    end
+end
 
 function Base.show(io::IO, ::MIME"text/plain", env::GoToTargetUndirected)
-    str = GW.get_pretty_tile_map(env)
-    str = str * "\nreward = $(env.reward)\ndone = $(env.done)\ntarget = $(env.target) ($(CHARACTERS[2 + env.target]))"
+    characters = ('☻', '█', '✖', '♦', '⋅')
+
+    str = "tile_map:\n"
+    str = str * GW.get_pretty_tile_map(env)
+    str = str * "\nsub_tile_map:\n"
+    str = str * GW.get_pretty_sub_tile_map(env, GW.get_window_size(env))
+    str = str * "\nreward: $(env.reward)"
+    str = str * "\ndone: $(env.done)"
+    str = str * "\ntarget = $(env.target) ($(characters[2 + env.target]))"
+    str = str * "\naction_names: $(GW.get_action_names(env))"
+    str = str * "\nobject_names: $(GW.get_object_names(env))"
     print(io, str)
     return nothing
 end
+
+GW.get_action_keys(env::GoToTargetUndirected) = ('w', 's', 'a', 'd')
 
 #####
 ##### RLBase API
