@@ -131,7 +131,7 @@ CHARACTERS = ('☻', '█', '✖', '♦', '⋅')
 GW.get_height(env::GoToTargetUndirected) = size(env.tile_map, 2)
 GW.get_width(env::GoToTargetUndirected) = size(env.tile_map, 3)
 
-function GW.get_tile_pretty_repr(env::GoToTargetUndirected, i::Integer, j::Integer)
+function GW.get_pretty_tile_map(env::GoToTargetUndirected, i::Integer, j::Integer)
     object = findfirst(@view env.tile_map[:, i, j])
     if isnothing(object)
         return CHARACTERS[end]
@@ -144,7 +144,7 @@ GW.get_action_keys(env::GoToTargetUndirected) = ('w', 's', 'a', 'd')
 GW.get_action_names(env::GoToTargetUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function Base.show(io::IO, ::MIME"text/plain", env::GoToTargetUndirected)
-    str = GW.get_tile_map_pretty_repr(env)
+    str = GW.get_pretty_tile_map(env)
     str = str * "\nreward = $(env.reward)\ndone = $(env.done)\ntarget = $(env.target) ($(CHARACTERS[2 + env.target]))"
     print(io, str)
     return nothing

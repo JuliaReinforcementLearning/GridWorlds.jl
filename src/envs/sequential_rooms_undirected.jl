@@ -299,7 +299,7 @@ CHARACTERS = ('☻', '█', '♥', '⋅')
 GW.get_height(env::SequentialRoomsUndirected) = size(env.tile_map, 2)
 GW.get_width(env::SequentialRoomsUndirected) = size(env.tile_map, 3)
 
-function GW.get_tile_pretty_repr(env::SequentialRoomsUndirected, i::Integer, j::Integer)
+function GW.get_pretty_tile_map(env::SequentialRoomsUndirected, i::Integer, j::Integer)
     object = findfirst(@view env.tile_map[:, i, j])
     if isnothing(object)
         return CHARACTERS[end]

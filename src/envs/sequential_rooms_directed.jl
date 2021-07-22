@@ -82,7 +82,7 @@ CHARACTERS = ('☻', '█', '♥', '→', '↑', '←', '↓', '⋅')
 GW.get_height(env::SequentialRoomsDirected) = size(env.env.tile_map, 2)
 GW.get_width(env::SequentialRoomsDirected) = size(env.env.tile_map, 3)
 
-function GW.get_tile_pretty_repr(env::SequentialRoomsDirected, i::Integer, j::Integer)
+function GW.get_pretty_tile_map(env::SequentialRoomsDirected, i::Integer, j::Integer)
     object = findfirst(@view env.env.tile_map[:, i, j])
     if isnothing(object)
         return CHARACTERS[end]

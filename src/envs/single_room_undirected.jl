@@ -114,7 +114,7 @@ CHARACTERS = ('☻', '█', '♥', '⋅')
 GW.get_height(env::SingleRoomUndirected) = size(env.tile_map, 2)
 GW.get_width(env::SingleRoomUndirected) = size(env.tile_map, 3)
 
-function GW.get_tile_pretty_repr(env::SingleRoomUndirected, i::Integer, j::Integer)
+function GW.get_pretty_tile_map(env::SingleRoomUndirected, i::Integer, j::Integer)
     object = findfirst(@view env.tile_map[:, i, j])
     if isnothing(object)
         return CHARACTERS[end]
@@ -142,7 +142,7 @@ GW.get_action_names(env::SingleRoomUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LE
 
 function Base.show(io::IO, ::MIME"text/plain", env::SingleRoomUndirected)
     str = "tile_map:\n"
-    str = str * GW.get_tile_map_pretty_repr(env)
+    str = str * GW.get_pretty_tile_map(env)
     str = str * "\nsub_tile_map:\n"
     str = str * GW.get_sub_tile_map_pretty_repr(env, GW.get_window_size(env))
     str = str * "\nreward = $(env.reward)\ndone = $(env.done)"

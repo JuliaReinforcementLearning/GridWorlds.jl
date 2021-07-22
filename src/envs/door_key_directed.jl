@@ -89,7 +89,7 @@ CHARACTERS = ('☻', '█', '♥', '▒', '⚷', '→', '↑', '←', '↓', '�
 GW.get_height(env::DoorKeyDirected) = size(env.env.tile_map, 2)
 GW.get_width(env::DoorKeyDirected) = size(env.env.tile_map, 3)
 
-function GW.get_tile_pretty_repr(env::DoorKeyDirected, i::Integer, j::Integer)
+function GW.get_pretty_tile_map(env::DoorKeyDirected, i::Integer, j::Integer)
     object = findfirst(@view env.env.tile_map[:, i, j])
     if isnothing(object)
         return CHARACTERS[end]
@@ -104,7 +104,7 @@ GW.get_action_keys(env::DoorKeyDirected) = ('w', 's', 'a', 'd', 'p')
 GW.get_action_names(env::DoorKeyDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT, :PICK_UP)
 
 function Base.show(io::IO, ::MIME"text/plain", env::DoorKeyDirected)
-    str = GW.get_tile_map_pretty_repr(env)
+    str = GW.get_pretty_tile_map(env)
     str = str * "\nreward = $(env.env.reward)\ndone = $(env.env.done)"
     print(io, str)
     return nothing

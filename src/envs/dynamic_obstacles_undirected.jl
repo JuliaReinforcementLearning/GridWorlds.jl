@@ -153,7 +153,7 @@ CHARACTERS = ('☻', '█', '♥', '⊗', '⋅')
 GW.get_height(env::DynamicObstaclesUndirected) = size(env.tile_map, 2)
 GW.get_width(env::DynamicObstaclesUndirected) = size(env.tile_map, 3)
 
-function GW.get_tile_pretty_repr(env::DynamicObstaclesUndirected, i::Integer, j::Integer)
+function GW.get_pretty_tile_map(env::DynamicObstaclesUndirected, i::Integer, j::Integer)
     object = findfirst(@view env.tile_map[:, i, j])
     if isnothing(object)
         return CHARACTERS[end]
@@ -166,7 +166,7 @@ GW.get_action_keys(env::DynamicObstaclesUndirected) = ('w', 's', 'a', 'd')
 GW.get_action_names(env::DynamicObstaclesUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function Base.show(io::IO, ::MIME"text/plain", env::DynamicObstaclesUndirected)
-    str = GW.get_tile_map_pretty_repr(env)
+    str = GW.get_pretty_tile_map(env)
     str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
     print(io, str)
     return nothing

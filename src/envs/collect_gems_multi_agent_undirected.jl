@@ -151,7 +151,7 @@ end
 GW.get_height(env::CollectGemsMultiAgentUndirected) = size(env.tile_map, 2)
 GW.get_width(env::CollectGemsMultiAgentUndirected) = size(env.tile_map, 3)
 
-function GW.get_tile_pretty_repr(env::CollectGemsMultiAgentUndirected, i::Integer, j::Integer)
+function GW.get_pretty_tile_map(env::CollectGemsMultiAgentUndirected, i::Integer, j::Integer)
     tile_map = env.tile_map
     object = findfirst(@view tile_map[:, i, j])
     num_agents = size(tile_map, 1) - 2
@@ -171,7 +171,7 @@ GW.get_action_keys(env::CollectGemsMultiAgentUndirected) = ('w', 's', 'a', 'd')
 GW.get_action_names(env::CollectGemsMultiAgentUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
 
 function Base.show(io::IO, ::MIME"text/plain", env::CollectGemsMultiAgentUndirected)
-    str = GW.get_tile_map_pretty_repr(env)
+    str = GW.get_pretty_tile_map(env)
     str = str * "\nreward = $(env.reward)\ndone = $(env.done)\ncurrent_agent = $(env.current_agent)"
     print(io, str)
     return nothing
