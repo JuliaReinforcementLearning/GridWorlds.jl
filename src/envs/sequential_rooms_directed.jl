@@ -77,42 +77,31 @@ end
 ##### miscellaneous
 #####
 
-CHARACTERS = ('☻', '█', '♥', '→', '↑', '←', '↓', '⋅')
+GW.get_height(env::SequentialRoomsDirected) = GW.get_height(env.env)
+GW.get_width(env::SequentialRoomsDirected) = GW.get_width(env.env)
 
-GW.get_height(env::SequentialRoomsDirected) = size(env.env.tile_map, 2)
-GW.get_width(env::SequentialRoomsDirected) = size(env.env.tile_map, 3)
-
-function GW.get_pretty_tile_map(env::SequentialRoomsDirected, i::Integer, j::Integer)
-    object = findfirst(@view env.env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    elseif object == AGENT
-        return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-GW.get_action_keys(env::SequentialRoomsDirected) = ('w', 's', 'a', 'd')
 GW.get_action_names(env::SequentialRoomsDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
+GW.get_object_names(env::SequentialRoomsDirected) = GW.get_object_names(env.env)
 
 function Base.show(io::IO, ::MIME"text/plain", env::SequentialRoomsDirected)
     tile_map = env.env.tile_map
     small_tile_map = SRUM.get_small_tile_map(tile_map)
 
+    characters = ('☻', '█', '♥', '→', '↑', '←', '↓', '⋅')
+
     _, height_small_tile_map, width_small_tile_map = size(small_tile_map)
 
-    str = ""
+    str = "tile_map:\n"
 
     for i in 1:height_small_tile_map
         for j in 1:width_small_tile_map
             object = findfirst(@view small_tile_map[:, i, j])
             if isnothing(object)
-                char = CHARACTERS[end]
+                char = characters[end]
             elseif object == AGENT
-                char = CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
+                char = characters[NUM_OBJECTS + 1 + env.agent_direction]
             else
-                char = CHARACTERS[object]
+                char = characters[object]
             end
             str = str * char
         end
@@ -122,10 +111,15 @@ function Base.show(io::IO, ::MIME"text/plain", env::SequentialRoomsDirected)
         end
     end
 
-    str = str * "\nreward = $(env.env.reward)\ndone = $(env.env.done)"
+    str = str * "\nreward: $(env.env.reward)"
+    str = str * "\ndone: $(env.env.done)"
+    str = str * "\naction_names: $(GW.get_action_names(env))"
+    str = str * "\nobject_names: $(GW.get_object_names(env))"
     print(io, str)
     return nothing
 end
+
+GW.get_action_keys(env::SequentialRoomsDirected) = ('w', 's', 'a', 'd')
 
 #####
 ##### RLBase API
