@@ -13,7 +13,7 @@ const AGENT = 1
 const GEM = 2
 const NUM_ACTIONS = 3
 
-mutable struct Catcher{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct Catcher{R, RNG} <: GW.AbstractGridWorld
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
     reward::R
@@ -125,29 +125,34 @@ end
 ##### miscellaneous
 #####
 
-CHARACTERS = ('☻', '♦', '⋅')
+GW.get_height(env::Catcher) = size(env.tile_map, 2)
+GW.get_width(env::Catcher) = size(env.tile_map, 3)
 
-GW.get_tile_map_height(env::Catcher) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::Catcher) = size(env.tile_map, 3)
+function GW.get_pretty_tile_map(env::Catcher, position::CartesianIndex{2})
+    characters = ('☻', '♦', '⋅')
 
-function GW.get_tile_pretty_repr(env::Catcher, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
+    object = findfirst(@view env.tile_map[:, position])
     if isnothing(object)
-        return CHARACTERS[end]
+        return characters[end]
     else
-        return CHARACTERS[object]
+        return characters[object]
     end
 end
 
-GW.get_action_keys(env::Catcher) = ('a', 'd', 's')
+GW.get_object_names(env::Catcher) = (:AGENT, :GEM)
 GW.get_action_names(env::Catcher) = (:MOVE_LEFT, :MOVE_RIGHT, :NO_MOVE)
 
 function Base.show(io::IO, ::MIME"text/plain", env::Catcher)
-    str = GW.get_tile_map_pretty_repr(env)
-    str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
+    str = "tile_map:\n"
+    str = str * GW.get_pretty_tile_map(env)
+    str = str * "\nreward: $(env.reward)\ndone: $(env.done)"
+    str = str * "\naction_names: $(GW.get_action_names(env))"
+    str = str * "\nobject_names: $(GW.get_object_names(env))"
     print(io, str)
     return nothing
 end
+
+GW.get_action_keys(env::Catcher) = ('a', 'd', 's')
 
 #####
 ##### RLBase API
@@ -159,7 +164,7 @@ RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: Catcher} 
 
 RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: Catcher} = GW.reset!(env.env)
 
-RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: Catcher} = 1:NUM_ACTIONS
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: Catcher} = Base.OneTo(NUM_ACTIONS)
 (env::GW.RLBaseEnv{E})(action) where {E <: Catcher} = GW.act!(env.env, action)
 
 RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: Catcher} = env.env.reward

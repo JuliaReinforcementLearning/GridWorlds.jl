@@ -4,7 +4,7 @@ A package for creating grid world environments for reinforcement learning in Jul
 
 This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minigrid). In order to cite this package, please refer to the file `CITATION.bib`. Starring the repository on GitHub is also appreciated. For benchmarks, refer to `benchmark/benchmarks.md`.
 
-**Important note:** This package is undergoing heavy internal redesign. This README reflects the new design. The README for the last released version (`0.4.0`) can be found [here](https://github.com/JuliaReinforcementLearning/GridWorlds.jl/tree/c0e86bb6c33819f0e4a4cefe0284d985d0474ed3).
+**Important note:** This package is undergoing heavy internal redesign. This README reflects the new design (some visualizations might be oudated). The README for the last released version (`0.4.0`) can be found [here](https://github.com/JuliaReinforcementLearning/GridWorlds.jl/tree/c0e86bb6c33819f0e4a4cefe0284d985d0474ed3).
 
 ## Table of contents:
 

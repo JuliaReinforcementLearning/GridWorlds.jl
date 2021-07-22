@@ -16,7 +16,7 @@ const DOOR = 4
 const KEY = 5
 const NUM_ACTIONS = 5
 
-mutable struct DoorKeyUndirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct DoorKeyUndirected{R, RNG} <: GW.AbstractGridWorld
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
     reward::R
@@ -180,29 +180,54 @@ end
 ##### miscellaneous
 #####
 
-CHARACTERS = ('☻', '█', '♥', '▒', '⚷', '⋅')
+GW.get_height(env::DoorKeyUndirected) = size(env.tile_map, 2)
+GW.get_width(env::DoorKeyUndirected) = size(env.tile_map, 3)
 
-GW.get_tile_map_height(env::DoorKeyUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::DoorKeyUndirected) = size(env.tile_map, 3)
+GW.get_action_names(env::DoorKeyUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT, :PICK_UP)
+GW.get_object_names(env::DoorKeyUndirected) = (:AGENT, :WALL, :GOAL, :DOOR, :KEY)
 
-function GW.get_tile_pretty_repr(env::DoorKeyUndirected, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
+function GW.get_pretty_tile_map(env::DoorKeyUndirected, position::CartesianIndex{2})
+    characters = ('☻', '█', '♥', '▒', '⚷', '⋅')
+
+    object = findfirst(@view env.tile_map[:, position])
     if isnothing(object)
-        return CHARACTERS[end]
+        return characters[end]
     else
-        return CHARACTERS[object]
+        return characters[object]
     end
 end
 
-GW.get_action_keys(env::DoorKeyUndirected) = ('w', 's', 'a', 'd', 'p')
-GW.get_action_names(env::DoorKeyUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT, :PICK_UP)
+function GW.get_pretty_sub_tile_map(env::DoorKeyUndirected, window_size, position::CartesianIndex{2})
+    tile_map = env.tile_map
+    agent_position = env.agent_position
+
+    characters = ('☻', '█', '♥', '▒', '⚷', '⋅')
+
+    sub_tile_map = GW.get_sub_tile_map(tile_map, agent_position, window_size)
+
+    object = findfirst(@view sub_tile_map[:, position])
+    if isnothing(object)
+        return characters[end]
+    else
+        return characters[object]
+    end
+end
 
 function Base.show(io::IO, ::MIME"text/plain", env::DoorKeyUndirected)
-    str = GW.get_tile_map_pretty_repr(env)
-    str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
+    str = "tile_map:\n"
+    str = str * GW.get_pretty_tile_map(env)
+    str = str * "\nsub_tile_map:\n"
+    str = str * GW.get_pretty_sub_tile_map(env, GW.get_window_size(env))
+    str = str * "\nreward: $(env.reward)"
+    str = str * "\ndone: $(env.done)"
+    str = str * "\nhas_key: $(env.has_key)"
+    str = str * "\naction_names: $(GW.get_action_names(env))"
+    str = str * "\nobject_names: $(GW.get_object_names(env))"
     print(io, str)
     return nothing
 end
+
+GW.get_action_keys(env::DoorKeyUndirected) = ('w', 's', 'a', 'd', 'p')
 
 #####
 ##### RLBase API
@@ -214,7 +239,7 @@ RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: DoorKeyUn
 
 RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: DoorKeyUndirected} = GW.reset!(env.env)
 
-RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: DoorKeyUndirected} = 1:NUM_ACTIONS
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: DoorKeyUndirected} = Base.OneTo(NUM_ACTIONS)
 (env::GW.RLBaseEnv{E})(action) where {E <: DoorKeyUndirected} = GW.act!(env.env, action)
 
 RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: DoorKeyUndirected} = env.env.reward

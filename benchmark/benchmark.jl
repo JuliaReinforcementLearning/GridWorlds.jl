@@ -22,7 +22,7 @@ end
 function benchmark(Env, num_resets, steps_per_reset)
     benchmark = DS.OrderedDict()
 
-    env = GW.RLBaseEnvModule.RLBaseEnv(Env())
+    env = GW.RLBaseEnv(Env())
 
     benchmark[:random_policy] = BT.@benchmark run_random_policy!($(Ref(env))[], $(Ref(num_resets))[], $(Ref(steps_per_reset))[])
     benchmark[:reset] = BT.@benchmark RLBase.reset!($(Ref(env))[])

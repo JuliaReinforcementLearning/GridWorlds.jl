@@ -16,7 +16,7 @@ const BODY = 3
 const FOOD = 4
 const NUM_ACTIONS = 4
 
-mutable struct Snake{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct Snake{R, RNG} <: GW.AbstractGridWorld
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
     reward::R
@@ -152,29 +152,53 @@ end
 ##### miscellaneous
 #####
 
-CHARACTERS = ('☻', '█', '∘', '♦', '⋅')
+GW.get_height(env::Snake) = size(env.tile_map, 2)
+GW.get_width(env::Snake) = size(env.tile_map, 3)
 
-GW.get_tile_map_height(env::Snake) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::Snake) = size(env.tile_map, 3)
+GW.get_action_names(env::Snake) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
+GW.get_object_names(env::Snake) = (:AGENT, :WALL, :BODY, :FOOD)
 
-function GW.get_tile_pretty_repr(env::Snake, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
+function GW.get_pretty_tile_map(env::Snake, position::CartesianIndex{2})
+    characters = ('☻', '█', '∘', '♦', '⋅')
+
+    object = findfirst(@view env.tile_map[:, position])
     if isnothing(object)
-        return CHARACTERS[end]
+        return characters[end]
     else
-        return CHARACTERS[object]
+        return characters[object]
     end
 end
 
-GW.get_action_keys(env::Snake) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::Snake) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
+function GW.get_pretty_sub_tile_map(env::Snake, window_size, position::CartesianIndex{2})
+    tile_map = env.tile_map
+    agent_position = env.agent_position
+
+    characters = ('☻', '█', '∘', '♦', '⋅')
+
+    sub_tile_map = GW.get_sub_tile_map(tile_map, agent_position, window_size)
+
+    object = findfirst(@view sub_tile_map[:, position])
+    if isnothing(object)
+        return characters[end]
+    else
+        return characters[object]
+    end
+end
 
 function Base.show(io::IO, ::MIME"text/plain", env::Snake)
-    str = GW.get_tile_map_pretty_repr(env)
-    str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
+    str = "tile_map:\n"
+    str = str * GW.get_pretty_tile_map(env)
+    str = str * "\nsub_tile_map:\n"
+    str = str * GW.get_pretty_sub_tile_map(env, GW.get_window_size(env))
+    str = str * "\nreward: $(env.reward)"
+    str = str * "\ndone: $(env.done)"
+    str = str * "\naction_names: $(GW.get_action_names(env))"
+    str = str * "\nobject_names: $(GW.get_object_names(env))"
     print(io, str)
     return nothing
 end
+
+GW.get_action_keys(env::Snake) = ('w', 's', 'a', 'd')
 
 #####
 ##### RLBase API
@@ -186,7 +210,7 @@ RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.Observation) where {E <: Snake} = en
 
 RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: Snake} = GW.reset!(env.env)
 
-RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: Snake} = 1:NUM_ACTIONS
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: Snake} = Base.OneTo(NUM_ACTIONS)
 (env::GW.RLBaseEnv{E})(action) where {E <: Snake} = GW.act!(env.env, action)
 
 RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: Snake} = env.env.reward

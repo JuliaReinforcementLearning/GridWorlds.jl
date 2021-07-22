@@ -16,7 +16,7 @@ const BOX = SUM.BOX
 const TARGET = SUM.TARGET
 const NUM_ACTIONS = 4
 
-mutable struct SokobanDirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct SokobanDirected{R, RNG} <: GW.AbstractGridWorld
     env::SUM.SokobanUndirected{R, RNG}
     agent_direction::Int
 end
@@ -92,31 +92,59 @@ end
 ##### miscellaneous
 #####
 
-CHARACTERS = ('☻', '█', '▒', '✖', '→', '↑', '←', '↓', '⋅')
+GW.get_height(env::SokobanDirected) = GW.get_height(env.env)
+GW.get_width(env::SokobanDirected) = GW.get_width(env.env)
 
-GW.get_tile_map_height(env::SokobanDirected) = size(env.env.tile_map, 2)
-GW.get_tile_map_width(env::SokobanDirected) = size(env.env.tile_map, 3)
+GW.get_action_names(env::SokobanDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
+GW.get_object_names(env::SokobanDirected) = GW.get_object_names(env.env)
 
-function GW.get_tile_pretty_repr(env::SokobanDirected, i::Integer, j::Integer)
-    object = findfirst(@view env.env.tile_map[:, i, j])
+function GW.get_pretty_tile_map(env::SokobanDirected, position::CartesianIndex{2})
+    characters = ('☻', '█', '▒', '✖', '→', '↑', '←', '↓', '⋅')
+
+    object = findfirst(@view env.env.tile_map[:, position])
     if isnothing(object)
-        return CHARACTERS[end]
+        return characters[end]
     elseif object == AGENT
         return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
     else
-        return CHARACTERS[object]
+        return characters[object]
     end
 end
 
-GW.get_action_keys(env::SokobanDirected) = ('w', 's', 'a', 'd')
-GW.get_action_names(env::SokobanDirected) = (:MOVE_FORWARD, :MOVE_BACKWARD, :TURN_LEFT, :TURN_RIGHT)
+function GW.get_pretty_sub_tile_map(env::SokobanDirected, window_size, position::CartesianIndex{2})
+    tile_map = env.env.tile_map
+    agent_position = env.env.agent_position
+    agent_direction = env.agent_direction
+
+    characters = ('☻', '█', '▒', '✖', '→', '↑', '←', '↓', '⋅')
+
+    sub_tile_map = GW.get_sub_tile_map(tile_map, agent_position, window_size, agent_direction)
+
+    object = findfirst(@view sub_tile_map[:, position])
+    if isnothing(object)
+        return characters[end]
+    elseif object == AGENT
+        return '↓'
+    else
+        return characters[object]
+    end
+end
 
 function Base.show(io::IO, ::MIME"text/plain", env::SokobanDirected)
-    str = GW.get_tile_map_pretty_repr(env)
-    str = str * "\nreward = $(env.env.reward)\ndone = $(env.env.done)\nlevel_number = $(env.env.level_number)"
+    str = "tile_map:\n"
+    str = str * GW.get_pretty_tile_map(env)
+    str = str * "\nsub_tile_map:\n"
+    str = str * GW.get_pretty_sub_tile_map(env, GW.get_window_size(env))
+    str = str * "\nreward: $(env.env.reward)"
+    str = str * "\ndone: $(env.env.done)"
+    str = str * "\nlevel_number: $(env.env.level_number)"
+    str = str * "\naction_names: $(GW.get_action_names(env))"
+    str = str * "\nobject_names: $(GW.get_object_names(env))"
     print(io, str)
     return nothing
 end
+
+GW.get_action_keys(env::SokobanDirected) = ('w', 's', 'a', 'd')
 
 #####
 ##### RLBase API
@@ -128,7 +156,7 @@ RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: SokobanDi
 
 RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: SokobanDirected} = GW.reset!(env.env)
 
-RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: SokobanDirected} = 1:NUM_ACTIONS
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: SokobanDirected} = Base.OneTo(NUM_ACTIONS)
 (env::GW.RLBaseEnv{E})(action) where {E <: SokobanDirected} = GW.act!(env.env, action)
 
 RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: SokobanDirected} = env.env.env.reward

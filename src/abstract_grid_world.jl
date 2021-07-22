@@ -1,34 +1,35 @@
-abstract type AbstractGridWorldGame end
+abstract type AbstractGridWorld end
 
 #####
 ##### Game logic methods
 #####
 
-reset!(env::AbstractGridWorldGame) = error("Method not implemented for $(typeof(env))")
-act!(env::AbstractGridWorldGame) = error("Method not implemented for $(typeof(env))")
+reset!(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
+act!(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
 
 #####
 ##### Optional methods for pretty printing, playing, etc...
 #####
 
-get_tile_pretty_repr(env::AbstractGridWorldGame, i::Integer, j::Integer) = error("Method not implemented for $(typeof(env))")
-get_sub_tile_map_pretty_repr(env::AbstractGridWorldGame, position::CartesianIndex{2}) = error("Method not implemented for $(typeof(env))")
-get_action_keys(env::AbstractGridWorldGame) = error("Method not implemented for $(typeof(env))")
-get_action_names(env::AbstractGridWorldGame) = error("Method not implemented for $(typeof(env))")
-get_tile_map_height(env::AbstractGridWorldGame) = error("Method not implemented for $(typeof(env))")
-get_tile_map_width(env::AbstractGridWorldGame) = error("Method not implemented for $(typeof(env))")
+get_pretty_tile_map(env::AbstractGridWorld, i::Integer, j::Integer) = error("Method not implemented for $(typeof(env))")
+get_pretty_sub_tile_map(env::AbstractGridWorld, position::CartesianIndex{2}) = error("Method not implemented for $(typeof(env))")
+get_action_keys(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
+get_action_names(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
+get_object_names(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
+get_height(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
+get_width(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
 
-function get_tile_map_pretty_repr(env::AbstractGridWorldGame)
-    height_tile_map = get_tile_map_height(env)
-    width_tile_map = get_tile_map_width(env)
+function get_pretty_tile_map(env::AbstractGridWorld)
+    height = get_height(env)
+    width = get_width(env)
 
     str = ""
 
-    for i in 1:height_tile_map
-        for j in 1:width_tile_map
-            str = str * get_tile_pretty_repr(env, i, j)
+    for i in 1:height
+        for j in 1:width
+            str = str * get_pretty_tile_map(env, CartesianIndex(i, j))
         end
-        if i < height_tile_map
+        if i < height
             str = str * "\n"
         end
     end
@@ -36,22 +37,22 @@ function get_tile_map_pretty_repr(env::AbstractGridWorldGame)
     return str
 end
 
-function get_window_size(env::AbstractGridWorldGame)
-    height = get_tile_map_height(env)
-    width = get_tile_map_width(env)
+function get_window_size(env::AbstractGridWorld)
+    height = get_height(env)
+    width = get_width(env)
     return (2 * (height ÷ 4) + 1, 2 * (width ÷ 4) + 1)
 end
 
-function get_sub_tile_map_pretty_repr(env::AbstractGridWorldGame, window_size)
-    height_sub_tile_map, width_sub_tile_map = window_size
+function get_pretty_sub_tile_map(env::AbstractGridWorld, window_size)
+    height, width = window_size
 
     str = ""
 
-    for i in 1:height_sub_tile_map
-        for j in 1:width_sub_tile_map
-            str = str * get_sub_tile_map_pretty_repr(env, window_size, CartesianIndex(i, j))
+    for i in 1:height
+        for j in 1:width
+            str = str * get_pretty_sub_tile_map(env, window_size, CartesianIndex(i, j))
         end
-        if i < height_sub_tile_map
+        if i < height
             str = str * "\n"
         end
     end

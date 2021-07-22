@@ -20,7 +20,7 @@ end
 
 Room(top_left, height, width) = Room(CartesianIndices((top_left.I[1] : top_left.I[1] + height - 1, top_left.I[2] : top_left.I[2] + width - 1)))
 
-mutable struct SequentialRoomsUndirected{R, RNG} <: GW.AbstractGridWorldGame
+mutable struct SequentialRoomsUndirected{R, RNG} <: GW.AbstractGridWorld
     tile_map::BitArray{3}
     agent_position::CartesianIndex{2}
     reward::R
@@ -294,38 +294,29 @@ end
 ##### miscellaneous
 #####
 
-CHARACTERS = ('☻', '█', '♥', '⋅')
+GW.get_height(env::SequentialRoomsUndirected) = size(env.tile_map, 2)
+GW.get_width(env::SequentialRoomsUndirected) = size(env.tile_map, 3)
 
-GW.get_tile_map_height(env::SequentialRoomsUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::SequentialRoomsUndirected) = size(env.tile_map, 3)
-
-function GW.get_tile_pretty_repr(env::SequentialRoomsUndirected, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
-    if isnothing(object)
-        return CHARACTERS[end]
-    else
-        return CHARACTERS[object]
-    end
-end
-
-GW.get_action_keys(env::SequentialRoomsUndirected) = ('w', 's', 'a', 'd')
 GW.get_action_names(env::SequentialRoomsUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
+GW.get_object_names(env::SequentialRoomsUndirected) = (:AGENT, :WALL, :GOAL)
 
 function Base.show(io::IO, ::MIME"text/plain", env::SequentialRoomsUndirected)
     tile_map = env.tile_map
     small_tile_map = get_small_tile_map(tile_map)
 
+    characters = ('☻', '█', '♥', '⋅')
+
     _, height_small_tile_map, width_small_tile_map = size(small_tile_map)
 
-    str = ""
+    str = "tile_map:\n"
 
     for i in 1:height_small_tile_map
         for j in 1:width_small_tile_map
             object = findfirst(small_tile_map[:, i, j])
             if isnothing(object)
-                char = CHARACTERS[end]
+                char = characters[end]
             else
-                char = CHARACTERS[object]
+                char = characters[object]
             end
             str = str * char
         end
@@ -335,10 +326,15 @@ function Base.show(io::IO, ::MIME"text/plain", env::SequentialRoomsUndirected)
         end
     end
 
-    str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
+    str = str * "\nreward: $(env.reward)"
+    str = str * "\ndone: $(env.done)"
+    str = str * "\naction_names: $(GW.get_action_names(env))"
+    str = str * "\nobject_names: $(GW.get_object_names(env))"
     print(io, str)
     return nothing
 end
+
+GW.get_action_keys(env::SequentialRoomsUndirected) = ('w', 's', 'a', 'd')
 
 #####
 ##### RLBase API
@@ -350,7 +346,7 @@ RLBase.state(env::GW.RLBaseEnv{E}, ::RLBase.InternalState) where {E <: Sequentia
 
 RLBase.reset!(env::GW.RLBaseEnv{E}) where {E <: SequentialRoomsUndirected} = GW.reset!(env.env)
 
-RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: SequentialRoomsUndirected} = 1:NUM_ACTIONS
+RLBase.action_space(env::GW.RLBaseEnv{E}) where {E <: SequentialRoomsUndirected} = Base.OneTo(NUM_ACTIONS)
 (env::GW.RLBaseEnv{E})(action) where {E <: SequentialRoomsUndirected} = GW.act!(env.env, action)
 
 RLBase.reward(env::GW.RLBaseEnv{E}) where {E <: SequentialRoomsUndirected} = env.env.reward
