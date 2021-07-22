@@ -125,29 +125,34 @@ end
 ##### miscellaneous
 #####
 
-CHARACTERS = ('☻', '♦', '⋅')
-
 GW.get_height(env::Catcher) = size(env.tile_map, 2)
 GW.get_width(env::Catcher) = size(env.tile_map, 3)
 
-function GW.get_pretty_tile_map(env::Catcher, i::Integer, j::Integer)
-    object = findfirst(@view env.tile_map[:, i, j])
+function GW.get_pretty_tile_map(env::Catcher, position::CartesianIndex{2})
+    characters = ('☻', '♦', '⋅')
+
+    object = findfirst(@view env.tile_map[:, position])
     if isnothing(object)
-        return CHARACTERS[end]
+        return characters[end]
     else
-        return CHARACTERS[object]
+        return characters[object]
     end
 end
 
-GW.get_action_keys(env::Catcher) = ('a', 'd', 's')
+GW.get_object_names(env::Catcher) = (:AGENT, :GEM)
 GW.get_action_names(env::Catcher) = (:MOVE_LEFT, :MOVE_RIGHT, :NO_MOVE)
 
 function Base.show(io::IO, ::MIME"text/plain", env::Catcher)
-    str = GW.get_pretty_tile_map(env)
-    str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
+    str = "tile_map:\n"
+    str = str * GW.get_pretty_tile_map(env)
+    str = str * "\nreward: $(env.reward)\ndone: $(env.done)"
+    str = str * "\naction_names: $(GW.get_action_names(env))"
+    str = str * "\nobject_names: $(GW.get_object_names(env))"
     print(io, str)
     return nothing
 end
+
+GW.get_action_keys(env::Catcher) = ('a', 'd', 's')
 
 #####
 ##### RLBase API
