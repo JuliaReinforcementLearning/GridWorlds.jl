@@ -130,8 +130,8 @@ end
 
 CHARACTERS = ('☻', '█', '♥', '⋅')
 
-GW.get_tile_map_height(env::GridRoomsUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::GridRoomsUndirected) = size(env.tile_map, 3)
+GW.get_height(env::GridRoomsUndirected) = size(env.tile_map, 2)
+GW.get_width(env::GridRoomsUndirected) = size(env.tile_map, 3)
 
 function GW.get_tile_pretty_repr(env::GridRoomsUndirected, i::Integer, j::Integer)
     object = findfirst(@view env.tile_map[:, i, j])

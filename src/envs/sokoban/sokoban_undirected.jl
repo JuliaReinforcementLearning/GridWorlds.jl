@@ -194,8 +194,8 @@ end
 
 CHARACTERS = ('☻', '█', '▒', '✖', '⋅')
 
-GW.get_tile_map_height(env::SokobanUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::SokobanUndirected) = size(env.tile_map, 3)
+GW.get_height(env::SokobanUndirected) = size(env.tile_map, 2)
+GW.get_width(env::SokobanUndirected) = size(env.tile_map, 3)
 
 function GW.get_tile_pretty_repr(env::SokobanUndirected, i::Integer, j::Integer)
     object = findfirst(@view env.tile_map[:, i, j])

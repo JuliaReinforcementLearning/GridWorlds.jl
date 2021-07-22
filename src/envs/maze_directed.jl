@@ -79,8 +79,8 @@ end
 
 CHARACTERS = ('☻', '█', '♥', '→', '↑', '←', '↓', '⋅')
 
-GW.get_tile_map_height(env::MazeDirected) = size(env.env.tile_map, 2)
-GW.get_tile_map_width(env::MazeDirected) = size(env.env.tile_map, 3)
+GW.get_height(env::MazeDirected) = size(env.env.tile_map, 2)
+GW.get_width(env::MazeDirected) = size(env.env.tile_map, 3)
 
 function GW.get_tile_pretty_repr(env::MazeDirected, i::Integer, j::Integer)
     object = findfirst(@view env.env.tile_map[:, i, j])

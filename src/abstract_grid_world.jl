@@ -15,20 +15,20 @@ get_tile_pretty_repr(env::AbstractGridWorld, i::Integer, j::Integer) = error("Me
 get_sub_tile_map_pretty_repr(env::AbstractGridWorld, position::CartesianIndex{2}) = error("Method not implemented for $(typeof(env))")
 get_action_keys(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
 get_action_names(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
-get_tile_map_height(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
-get_tile_map_width(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
+get_height(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
+get_width(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
 
 function get_tile_map_pretty_repr(env::AbstractGridWorld)
-    height_tile_map = get_tile_map_height(env)
-    width_tile_map = get_tile_map_width(env)
+    height = get_height(env)
+    width = get_width(env)
 
     str = ""
 
-    for i in 1:height_tile_map
-        for j in 1:width_tile_map
+    for i in 1:height
+        for j in 1:width
             str = str * get_tile_pretty_repr(env, i, j)
         end
-        if i < height_tile_map
+        if i < height
             str = str * "\n"
         end
     end
@@ -37,21 +37,21 @@ function get_tile_map_pretty_repr(env::AbstractGridWorld)
 end
 
 function get_window_size(env::AbstractGridWorld)
-    height = get_tile_map_height(env)
-    width = get_tile_map_width(env)
+    height = get_height(env)
+    width = get_width(env)
     return (2 * (height ÷ 4) + 1, 2 * (width ÷ 4) + 1)
 end
 
 function get_sub_tile_map_pretty_repr(env::AbstractGridWorld, window_size)
-    height_sub_tile_map, width_sub_tile_map = window_size
+    height, width = window_size
 
     str = ""
 
-    for i in 1:height_sub_tile_map
-        for j in 1:width_sub_tile_map
+    for i in 1:height
+        for j in 1:width
             str = str * get_sub_tile_map_pretty_repr(env, window_size, CartesianIndex(i, j))
         end
-        if i < height_sub_tile_map
+        if i < height
             str = str * "\n"
         end
     end

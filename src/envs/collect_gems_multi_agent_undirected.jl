@@ -148,8 +148,8 @@ end
 ##### miscellaneous
 #####
 
-GW.get_tile_map_height(env::CollectGemsMultiAgentUndirected) = size(env.tile_map, 2)
-GW.get_tile_map_width(env::CollectGemsMultiAgentUndirected) = size(env.tile_map, 3)
+GW.get_height(env::CollectGemsMultiAgentUndirected) = size(env.tile_map, 2)
+GW.get_width(env::CollectGemsMultiAgentUndirected) = size(env.tile_map, 3)
 
 function GW.get_tile_pretty_repr(env::CollectGemsMultiAgentUndirected, i::Integer, j::Integer)
     tile_map = env.tile_map

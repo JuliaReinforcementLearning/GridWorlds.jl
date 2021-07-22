@@ -84,8 +84,8 @@ end
 
 CHARACTERS = ('☻', '█', '♥', '⊗', '→', '↑', '←', '↓', '⋅')
 
-GW.get_tile_map_height(env::DynamicObstaclesDirected) = size(env.env.tile_map, 2)
-GW.get_tile_map_width(env::DynamicObstaclesDirected) = size(env.env.tile_map, 3)
+GW.get_height(env::DynamicObstaclesDirected) = size(env.env.tile_map, 2)
+GW.get_width(env::DynamicObstaclesDirected) = size(env.env.tile_map, 3)
 
 function GW.get_tile_pretty_repr(env::DynamicObstaclesDirected, i::Integer, j::Integer)
     object = findfirst(@view env.env.tile_map[:, i, j])
