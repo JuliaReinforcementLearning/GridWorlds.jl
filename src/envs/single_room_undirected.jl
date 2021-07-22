@@ -123,7 +123,7 @@ function GW.get_pretty_tile_map(env::SingleRoomUndirected, i::Integer, j::Intege
     end
 end
 
-function GW.get_sub_tile_map_pretty_repr(env::SingleRoomUndirected, window_size, position::CartesianIndex{2})
+function GW.get_pretty_sub_tile_map(env::SingleRoomUndirected, window_size, position::CartesianIndex{2})
     tile_map = env.tile_map
     agent_position = env.agent_position
 
@@ -144,7 +144,7 @@ function Base.show(io::IO, ::MIME"text/plain", env::SingleRoomUndirected)
     str = "tile_map:\n"
     str = str * GW.get_pretty_tile_map(env)
     str = str * "\nsub_tile_map:\n"
-    str = str * GW.get_sub_tile_map_pretty_repr(env, GW.get_window_size(env))
+    str = str * GW.get_pretty_sub_tile_map(env, GW.get_window_size(env))
     str = str * "\nreward = $(env.reward)\ndone = $(env.done)"
     print(io, str)
     return nothing

@@ -12,7 +12,7 @@ act!(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))"
 #####
 
 get_pretty_tile_map(env::AbstractGridWorld, i::Integer, j::Integer) = error("Method not implemented for $(typeof(env))")
-get_sub_tile_map_pretty_repr(env::AbstractGridWorld, position::CartesianIndex{2}) = error("Method not implemented for $(typeof(env))")
+get_pretty_sub_tile_map(env::AbstractGridWorld, position::CartesianIndex{2}) = error("Method not implemented for $(typeof(env))")
 get_action_keys(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
 get_action_names(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
 get_height(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
@@ -42,14 +42,14 @@ function get_window_size(env::AbstractGridWorld)
     return (2 * (height ÷ 4) + 1, 2 * (width ÷ 4) + 1)
 end
 
-function get_sub_tile_map_pretty_repr(env::AbstractGridWorld, window_size)
+function get_pretty_sub_tile_map(env::AbstractGridWorld, window_size)
     height, width = window_size
 
     str = ""
 
     for i in 1:height
         for j in 1:width
-            str = str * get_sub_tile_map_pretty_repr(env, window_size, CartesianIndex(i, j))
+            str = str * get_pretty_sub_tile_map(env, window_size, CartesianIndex(i, j))
         end
         if i < height
             str = str * "\n"
