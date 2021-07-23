@@ -128,40 +128,31 @@ function GW.reset!(env::DoorKeyUndirected)
 end
 
 function GW.act!(env::DoorKeyUndirected, action)
-    tile_map = env.tile_map
+    @assert action in Base.OneTo(NUM_ACTIONS) "Invalid action $(action). Action must be in Base.OneTo($(NUM_ACTIONS))"
 
-    if action == 1
-        new_agent_position = CartesianIndex(GW.move_up(env.agent_position.I...))
-        if !(tile_map[DOOR, new_agent_position] || tile_map[WALL, new_agent_position]) || (tile_map[DOOR, new_agent_position] && env.has_key)
-            tile_map[AGENT, env.agent_position] = false
-            env.agent_position = new_agent_position
-            tile_map[AGENT, new_agent_position] = true
+    tile_map = env.tile_map
+    agent_position = env.agent_position
+
+    if action in Base.OneTo(4)
+        if action == 1
+            new_agent_position = GW.move_up(agent_position)
+        elseif action == 2
+            new_agent_position = GW.move_down(agent_position)
+        elseif action == 3
+            new_agent_position = GW.move_left(agent_position)
+        else
+            new_agent_position = GW.move_right(agent_position)
         end
-    elseif action == 2
-        new_agent_position = CartesianIndex(GW.move_down(env.agent_position.I...))
+
         if !(tile_map[DOOR, new_agent_position] || tile_map[WALL, new_agent_position]) || (tile_map[DOOR, new_agent_position] && env.has_key)
-            tile_map[AGENT, env.agent_position] = false
-            env.agent_position = new_agent_position
-            tile_map[AGENT, new_agent_position] = true
-        end
-    elseif action == 3
-        new_agent_position = CartesianIndex(GW.move_left(env.agent_position.I...))
-        if !(tile_map[DOOR, new_agent_position] || tile_map[WALL, new_agent_position]) || (tile_map[DOOR, new_agent_position] && env.has_key)
-            tile_map[AGENT, env.agent_position] = false
-            env.agent_position = new_agent_position
-            tile_map[AGENT, new_agent_position] = true
-        end
-    elseif action == 4
-        new_agent_position = CartesianIndex(GW.move_right(env.agent_position.I...))
-        if !(tile_map[DOOR, new_agent_position] || tile_map[WALL, new_agent_position]) || (tile_map[DOOR, new_agent_position] && env.has_key)
-            tile_map[AGENT, env.agent_position] = false
+            tile_map[AGENT, agent_position] = false
             env.agent_position = new_agent_position
             tile_map[AGENT, new_agent_position] = true
         end
     else
-        if tile_map[KEY, env.agent_position]
+        if tile_map[KEY, agent_position]
             env.has_key = true
-            tile_map[KEY, env.agent_position] = false
+            tile_map[KEY, agent_position] = false
         end
     end
 

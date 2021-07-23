@@ -78,26 +78,26 @@ function GW.reset!(env::TransportUndirected)
 
     env.reward = zero(env.reward)
     env.done = false
+    env.has_gem = false
 
     return nothing
 end
 
 function GW.act!(env::TransportUndirected, action)
-    @assert action in Base.OneTo(NUM_ACTIONS) "Invalid action $(action)"
+    @assert action in Base.OneTo(NUM_ACTIONS) "Invalid action $(action). Action must be in Base.OneTo($(NUM_ACTIONS))"
 
     tile_map = env.tile_map
-
     agent_position = env.agent_position
 
-    if action in 1:4
+    if action in Base.OneTo(4)
         if action == 1
-            new_agent_position = CartesianIndex(GW.move_up(agent_position.I...))
+            new_agent_position = GW.move_up(agent_position)
         elseif action == 2
-            new_agent_position = CartesianIndex(GW.move_down(agent_position.I...))
+            new_agent_position = GW.move_down(agent_position)
         elseif action == 3
-            new_agent_position = CartesianIndex(GW.move_left(agent_position.I...))
+            new_agent_position = GW.move_left(agent_position)
         else
-            new_agent_position = CartesianIndex(GW.move_right(agent_position.I...))
+            new_agent_position = GW.move_right(agent_position)
         end
 
         if !tile_map[WALL, new_agent_position]
@@ -105,13 +105,17 @@ function GW.act!(env::TransportUndirected, action)
             env.agent_position = new_agent_position
             tile_map[AGENT, new_agent_position] = true
         end
-    elseif action == 5 && tile_map[GEM, agent_position]
-        tile_map[GEM, agent_position] = false
-        env.has_gem = true
-    elseif action == 6 && env.has_gem
-        env.has_gem = false
-        env.gem_position = agent_position
-        tile_map[GEM, agent_position] = true
+    elseif action == 5
+        if tile_map[GEM, agent_position]
+            tile_map[GEM, agent_position] = false
+            env.has_gem = true
+        end
+    else
+        if env.has_gem
+            env.has_gem = false
+            env.gem_position = agent_position
+            tile_map[GEM, agent_position] = true
+        end
     end
 
     if tile_map[GEM, env.target_position]

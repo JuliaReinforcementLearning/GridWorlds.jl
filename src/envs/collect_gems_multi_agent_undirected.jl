@@ -97,7 +97,7 @@ function GW.reset!(env::CollectGemsMultiAgentUndirected)
 end
 
 function GW.act!(env::CollectGemsMultiAgentUndirected, action)
-    @assert action in Base.OneTo(NUM_ACTIONS) "Invalid action $(action)"
+    @assert action in Base.OneTo(NUM_ACTIONS) "Invalid action $(action). Action must be in Base.OneTo($(NUM_ACTIONS))"
 
     tile_map = env.tile_map
     agent_positions = env.agent_positions
@@ -109,13 +109,13 @@ function GW.act!(env::CollectGemsMultiAgentUndirected, action)
     GEM = num_agents + 2
 
     if action == 1
-        new_agent_position = CartesianIndex(GW.move_up(agent_position.I...))
+        new_agent_position = GW.move_up(agent_position)
     elseif action == 2
-        new_agent_position = CartesianIndex(GW.move_down(agent_position.I...))
+        new_agent_position = GW.move_down(agent_position)
     elseif action == 3
-        new_agent_position = CartesianIndex(GW.move_left(agent_position.I...))
+        new_agent_position = GW.move_left(agent_position)
     else
-        new_agent_position = CartesianIndex(GW.move_right(agent_position.I...))
+        new_agent_position = GW.move_right(agent_position)
     end
 
     if !any(@view tile_map[1 : num_agents + 1, new_agent_position]) # assuming WALL = num_agents + 1

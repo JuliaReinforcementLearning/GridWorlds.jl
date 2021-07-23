@@ -36,23 +36,24 @@ function GW.reset!(env::SokobanDirected)
 end
 
 function GW.act!(env::SokobanDirected, action)
+    @assert action in Base.OneTo(NUM_ACTIONS) "Invalid action $(action). Action must be in Base.OneTo($(NUM_ACTIONS))"
+
     inner_env = env.env
     tile_map = inner_env.tile_map
     box_positions = inner_env.box_positions
     box_reward = inner_env.box_reward
 
     r1 = sum(pos -> tile_map[TARGET, pos], box_positions) * box_reward
+    agent_position = inner_env.agent_position
+    agent_direction = env.agent_direction
 
-    if (action == 1) || (action == 2)
-        agent_position = inner_env.agent_position
-        agent_direction = env.agent_direction
-
+    if action in Base.OneTo(2)
         if action == 1
-            dest = CartesianIndex(GW.move_forward(agent_direction, agent_position.I...))
-            beyond_dest = CartesianIndex(GW.move_forward(agent_direction, dest.I...))
+            dest = GW.move_forward(agent_position, agent_direction)
+            beyond_dest = GW.move_forward(dest, agent_direction)
         else
-            dest = CartesianIndex(GW.move_backward(agent_direction, agent_position.I...))
-            beyond_dest = CartesianIndex(GW.move_backward(agent_direction, dest.I...))
+            dest = GW.move_backward(agent_position, agent_direction)
+            beyond_dest = GW.move_backward(dest, agent_direction)
         end
 
         if !tile_map[WALL, dest]
@@ -65,7 +66,7 @@ function GW.act!(env::SokobanDirected, action)
                     tile_map[BOX, dest] = false
                     tile_map[BOX, beyond_dest] = true
 
-                    box_idx = findfirst(pos -> pos == dest, box_positions)
+                    box_idx = findfirst(==(dest), box_positions)
                     box_positions[box_idx] = beyond_dest
                     tile_map[AGENT, agent_position] = false
                     inner_env.agent_position = dest
@@ -74,11 +75,9 @@ function GW.act!(env::SokobanDirected, action)
             end
         end
     elseif action == 3
-        env.agent_direction = GW.turn_left(env.agent_direction)
-    elseif action == 4
-        env.agent_direction = GW.turn_right(env.agent_direction)
+        env.agent_direction = GW.turn_left(agent_direction)
     else
-        error("Invalid action $(action)")
+        env.agent_direction = GW.turn_right(agent_direction)
     end
 
     inner_env.done = all(pos -> tile_map[TARGET, pos], box_positions)
@@ -105,7 +104,7 @@ function GW.get_pretty_tile_map(env::SokobanDirected, position::CartesianIndex{2
     if isnothing(object)
         return characters[end]
     elseif object == AGENT
-        return CHARACTERS[NUM_OBJECTS + 1 + env.agent_direction]
+        return characters[NUM_OBJECTS + 1 + env.agent_direction]
     else
         return characters[object]
     end

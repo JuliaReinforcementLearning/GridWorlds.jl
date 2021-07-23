@@ -89,35 +89,36 @@ function GW.reset!(env::Snake)
 end
 
 function GW.act!(env::Snake, action)
+    @assert action in Base.OneTo(NUM_ACTIONS) "Invalid action $(action). Action must be in Base.OneTo($(NUM_ACTIONS))"
+
     tile_map = env.tile_map
     rng = env.rng
     body = env.body
     _, height, width = size(tile_map)
+    agent_position = env.agent_position
 
     if action == 1
-        dest = CartesianIndex(GW.move_up(env.agent_position.I...))
+        new_agent_position = GW.move_up(agent_position)
     elseif action == 2
-        dest = CartesianIndex(GW.move_down(env.agent_position.I...))
+        new_agent_position = GW.move_down(agent_position)
     elseif action == 3
-        dest = CartesianIndex(GW.move_left(env.agent_position.I...))
-    elseif action == 4
-        dest = CartesianIndex(GW.move_right(env.agent_position.I...))
+        new_agent_position = GW.move_left(agent_position)
     else
-        error("Invalid action $(action)")
+        new_agent_position = GW.move_right(agent_position)
     end
 
-    if (tile_map[WALL, dest] || tile_map[BODY, dest])
+    if (tile_map[WALL, new_agent_position] || tile_map[BODY, new_agent_position])
         env.reward = env.terminal_penalty
         env.done = true
-    elseif tile_map[FOOD, dest]
-        tile_map[AGENT, env.agent_position] = false
-        env.agent_position = dest
-        tile_map[AGENT, dest] = true
+    elseif tile_map[FOOD, new_agent_position]
+        tile_map[AGENT, agent_position] = false
+        env.agent_position = new_agent_position
+        tile_map[AGENT, new_agent_position] = true
 
-        DS.enqueue!(body, dest)
-        tile_map[BODY, dest] = true
+        DS.enqueue!(body, new_agent_position)
+        tile_map[BODY, new_agent_position] = true
 
-        tile_map[FOOD, dest] = false
+        tile_map[FOOD, new_agent_position] = false
 
         if length(body) == (height - 2) * (width - 2)
             env.reward = env.food_reward + env.terminal_reward
@@ -131,12 +132,12 @@ function GW.act!(env::Snake, action)
             env.done = false
         end
     else
-        tile_map[AGENT, env.agent_position] = false
-        env.agent_position = dest
-        tile_map[AGENT, dest] = true
+        tile_map[AGENT, agent_position] = false
+        env.agent_position = new_agent_position
+        tile_map[AGENT, new_agent_position] = true
 
-        DS.enqueue!(body, dest)
-        tile_map[BODY, dest] = true
+        DS.enqueue!(body, new_agent_position)
+        tile_map[BODY, new_agent_position] = true
 
         last_position = DS.dequeue!(body)
         tile_map[BODY, last_position] = false

@@ -69,39 +69,41 @@ function GW.reset!(env::Catcher)
 end
 
 function GW.act!(env::Catcher, action)
+    @assert action in Base.OneTo(NUM_ACTIONS) "Invalid action $(action). Action must be in Base.OneTo($(NUM_ACTIONS))"
+
     tile_map = env.tile_map
     rng = env.rng
     _, height, width = size(tile_map)
+    agent_position = env.agent_position
+    gem_position = env.gem_position
 
     if action == 1
-        if env.agent_position[2] == 1
-            new_agent_position = env.agent_position
+        if agent_position[2] == 1
+            new_agent_position = agent_position
         else
-            new_agent_position = CartesianIndex(GW.move_left(env.agent_position.I...))
+            new_agent_position = GW.move_left(agent_position)
         end
     elseif action == 2
-        if env.agent_position[2] == width
-            new_agent_position = env.agent_position
+        if agent_position[2] == width
+            new_agent_position = agent_position
         else
-            new_agent_position = CartesianIndex(GW.move_right(env.agent_position.I...))
+            new_agent_position = GW.move_right(agent_position)
         end
-    elseif action == 3
-        new_agent_position = env.agent_position
     else
-        error("Invalid action $(action)")
+        new_agent_position = agent_position
     end
 
-    tile_map[AGENT, env.agent_position] = false
+    tile_map[AGENT, agent_position] = false
     env.agent_position = new_agent_position
     tile_map[AGENT, new_agent_position] = true
 
-    if env.gem_position[1] == height
+    if gem_position[1] == height
         new_gem_position = CartesianIndex(1, rand(rng, 1 : width))
     else
-        new_gem_position = CartesianIndex(GW.move_down(env.gem_position.I...))
+        new_gem_position = GW.move_down(gem_position)
     end
 
-    tile_map[GEM, env.gem_position] = false
+    tile_map[GEM, gem_position] = false
     env.gem_position = new_gem_position
     tile_map[GEM, new_gem_position] = true
 

@@ -35,31 +35,29 @@ function GW.reset!(env::MazeDirected)
 end
 
 function GW.act!(env::MazeDirected, action)
+    @assert action in Base.OneTo(NUM_ACTIONS) "Invalid action $(action). Action must be in Base.OneTo($(NUM_ACTIONS))"
+
     inner_env = env.env
     tile_map = inner_env.tile_map
+    agent_position = inner_env.agent_position
+    agent_direction = env.agent_direction
 
-    if action == 1
-        agent_position = inner_env.agent_position
-        agent_direction = env.agent_direction
-        new_agent_position = CartesianIndex(GW.move_forward(agent_direction, agent_position.I...))
-        if !tile_map[WALL, new_agent_position]
-            tile_map[AGENT, agent_position] = false
-            inner_env.agent_position = new_agent_position
-            tile_map[AGENT, new_agent_position] = true
+    if action in Base.OneTo(2)
+        if action == 1
+            new_agent_position = GW.move_forward(agent_position, agent_direction)
+        else
+            new_agent_position = GW.move_backward(agent_position, agent_direction)
         end
-    elseif action == 2
-        agent_position = inner_env.agent_position
-        agent_direction = env.agent_direction
-        new_agent_position = CartesianIndex(GW.move_backward(agent_direction, agent_position.I...))
+
         if !tile_map[WALL, new_agent_position]
             tile_map[AGENT, agent_position] = false
             inner_env.agent_position = new_agent_position
             tile_map[AGENT, new_agent_position] = true
         end
     elseif action == 3
-        env.agent_direction = GW.turn_left(env.agent_direction)
-    elseif action == 4
-        env.agent_direction = GW.turn_right(env.agent_direction)
+        env.agent_direction = GW.turn_left(agent_direction)
+    else
+        env.agent_direction = GW.turn_right(agent_direction)
     end
 
     if tile_map[GOAL, inner_env.agent_position]

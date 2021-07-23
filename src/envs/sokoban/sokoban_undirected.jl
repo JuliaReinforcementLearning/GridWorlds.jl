@@ -107,6 +107,8 @@ function GW.reset!(env::SokobanUndirected)
 end
 
 function GW.act!(env::SokobanUndirected, action)
+    @assert action in Base.OneTo(NUM_ACTIONS) "Invalid action $(action). Action must be in Base.OneTo($(NUM_ACTIONS))"
+
     tile_map = env.tile_map
     box_positions = env.box_positions
     box_reward = env.box_reward
@@ -115,19 +117,17 @@ function GW.act!(env::SokobanUndirected, action)
     agent_position = env.agent_position
 
     if action == 1
-        dest = CartesianIndex(GW.move_up(agent_position.I...))
-        beyond_dest = CartesianIndex(GW.move_up(dest.I...))
+        dest = GW.move_up(agent_position)
+        beyond_dest = GW.move_up(dest)
     elseif action == 2
-        dest = CartesianIndex(GW.move_down(agent_position.I...))
-        beyond_dest = CartesianIndex(GW.move_down(dest.I...))
+        dest = GW.move_down(agent_position)
+        beyond_dest = GW.move_down(dest)
     elseif action == 3
-        dest = CartesianIndex(GW.move_left(agent_position.I...))
-        beyond_dest = CartesianIndex(GW.move_left(dest.I...))
-    elseif action == 4
-        dest = CartesianIndex(GW.move_right(agent_position.I...))
-        beyond_dest = CartesianIndex(GW.move_right(dest.I...))
+        dest = GW.move_left(agent_position)
+        beyond_dest = GW.move_left(dest)
     else
-        error("Invalid action $(action)")
+        dest = GW.move_right(agent_position)
+        beyond_dest = GW.move_right(dest)
     end
 
     if !tile_map[WALL, dest]
@@ -140,7 +140,7 @@ function GW.act!(env::SokobanUndirected, action)
                 tile_map[BOX, dest] = false
                 tile_map[BOX, beyond_dest] = true
 
-                box_idx = findfirst(pos -> pos == dest, box_positions)
+                box_idx = findfirst(==(dest), box_positions)
                 box_positions[box_idx] = beyond_dest
                 tile_map[AGENT, agent_position] = false
                 env.agent_position = dest
