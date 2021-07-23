@@ -14,31 +14,93 @@ close_maybe(io::Nothing) = nothing
 
 write_maybe(io::IO, content) = write(io, content)
 write_maybe(io::Nothing, content) = 0
-write_io1_maybe_io2(io1::IO, io2::Union{Nothing, IO}, content) = write(io1, content) + write_maybe(io2, content)
+write_maybe(io1, io2, content) = write_maybe(io1, content) + write_maybe(io2, content)
 
-show_maybe(io::IO, mime::MIME, content) = show(io, mime, content)
-show_maybe(io::Nothing, mime::MIME, content) = nothing
-function show_io1_maybe_io2(io1::IO, io2::Union{Nothing, IO}, mime::MIME, content)
-    show(io1, mime, content)
-    show_maybe(io2, mime, content)
+function play!(terminal::REPL.Terminals.UnixTerminal, env::AbstractGridWorld, file_name::Union{Nothing, AbstractString}, frame_start_delimiter::Union{Nothing, AbstractString})
+    if !isnothing(file_name) && isnothing(frame_start_delimiter)
+        error("Please additionally specify a string for the keyword argument `frame_start_delimiter`, for example `frame_start_delimiter = \"FRAME_START_DELIMITER\"`. This is needed when you want to replay the recording.")
+    end
+    if isnothing(file_name) && !isnothing(frame_start_delimiter)
+        error("Please additionally specify a string for the keyword argument `file_name`, for example `file_name = \"recording.txt\"`. This is needed to save the recording in a text file and replay it later.")
+    end
+
+    terminal_out = terminal.out_stream
+    terminal_in = terminal.in_stream
+    file = open_maybe(file_name)
+
+    action_keys = get_action_keys(env)
+    key_bindings = "Key bindings to play: 'q': quit, 'r': GW.reset!, $(action_keys): GW.act!"
+
+    char = nothing
+
+    write(terminal_out, CLEAR_SCREEN)
+    write(terminal_out, MOVE_CURSOR_TO_ORIGIN)
+    write(terminal_out, HIDE_CURSOR)
+
+    REPL.Terminals.raw!(terminal, true)
+
+    try
+        while true
+            write_maybe(file, frame_start_delimiter)
+
+            frame = key_bindings
+            frame = frame * "\n" * "Last play character read: $(char)"
+            frame = frame * "\n" * repr(MIME"text/plain"(), env)
+
+            write_maybe(terminal_out, file, frame)
+
+            char = read(terminal_in, Char)
+
+            if char == 'q'
+                write(terminal_out, SHOW_CURSOR)
+                close_maybe(file)
+                REPL.Terminals.raw!(terminal, false)
+                return nothing
+            elseif char == 'r'
+                reset!(env)
+            elseif char in action_keys
+                act!(env, findfirst(==(char), action_keys))
+            end
+
+            write(terminal_out, EMPTY_SCREEN)
+        end
+    finally
+        write(terminal_out, SHOW_CURSOR)
+        close_maybe(file)
+        REPL.Terminals.raw!(terminal, false)
+    end
+
     return nothing
 end
 
-function replay(terminal::REPL.Terminals.UnixTerminal, file_name::AbstractString; frame_rate = Union{Nothing, Real} = nothing)
+play!(env::AbstractGridWorld; file_name = nothing, frame_start_delimiter = nothing) = play!(REPL.TerminalMenus.terminal, env, file_name, frame_start_delimiter)
+
+function replay(terminal::REPL.Terminals.UnixTerminal, file_name::AbstractString, frame_start_delimiter::AbstractString, frame_rate = Union{Nothing, Real})
     terminal_out = terminal.out_stream
-    delimiter = EMPTY_SCREEN
-    frames = split(read(file_name, String), delimiter)
+    strings = split(read(file_name, String), frame_start_delimiter)
+    frames = @view strings[2:end]
     num_frames = length(frames)
+
+    write(terminal_out, CLEAR_SCREEN)
+    write(terminal_out, MOVE_CURSOR_TO_ORIGIN)
+    write(terminal_out, HIDE_CURSOR)
 
     if isnothing(frame_rate)
         terminal_in = terminal.in_stream
-        REPL.Terminals.raw!(terminal, true)
+        replay_key_bindings = "Key bindings to replay: 'q': quit, 'f': first frame, 'n': next frame, 'p': previous frame"
         current_frame = 1
+        char = nothing
+
+        REPL.Terminals.raw!(terminal, true)
+
         try
             while true
-                write(terminal_out, frames[current_frame])
-                println(terminal_out)
-                println(terminal_out, "replay key bindings: 'q': quit, 'f': go to first frame, 'n': go to next frame, 'p': go to previous frame")
+                replay_frame = replay_key_bindings
+                replay_frame = replay_frame * "\n" * "Last replay character read: $(char)"
+                replay_frame = replay_frame * "\n" * "------------FRAME_START------------"
+                replay_frame = replay_frame * "\n" * frames[current_frame]
+
+                write(terminal_out, replay_frame)
 
                 char = read(terminal_in, Char)
 
@@ -62,61 +124,19 @@ function replay(terminal::REPL.Terminals.UnixTerminal, file_name::AbstractString
             return nothing
         end
     else
+        write(terminal_out, CLEAR_SCREEN)
+        write(terminal_out, MOVE_CURSOR_TO_ORIGIN)
+        write(terminal_out, HIDE_CURSOR)
+
         for frame in frames
             write(terminal_out, frame)
             sleep(1 / frame_rate)
-            write(terminal_out, delimiter)
+            write(terminal_out, EMPTY_SCREEN)
         end
-    end
 
-    return nothing
+        write(terminal_out, SHOW_CURSOR)
+        return nothing
+    end
 end
 
-replay(file_name; frame_rate = nothing) = replay(REPL.TerminalMenus.terminal, file_name, frame_rate = frame_rate)
-
-function play!(terminal::REPL.Terminals.UnixTerminal, env::AbstractGridWorld; file_name::Union{Nothing, AbstractString} = nothing)
-    REPL.Terminals.raw!(terminal, true)
-
-    terminal_out = terminal.out_stream
-    terminal_in = terminal.in_stream
-    file = open_maybe(file_name)
-
-    write_io1_maybe_io2(terminal_out, file, CLEAR_SCREEN)
-    write_io1_maybe_io2(terminal_out, file, MOVE_CURSOR_TO_ORIGIN)
-    write_io1_maybe_io2(terminal_out, file, HIDE_CURSOR)
-
-    action_keys = get_action_keys(env)
-    action_names = get_action_names(env)
-    key_bindings = "play key bindings: 'q': quit, 'r': reset!, $(action_keys): $(action_names)\n"
-
-    try
-        while true
-            write_io1_maybe_io2(terminal_out, file, key_bindings)
-            show_io1_maybe_io2(terminal_out, file, MIME"text/plain"(), env)
-
-            char = read(terminal_in, Char)
-
-            if char == 'q'
-                write_io1_maybe_io2(terminal_out, file, SHOW_CURSOR)
-                close_maybe(file)
-                REPL.Terminals.raw!(terminal, false)
-                return nothing
-            elseif char == 'r'
-                reset!(env)
-            elseif char in action_keys
-                act!(env, findfirst(==(char), action_keys))
-            end
-
-            write_io1_maybe_io2(terminal_out, file, EMPTY_SCREEN)
-            write_io1_maybe_io2(terminal_out, file, "Last character: $(char)\n")
-        end
-    finally
-        write_io1_maybe_io2(terminal_out, file, SHOW_CURSOR)
-        close_maybe(file)
-        REPL.Terminals.raw!(terminal, false)
-    end
-
-    return nothing
-end
-
-play!(env::AbstractGridWorld; file_name = nothing) = play!(REPL.TerminalMenus.terminal, env, file_name = file_name)
+replay(; file_name, frame_start_delimiter, frame_rate = nothing) = replay(REPL.TerminalMenus.terminal, file_name, frame_start_delimiter, frame_rate)
