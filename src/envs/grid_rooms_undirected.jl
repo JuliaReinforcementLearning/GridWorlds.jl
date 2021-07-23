@@ -95,20 +95,23 @@ function GW.reset!(env::GridRoomsUndirected)
 end
 
 function GW.act!(env::GridRoomsUndirected, action)
+    @assert action in Base.OneTo(NUM_ACTIONS) "Invalid action $(action). Action must be in Base.OneTo($(NUM_ACTIONS))"
+
     tile_map = env.tile_map
+    agent_position = env.agent_position
 
     if action == 1
-        new_agent_position = CartesianIndex(GW.move_up(env.agent_position.I...))
+        new_agent_position = GW.move_up(agent_position)
     elseif action == 2
-        new_agent_position = CartesianIndex(GW.move_down(env.agent_position.I...))
+        new_agent_position = GW.move_down(agent_position)
     elseif action == 3
-        new_agent_position = CartesianIndex(GW.move_left(env.agent_position.I...))
-    elseif action == 4
-        new_agent_position = CartesianIndex(GW.move_right(env.agent_position.I...))
+        new_agent_position = GW.move_left(agent_position)
+    else
+        new_agent_position = GW.move_right(agent_position)
     end
 
     if !tile_map[WALL, new_agent_position]
-        tile_map[AGENT, env.agent_position] = false
+        tile_map[AGENT, agent_position] = false
         env.agent_position = new_agent_position
         tile_map[AGENT, new_agent_position] = true
     end
