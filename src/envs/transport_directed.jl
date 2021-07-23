@@ -36,18 +36,18 @@ function GW.reset!(env::TransportDirected)
 end
 
 function GW.act!(env::TransportDirected, action)
-    @assert action in Base.OneTo(NUM_ACTIONS) "Invalid action $(action)"
+    @assert action in Base.OneTo(NUM_ACTIONS) "Invalid action $(action). Action must be in Base.OneTo($(NUM_ACTIONS))"
 
     inner_env = env.env
     tile_map = inner_env.tile_map
     agent_position = inner_env.agent_position
     agent_direction = env.agent_direction
 
-    if action in 1:2
+    if action in Base.OneTo(2)
         if action == 1
-            new_agent_position = CartesianIndex(GW.move_forward(agent_direction, agent_position.I...))
+            new_agent_position = GW.move_forward(agent_position, agent_direction)
         else
-            new_agent_position = CartesianIndex(GW.move_backward(agent_direction, agent_position.I...))
+            new_agent_position = GW.move_backward(agent_position, agent_direction)
         end
 
         if !tile_map[WALL, new_agent_position]
@@ -59,13 +59,17 @@ function GW.act!(env::TransportDirected, action)
         env.agent_direction = GW.turn_left(agent_direction)
     elseif action == 4
         env.agent_direction = GW.turn_right(agent_direction)
-    elseif action == 5 && tile_map[GEM, agent_position]
-        tile_map[GEM, agent_position] = false
-        inner_env.has_gem = true
-    elseif action == 6 && inner_env.has_gem
-        inner_env.has_gem = false
-        inner_env.gem_position = agent_position
-        tile_map[GEM, agent_position] = true
+    elseif action == 5
+        if tile_map[GEM, agent_position]
+            tile_map[GEM, agent_position] = false
+            inner_env.has_gem = true
+        end
+    else
+        if inner_env.has_gem
+            inner_env.has_gem = false
+            inner_env.gem_position = agent_position
+            tile_map[GEM, agent_position] = true
+        end
     end
 
     if tile_map[GEM, inner_env.target_position]
