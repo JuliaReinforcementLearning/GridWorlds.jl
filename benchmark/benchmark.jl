@@ -28,7 +28,7 @@ function benchmark(Env, num_resets, steps_per_reset)
     benchmark[:reset] = BT.@benchmark RLBase.reset!($(Ref(env))[])
     benchmark[:state] = BT.@benchmark RLBase.state($(Ref(env))[])
 
-    action_names = GW.get_action_names(env)
+    action_names = GW.get_action_names(env.env)
 
     for action in RLBase.action_space(env)
         benchmark[action_names[action]] = BT.@benchmark $(Ref(env))[]($(Ref(action))[])
