@@ -1,7 +1,5 @@
 module GridWorlds
 
-import DataStructures as DS
-import Random
 import REPL
 import ReinforcementLearningBase as RLBase
 
