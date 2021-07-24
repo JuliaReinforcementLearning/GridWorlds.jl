@@ -25,19 +25,17 @@ mutable struct SingleRoomUndirected{R, RNG} <: GW.AbstractGridWorld
 end
 
 function SingleRoomUndirected(; R = Float32, height = 8, width = 8, rng = Random.GLOBAL_RNG)
-    tile_map = BitArray(undef, NUM_OBJECTS, height, width)
+    tile_map = falses(NUM_OBJECTS, height, width)
 
-    inner_area = CartesianIndices((2 : height - 1, 2 : width - 1))
-
-    tile_map[:, :, :] .= false
     tile_map[WALL, 1, :] .= true
     tile_map[WALL, height, :] .= true
     tile_map[WALL, :, 1] .= true
     tile_map[WALL, :, width] .= true
 
-    agent_position, goal_position = GW.sample_two_positions_without_replacement(rng, inner_area)
-
+    agent_position = GW.sample_empty_position(rng, tile_map)
     tile_map[AGENT, agent_position] = true
+
+    goal_position = GW.sample_empty_position(rng, tile_map)
     tile_map[GOAL, goal_position] = true
 
     reward = zero(R)
@@ -56,16 +54,15 @@ function GW.reset!(env::SingleRoomUndirected)
     rng = env.rng
 
     _, height, width = size(tile_map)
-    inner_area = CartesianIndices((2 : height - 1, 2 : width - 1))
 
     tile_map[AGENT, env.agent_position] = false
     tile_map[GOAL, env.goal_position] = false
 
-    new_agent_position, new_goal_position = GW.sample_two_positions_without_replacement(rng, inner_area)
-
+    new_agent_position = GW.sample_empty_position(rng, tile_map)
     env.agent_position = new_agent_position
     tile_map[AGENT, new_agent_position] = true
 
+    new_goal_position = GW.sample_empty_position(rng, tile_map)
     env.goal_position = new_goal_position
     tile_map[GOAL, new_goal_position] = true
 
