@@ -124,7 +124,7 @@ function GW.act!(env::Snake, action)
             env.reward = env.food_reward + env.terminal_reward
             env.done = true
         else
-            new_food_position = GW.sample_empty_position(rng, tile_map, 100 * height * width)
+            new_food_position = GW.sample_empty_position(rng, tile_map)
             env.food_position = new_food_position
             tile_map[FOOD, new_food_position] = true
 
