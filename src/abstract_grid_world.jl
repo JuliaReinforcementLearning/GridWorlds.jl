@@ -12,7 +12,7 @@ act!(env::AbstractGridWorld, action) = error("Method not implemented for $(typeo
 #####
 
 get_pretty_tile_map(env::AbstractGridWorld, position::CartesianIndex{2}) = error("Method not implemented for $(typeof(env))")
-get_pretty_sub_tile_map(env::AbstractGridWorld, position::CartesianIndex{2}) = error("Method not implemented for $(typeof(env))")
+get_pretty_sub_tile_map(env::AbstractGridWorld, window_size, position::CartesianIndex{2}) = error("Method not implemented for $(typeof(env))")
 get_action_keys(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
 get_action_names(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
 get_object_names(env::AbstractGridWorld) = error("Method not implemented for $(typeof(env))")
