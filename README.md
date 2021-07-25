@@ -149,7 +149,7 @@ All the environments can be played directly inside the REPL. These interactive s
 
 Here is an example:
 
-<img src="">
+<img src="https://user-images.githubusercontent.com/32610387/126912986-83c112e4-feb2-4953-a4dc-06f7d67bb023.gif">
 
 ## List of Environments
 
