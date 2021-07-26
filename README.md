@@ -7,7 +7,7 @@ This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minig
 ## Table of contents:
 
 * [Getting Started](#getting-started)
-* [Notes on Design](#notes-on-design)
+* [Notes](#notes)
 
 [List of Environments](#list-of-environments)
 1. [SingleRoomUndirected](#singleroomundirected)
@@ -97,7 +97,7 @@ rlbase_env(3) # move left
 rlbase_env(4) # move right
 ```
 
-## Notes on Design
+## Notes
 
 ### Reinforcement Learning
 
@@ -141,7 +141,7 @@ julia> GW.get_object_names(env)
 
 Several environments contain the word `Undirected` or `Directed` within their name. This refers to the navigation style of the agent. `Undirected` means that the agent has no direction associated with it, and navigates around by directly moving up, down, left, or right on the tile map. `Directed` means that the agent has a direction associated with it, and it navigates around by moving forward or backward along its current direction, or it could also turn left or right with respect to its current direction. There are 4 directions - `UP`, `DOWN`, `LEFT`, and `RIGHT`.
 
-### Playing and Recording
+### Interactive Playing and Recording
 
 All the environments can be played directly inside the REPL. These interactive sessions can also be recorded in plain text files and replayed in the terminal. There are two ways to replay a recording:
 1. The default way is to manually step through each recorded frame. This allows you to move through the frames one by one at your own pace using keyboard inputs.
@@ -150,6 +150,48 @@ All the environments can be played directly inside the REPL. These interactive s
 Here is an example:
 
 <img src="https://user-images.githubusercontent.com/32610387/126912986-83c112e4-feb2-4953-a4dc-06f7d67bb023.gif">
+
+### Programmatic Recording of Agent's Behavior
+
+In order to programmatically record the behavior of an agent during an episode, you can simply log the string representation of the environment at each step prefixed with a delimiter. You can also log other arbitrary information if you want, like the total reward so far, for example. You can then use the `GW.replay` functiton to replay the recording inside the terminal. The string representation of an environment can be obtained using `repr(MIME"text/plain"(), env)`. Here is an example:
+
+```
+import GridWorlds as GW
+import ReinforcementLearningBase as RLBase
+
+game = GW.SingleRoomUndirectedModule.SingleRoomUndirected()
+env = GW.RLBaseEnv(game)
+
+total_reward = zero(RLBase.reward(env))
+frame_number = 1
+
+str = ""
+
+str = str * "FRAME_START_DELIMITER"
+str = str * "frame_number: $(frame_number)\n"
+str = str * repr(MIME"text/plain"(), env)
+str = str * "\ntotal_reward: $(total_reward)"
+
+while !RLBase.is_terminated(env)
+    action = rand(RLBase.action_space(env))
+    env(action)
+    reward = RLBase.reward(env)
+
+    global total_reward += reward
+    global frame_number += 1
+
+    global str = str * "FRAME_START_DELIMITER"
+    global str = str * "frame_number: $(frame_number)\n"
+    global str = str * repr(MIME"text/plain"(), env)
+    global str = str * "\ntotal_reward: $(total_reward)"
+end
+
+write("recording.txt", str)
+
+GW.replay(file_name = "recording.txt", frame_start_delimiter = "FRAME_START_DELIMITER")
+```
+
+In `ReinforcementLearning.jl`, you can create a [hook](https://juliareinforcementlearning.org/docs/How_to_use_hooks/) for recording the agent's behavior at any point during training.
 
 ## List of Environments
 
