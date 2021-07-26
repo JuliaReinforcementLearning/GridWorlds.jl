@@ -1,5 +1,7 @@
-Date: 2021_07_20_22_36_30 (yyyy_mm_dd_HH_MM_SS)
-**Note:** The time in benchmarks is the median time
+Date: 2021_07_26_14_39_10 (yyyy_mm_dd_HH_MM_SS)
+
+**Note:** The time in benchmarks is the median time. While benchmarking the random policy, each environment was run for 100 episodes of 100 steps each, that is, a total of 10000 steps.
+
 ## List of Environments
   1. [SingleRoomUndirected](#singleroomundirected)
   1. [SingleRoomDirected](#singleroomdirected)
@@ -15,6 +17,7 @@ Date: 2021_07_20_22_36_30 (yyyy_mm_dd_HH_MM_SS)
   1. [DoorKeyDirected](#doorkeydirected)
   1. [CollectGemsUndirected](#collectgemsundirected)
   1. [CollectGemsDirected](#collectgemsdirected)
+  1. [CollectGemsMultiAgentUndirected](#collectgemsmultiagentundirected)
   1. [DynamicObstaclesUndirected](#dynamicobstaclesundirected)
   1. [DynamicObstaclesDirected](#dynamicobstaclesdirected)
   1. [SokobanUndirected](#sokobanundirected)
@@ -23,120 +26,119 @@ Date: 2021_07_20_22_36_30 (yyyy_mm_dd_HH_MM_SS)
   1. [Catcher](#catcher)
   1. [TransportUndirected](#transportundirected)
   1. [TransportDirected](#transportdirected)
-  1. [CollectGemsMultiAgentUndirected](#collectgemsmultiagentundirected)
 
 ### SingleRoomUndirected
 |random_policy|reset|state|MOVE_UP|MOVE_DOWN|MOVE_LEFT|MOVE_RIGHT|is_terminated|reward|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|0 bytes<br>357.003 μs|0 bytes<br>84.623 ns|0 bytes<br>1.848 ns|0 bytes<br>20.809 ns|0 bytes<br>20.739 ns|0 bytes<br>20.809 ns|0 bytes<br>20.796 ns|0 bytes<br>1.873 ns|0 bytes<br>1.831 ns|
+|0 bytes<br>338.576 μs|0 bytes<br>77.548 ns|0 bytes<br>2.216 ns|0 bytes<br>13.480 ns|0 bytes<br>13.353 ns|0 bytes<br>13.672 ns|0 bytes<br>13.321 ns|0 bytes<br>1.847 ns|0 bytes<br>1.849 ns|
 
 ### SingleRoomDirected
 |random_policy|reset|state|MOVE_FORWARD|MOVE_BACKWARD|TURN_LEFT|TURN_RIGHT|is_terminated|reward|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|0 bytes<br>343.208 μs|0 bytes<br>100.051 ns|0 bytes<br>2.198 ns|0 bytes<br>22.266 ns|0 bytes<br>22.812 ns|0 bytes<br>20.067 ns|0 bytes<br>20.088 ns|0 bytes<br>1.860 ns|0 bytes<br>2.192 ns|
+|0 bytes<br>345.671 μs|0 bytes<br>86.328 ns|0 bytes<br>1.851 ns|0 bytes<br>14.628 ns|0 bytes<br>15.547 ns|0 bytes<br>12.485 ns|0 bytes<br>12.511 ns|0 bytes<br>2.194 ns|0 bytes<br>1.871 ns|
 
 ### GridRoomsUndirected
 |random_policy|reset|state|MOVE_UP|MOVE_DOWN|MOVE_LEFT|MOVE_RIGHT|is_terminated|reward|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|0 bytes<br>379.693 μs|0 bytes<br>240.677 ns|0 bytes<br>2.205 ns|0 bytes<br>20.812 ns|0 bytes<br>20.942 ns|0 bytes<br>20.802 ns|0 bytes<br>20.806 ns|0 bytes<br>1.841 ns|0 bytes<br>1.877 ns|
+|0 bytes<br>366.796 μs|0 bytes<br>219.287 ns|0 bytes<br>1.881 ns|0 bytes<br>13.470 ns|0 bytes<br>14.565 ns|0 bytes<br>15.510 ns|0 bytes<br>13.630 ns|0 bytes<br>1.856 ns|0 bytes<br>1.834 ns|
 
 ### GridRoomsDirected
 |random_policy|reset|state|MOVE_FORWARD|MOVE_BACKWARD|TURN_LEFT|TURN_RIGHT|is_terminated|reward|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|0 bytes<br>368.069 μs|0 bytes<br>272.597 ns|0 bytes<br>1.833 ns|0 bytes<br>22.314 ns|0 bytes<br>22.299 ns|0 bytes<br>20.054 ns|0 bytes<br>20.050 ns|0 bytes<br>2.197 ns|0 bytes<br>1.865 ns|
+|0 bytes<br>364.481 μs|0 bytes<br>229.418 ns|0 bytes<br>2.198 ns|0 bytes<br>15.245 ns|0 bytes<br>14.760 ns|0 bytes<br>12.486 ns|0 bytes<br>12.466 ns|0 bytes<br>1.852 ns|0 bytes<br>1.851 ns|
 
 ### SequentialRoomsUndirected
 |random_policy|reset|state|MOVE_UP|MOVE_DOWN|MOVE_LEFT|MOVE_RIGHT|is_terminated|reward|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|4.42 MiB<br>32.643 ms|32.72 KiB<br>35.553 μs|0 bytes<br>2.869 μs|0 bytes<br>20.777 ns|0 bytes<br>20.678 ns|0 bytes<br>20.778 ns|0 bytes<br>20.781 ns|0 bytes<br>1.843 ns|0 bytes<br>1.866 ns|
+|4.45 MiB<br>33.176 ms|32.72 KiB<br>35.608 μs|0 bytes<br>2.927 μs|0 bytes<br>20.412 ns|0 bytes<br>20.091 ns|0 bytes<br>20.417 ns|0 bytes<br>20.094 ns|0 bytes<br>1.857 ns|0 bytes<br>1.828 ns|
 
 ### SequentialRoomsDirected
 |random_policy|reset|state|MOVE_FORWARD|MOVE_BACKWARD|TURN_LEFT|TURN_RIGHT|is_terminated|reward|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|4.49 MiB<br>32.650 ms|32.72 KiB<br>35.477 μs|0 bytes<br>2.904 μs|0 bytes<br>22.288 ns|0 bytes<br>22.266 ns|0 bytes<br>20.064 ns|0 bytes<br>20.089 ns|0 bytes<br>2.195 ns|0 bytes<br>1.859 ns|
+|4.49 MiB<br>33.176 ms|32.72 KiB<br>35.705 μs|0 bytes<br>2.865 μs|0 bytes<br>14.638 ns|0 bytes<br>14.652 ns|0 bytes<br>12.653 ns|0 bytes<br>12.534 ns|0 bytes<br>1.855 ns|0 bytes<br>1.844 ns|
 
 ### MazeUndirected
 |random_policy|reset|state|MOVE_UP|MOVE_DOWN|MOVE_LEFT|MOVE_RIGHT|is_terminated|reward|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|85.94 KiB<br>844.284 μs|880 bytes<br>5.102 μs|0 bytes<br>1.843 ns|0 bytes<br>20.783 ns|0 bytes<br>20.648 ns|0 bytes<br>20.790 ns|0 bytes<br>20.714 ns|0 bytes<br>1.852 ns|0 bytes<br>1.836 ns|
+|85.94 KiB<br>808.307 μs|880 bytes<br>4.690 μs|0 bytes<br>2.221 ns|0 bytes<br>15.145 ns|0 bytes<br>14.289 ns|0 bytes<br>14.162 ns|0 bytes<br>14.433 ns|0 bytes<br>1.853 ns|0 bytes<br>1.865 ns|
 
 ### MazeDirected
 |random_policy|reset|state|MOVE_FORWARD|MOVE_BACKWARD|TURN_LEFT|TURN_RIGHT|is_terminated|reward|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|85.94 KiB<br>836.659 μs|880 bytes<br>5.039 μs|0 bytes<br>2.219 ns|0 bytes<br>22.842 ns|0 bytes<br>22.285 ns|0 bytes<br>20.075 ns|0 bytes<br>20.086 ns|0 bytes<br>1.868 ns|0 bytes<br>1.845 ns|
+|85.94 KiB<br>806.197 μs|880 bytes<br>4.710 μs|0 bytes<br>2.189 ns|0 bytes<br>15.098 ns|0 bytes<br>15.740 ns|0 bytes<br>12.656 ns|0 bytes<br>12.669 ns|0 bytes<br>1.854 ns|0 bytes<br>1.844 ns|
 
 ### GoToTargetUndirected
 |random_policy|reset|state|MOVE_UP|MOVE_DOWN|MOVE_LEFT|MOVE_RIGHT|is_terminated|reward|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|0 bytes<br>374.457 μs|0 bytes<br>355.140 ns|0 bytes<br>2.192 ns|0 bytes<br>21.440 ns|0 bytes<br>21.550 ns|0 bytes<br>21.463 ns|0 bytes<br>21.436 ns|0 bytes<br>1.848 ns|0 bytes<br>1.859 ns|
+|0 bytes<br>394.753 μs|0 bytes<br>306.571 ns|0 bytes<br>1.868 ns|0 bytes<br>13.972 ns|0 bytes<br>14.950 ns|0 bytes<br>17.539 ns|0 bytes<br>15.141 ns|0 bytes<br>1.860 ns|0 bytes<br>1.826 ns|
 
 ### GoToTargetDirected
 |random_policy|reset|state|MOVE_FORWARD|MOVE_BACKWARD|TURN_LEFT|TURN_RIGHT|is_terminated|reward|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|0 bytes<br>394.818 μs|0 bytes<br>357.257 ns|0 bytes<br>2.195 ns|0 bytes<br>23.036 ns|0 bytes<br>23.006 ns|0 bytes<br>21.203 ns|0 bytes<br>21.164 ns|0 bytes<br>1.852 ns|0 bytes<br>1.866 ns|
+|0 bytes<br>395.697 μs|0 bytes<br>291.905 ns|0 bytes<br>2.213 ns|0 bytes<br>15.945 ns|0 bytes<br>16.927 ns|0 bytes<br>14.681 ns|0 bytes<br>14.703 ns|0 bytes<br>1.853 ns|0 bytes<br>1.868 ns|
 
 ### DoorKeyUndirected
 |random_policy|reset|state|MOVE_UP|MOVE_DOWN|MOVE_LEFT|MOVE_RIGHT|PICK_UP|is_terminated|reward|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|0 bytes<br>350.839 μs|0 bytes<br>215.413 ns|0 bytes<br>2.228 ns|0 bytes<br>20.867 ns|0 bytes<br>20.392 ns|0 bytes<br>24.056 ns|0 bytes<br>20.768 ns|0 bytes<br>20.254 ns|0 bytes<br>1.854 ns|0 bytes<br>1.836 ns|
+|0 bytes<br>376.832 μs|0 bytes<br>199.785 ns|0 bytes<br>1.885 ns|0 bytes<br>14.057 ns|0 bytes<br>14.611 ns|0 bytes<br>14.584 ns|0 bytes<br>14.131 ns|0 bytes<br>13.020 ns|0 bytes<br>1.845 ns|0 bytes<br>1.865 ns|
 
 ### DoorKeyDirected
 |random_policy|reset|state|MOVE_FORWARD|MOVE_BACKWARD|TURN_LEFT|TURN_RIGHT|PICK_UP|is_terminated|reward|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|0 bytes<br>371.019 μs|0 bytes<br>230.249 ns|0 bytes<br>2.198 ns|0 bytes<br>23.063 ns|0 bytes<br>23.077 ns|0 bytes<br>20.828 ns|0 bytes<br>20.440 ns|0 bytes<br>22.084 ns|0 bytes<br>2.193 ns|0 bytes<br>1.858 ns|
+|0 bytes<br>363.589 μs|0 bytes<br>209.137 ns|0 bytes<br>2.188 ns|0 bytes<br>22.728 ns|0 bytes<br>18.863 ns|0 bytes<br>13.616 ns|0 bytes<br>13.316 ns|0 bytes<br>18.297 ns|0 bytes<br>1.853 ns|0 bytes<br>1.855 ns|
 
 ### CollectGemsUndirected
 |random_policy|reset|state|MOVE_UP|MOVE_DOWN|MOVE_LEFT|MOVE_RIGHT|is_terminated|reward|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|0 bytes<br>470.104 μs|0 bytes<br>1.071 μs|0 bytes<br>1.836 ns|0 bytes<br>22.046 ns|0 bytes<br>21.975 ns|0 bytes<br>22.024 ns|0 bytes<br>22.017 ns|0 bytes<br>1.864 ns|0 bytes<br>1.841 ns|
+|0 bytes<br>441.002 μs|0 bytes<br>908.355 ns|0 bytes<br>2.198 ns|0 bytes<br>13.930 ns|0 bytes<br>13.511 ns|0 bytes<br>13.448 ns|0 bytes<br>13.578 ns|0 bytes<br>1.853 ns|0 bytes<br>1.859 ns|
 
 ### CollectGemsDirected
 |random_policy|reset|state|MOVE_FORWARD|MOVE_BACKWARD|TURN_LEFT|TURN_RIGHT|is_terminated|reward|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|0 bytes<br>445.714 μs|0 bytes<br>1.142 μs|0 bytes<br>2.203 ns|0 bytes<br>22.758 ns|0 bytes<br>22.904 ns|0 bytes<br>20.257 ns|0 bytes<br>20.238 ns|0 bytes<br>1.860 ns|0 bytes<br>1.870 ns|
-
-### DynamicObstaclesUndirected
-|random_policy|reset|state|MOVE_UP|MOVE_DOWN|MOVE_LEFT|MOVE_RIGHT|is_terminated|reward|
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|0 bytes<br>1.967 ms|0 bytes<br>697.070 ns|0 bytes<br>2.212 ns|0 bytes<br>179.847 ns|0 bytes<br>179.636 ns|0 bytes<br>180.125 ns|0 bytes<br>179.782 ns|0 bytes<br>1.866 ns|0 bytes<br>1.851 ns|
-
-### DynamicObstaclesDirected
-|random_policy|reset|state|MOVE_FORWARD|MOVE_BACKWARD|TURN_LEFT|TURN_RIGHT|is_terminated|reward|
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|0 bytes<br>1.895 ms|0 bytes<br>686.417 ns|0 bytes<br>2.195 ns|0 bytes<br>168.305 ns|0 bytes<br>169.526 ns|0 bytes<br>167.081 ns|0 bytes<br>166.476 ns|0 bytes<br>1.856 ns|0 bytes<br>1.841 ns|
-
-### SokobanUndirected
-|random_policy|reset|state|MOVE_UP|MOVE_DOWN|MOVE_LEFT|MOVE_RIGHT|is_terminated|reward|
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|4.20 MiB<br>12.567 ms|0 bytes<br>761.301 ns|0 bytes<br>1.872 ns|288 bytes<br>536.716 ns|288 bytes<br>548.228 ns|288 bytes<br>545.566 ns|288 bytes<br>568.973 ns|0 bytes<br>1.876 ns|0 bytes<br>1.832 ns|
-
-### SokobanDirected
-|random_policy|reset|state|MOVE_FORWARD|MOVE_BACKWARD|TURN_LEFT|TURN_RIGHT|is_terminated|reward|
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|2.22 MiB<br>5.558 ms|0 bytes<br>773.543 ns|0 bytes<br>2.197 ns|304 bytes<br>517.880 ns|304 bytes<br>514.275 ns|16 bytes<br>55.051 ns|16 bytes<br>54.705 ns|0 bytes<br>1.873 ns|0 bytes<br>1.853 ns|
-
-### Snake
-|random_policy|reset|state|MOVE_UP|MOVE_DOWN|MOVE_LEFT|MOVE_RIGHT|is_terminated|reward|
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|0 bytes<br>437.962 μs|0 bytes<br>235.547 ns|0 bytes<br>1.884 ns|0 bytes<br>19.702 ns|0 bytes<br>19.737 ns|0 bytes<br>19.712 ns|0 bytes<br>19.711 ns|0 bytes<br>1.858 ns|0 bytes<br>1.833 ns|
-
-### Catcher
-|random_policy|reset|state|MOVE_LEFT|MOVE_RIGHT|NO_MOVE|is_terminated|reward|
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|0 bytes<br>331.623 μs|0 bytes<br>56.371 ns|0 bytes<br>1.848 ns|0 bytes<br>29.250 ns|0 bytes<br>29.351 ns|0 bytes<br>28.757 ns|0 bytes<br>1.846 ns|0 bytes<br>1.866 ns|
-
-### TransportUndirected
-|random_policy|reset|state|MOVE_UP|MOVE_DOWN|MOVE_LEFT|MOVE_RIGHT|PICK_UP|DROP|is_terminated|reward|
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|0 bytes<br>378.947 μs|0 bytes<br>346.329 ns|0 bytes<br>2.218 ns|0 bytes<br>22.504 ns|0 bytes<br>22.268 ns|0 bytes<br>22.126 ns|0 bytes<br>22.228 ns|0 bytes<br>21.972 ns|0 bytes<br>19.214 ns|0 bytes<br>1.871 ns|0 bytes<br>1.862 ns|
-
-### TransportDirected
-|random_policy|reset|state|MOVE_FORWARD|MOVE_BACKWARD|TURN_LEFT|TURN_RIGHT|PICK_UP|DROP|is_terminated|reward|
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|0 bytes<br>360.047 μs|0 bytes<br>352.756 ns|0 bytes<br>2.194 ns|0 bytes<br>22.764 ns|0 bytes<br>23.099 ns|0 bytes<br>21.166 ns|0 bytes<br>20.966 ns|0 bytes<br>22.614 ns|0 bytes<br>19.561 ns|0 bytes<br>2.195 ns|0 bytes<br>1.846 ns|
+|0 bytes<br>415.312 μs|0 bytes<br>982.661 ns|0 bytes<br>2.188 ns|0 bytes<br>14.312 ns|0 bytes<br>14.464 ns|0 bytes<br>13.031 ns|0 bytes<br>12.864 ns|0 bytes<br>1.850 ns|0 bytes<br>1.852 ns|
 
 ### CollectGemsMultiAgentUndirected
 |random_policy|reset|state|MOVE_UP|MOVE_DOWN|MOVE_LEFT|MOVE_RIGHT|is_terminated|reward|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|0 bytes<br>634.269 μs|0 bytes<br>1.540 μs|0 bytes<br>1.844 ns|0 bytes<br>30.490 ns|0 bytes<br>31.353 ns|0 bytes<br>31.729 ns|0 bytes<br>31.838 ns|0 bytes<br>1.863 ns|0 bytes<br>1.834 ns|
+|0 bytes<br>630.289 μs|0 bytes<br>1.338 μs|0 bytes<br>1.887 ns|0 bytes<br>25.334 ns|0 bytes<br>25.798 ns|0 bytes<br>24.040 ns|0 bytes<br>24.342 ns|0 bytes<br>1.855 ns|0 bytes<br>1.825 ns|
+
+### DynamicObstaclesUndirected
+|random_policy|reset|state|MOVE_UP|MOVE_DOWN|MOVE_LEFT|MOVE_RIGHT|is_terminated|reward|
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+|0 bytes<br>1.751 ms|0 bytes<br>563.709 ns|0 bytes<br>1.887 ns|0 bytes<br>150.750 ns|0 bytes<br>150.626 ns|0 bytes<br>150.340 ns|0 bytes<br>148.430 ns|0 bytes<br>1.869 ns|0 bytes<br>1.832 ns|
+
+### DynamicObstaclesDirected
+|random_policy|reset|state|MOVE_FORWARD|MOVE_BACKWARD|TURN_LEFT|TURN_RIGHT|is_terminated|reward|
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+|0 bytes<br>1.800 ms|0 bytes<br>572.072 ns|0 bytes<br>2.190 ns|0 bytes<br>153.142 ns|0 bytes<br>156.083 ns|0 bytes<br>154.026 ns|0 bytes<br>154.611 ns|0 bytes<br>1.850 ns|0 bytes<br>2.193 ns|
+
+### SokobanUndirected
+|random_policy|reset|state|MOVE_UP|MOVE_DOWN|MOVE_LEFT|MOVE_RIGHT|is_terminated|reward|
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+|0 bytes<br>812.181 μs|0 bytes<br>811.588 ns|0 bytes<br>2.197 ns|0 bytes<br>48.230 ns|0 bytes<br>53.669 ns|0 bytes<br>52.852 ns|0 bytes<br>48.247 ns|0 bytes<br>1.856 ns|0 bytes<br>1.833 ns|
+
+### SokobanDirected
+|random_policy|reset|state|MOVE_FORWARD|MOVE_BACKWARD|TURN_LEFT|TURN_RIGHT|is_terminated|reward|
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+|0 bytes<br>782.403 μs|0 bytes<br>816.440 ns|0 bytes<br>1.851 ns|0 bytes<br>48.445 ns|0 bytes<br>54.114 ns|0 bytes<br>46.958 ns|0 bytes<br>46.978 ns|0 bytes<br>2.193 ns|0 bytes<br>1.864 ns|
+
+### Snake
+|random_policy|reset|state|MOVE_UP|MOVE_DOWN|MOVE_LEFT|MOVE_RIGHT|is_terminated|reward|
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+|0 bytes<br>429.255 μs|0 bytes<br>202.144 ns|0 bytes<br>1.877 ns|0 bytes<br>12.634 ns|0 bytes<br>12.609 ns|0 bytes<br>12.618 ns|0 bytes<br>12.614 ns|0 bytes<br>1.853 ns|0 bytes<br>1.834 ns|
+
+### Catcher
+|random_policy|reset|state|MOVE_LEFT|MOVE_RIGHT|NO_MOVE|is_terminated|reward|
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+|0 bytes<br>327.558 μs|0 bytes<br>41.618 ns|0 bytes<br>1.882 ns|0 bytes<br>21.297 ns|0 bytes<br>20.260 ns|0 bytes<br>20.170 ns|0 bytes<br>1.849 ns|0 bytes<br>1.864 ns|
+
+### TransportUndirected
+|random_policy|reset|state|MOVE_UP|MOVE_DOWN|MOVE_LEFT|MOVE_RIGHT|PICK_UP|DROP|is_terminated|reward|
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+|0 bytes<br>382.490 μs|0 bytes<br>302.589 ns|0 bytes<br>2.196 ns|0 bytes<br>14.938 ns|0 bytes<br>15.182 ns|0 bytes<br>14.793 ns|0 bytes<br>14.705 ns|0 bytes<br>15.153 ns|0 bytes<br>11.392 ns|0 bytes<br>1.841 ns|0 bytes<br>1.869 ns|
+
+### TransportDirected
+|random_policy|reset|state|MOVE_FORWARD|MOVE_BACKWARD|TURN_LEFT|TURN_RIGHT|PICK_UP|DROP|is_terminated|reward|
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+|0 bytes<br>350.543 μs|0 bytes<br>281.448 ns|0 bytes<br>1.849 ns|0 bytes<br>17.298 ns|0 bytes<br>17.214 ns|0 bytes<br>12.375 ns|0 bytes<br>12.785 ns|0 bytes<br>14.785 ns|0 bytes<br>11.833 ns|0 bytes<br>1.839 ns|0 bytes<br>1.853 ns|
 
