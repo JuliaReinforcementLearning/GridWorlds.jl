@@ -2,7 +2,7 @@
 
 A package for creating grid world environments for reinforcement learning in Julia. This package is designed to be lightweight and fast.
 
-This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minigrid). In order to cite this package, please refer to the file `CITATION.bib`. Starring the repository on GitHub is also appreciated. For benchmarks, refer to `benchmark/benchmarks.md`.
+This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minigrid). In order to cite this package, please refer to the file `CITATION.bib`. Starring the repository on GitHub is also appreciated. For benchmarks, refer to `benchmarks/benchmarks.md`.
 
 ## Table of contents:
 
