@@ -1,7 +1,7 @@
 name = "GridWorlds"
 uuid = "e15a9946-cd7f-4d03-83e2-6c30bacb0043"
 authors = ["Siddharth Bhatia <sidb60200@gmail.com>", "Jun Tian <tianjun.cpp@gmail.com>", "contributors"]
-version = "0.4.0"
+version = "0.5.0"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
