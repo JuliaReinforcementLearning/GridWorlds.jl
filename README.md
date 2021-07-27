@@ -113,7 +113,7 @@ This package does not intend to reinvent a fully usable reinforcement learning A
 
     As of this writing, all actions in all environments are discrete. And so, to keep things simple and consistent, they are represented by elements of `Base.OneTo(NUM_ACTIONS)` (basically integers going from 1 to NUM_ACTIONS). In order to know which action does what, you can call `GW.get_action_names(env)` to get a list of names which gives a better description. For example:
 
-    ```
+    ```julia
     julia> env = GW.SingleRoomUndirectedModule.SingleRoomUndirected();
 
     julia> GW.get_action_names(env)
@@ -130,7 +130,7 @@ This package does not intend to reinvent a fully usable reinforcement learning A
 
 Each environment contains a tile map, which is a `BitArray{3}` that encodes information about the presence or absence of objects in the grid world. It is of size `(num_objects, height, width)`. The second and third dimensions correspond to positions along the height and width of the tile map. The first dimension corresponds to the presence or absence of objects at a particular position using a multi-hot encoding along the first dimension. You can get the name and ordering of objects along the first dimension of the tile map by using the following method:
 
-```
+```julia
 julia> env = GW.SingleRoomUndirectedModule.SingleRoomUndirected();
 
 julia> GW.get_object_names(env)
@@ -155,7 +155,7 @@ Here is an example:
 
 In order to programmatically record the behavior of an agent during an episode, you can simply log the string representation of the environment at each step prefixed with a delimiter. You can also log other arbitrary information if you want, like the total reward so far, for example. You can then use the `GW.replay` functiton to replay the recording inside the terminal. The string representation of an environment can be obtained using `repr(MIME"text/plain"(), env)`. Here is an example:
 
-```
+```julia
 import GridWorlds as GW
 import ReinforcementLearningBase as RLBase
 
