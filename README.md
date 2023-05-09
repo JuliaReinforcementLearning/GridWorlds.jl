@@ -33,6 +33,7 @@ This package is inspired by [gym-minigrid](https://github.com/maximecb/gym-minig
 1. [Catcher](#catcher)
 1. [TransportUndirected](#transportundirected)
 1. [TransportDirected](#transportdirected)
+1. [FrozenLakeUndirected](#frozenlakeundirected)
 
 ## Getting Started
 
@@ -355,3 +356,10 @@ In `ReinforcementLearning.jl`, you can create a [hook](https://juliareinforcemen
 
     <img src="https://user-images.githubusercontent.com/32610387/126910050-723e100c-c5c7-4703-8eab-5ab86a15e41f.png">
     <img src="https://user-images.githubusercontent.com/32610387/126909921-fdb3c853-4cac-4e6a-b20c-604caf5632e0.gif">
+
+1. ### FrozenLakeUndirected
+
+    The objective of the agent is to navigate its way to the goal while avoiding falling into the holes in the lake. When the agent reaches the goal, it receives a reward of 1 and the environment terminates. If the agent collides falls into a hole, the agent receives a reward of -1 and the environment terminates. The probablility of moving in the direction given by an agent is 1/3 while there is 1/3 chance to move in either perpendicular direction (for example: 1/3 chance to move up, 1/3 chance to move left and 1/3 chance to move right if the agent chose up). The scenario is based on the [Frozen Lake environment](https://gymnasium.farama.org/environments/toy_text/frozen_lake/) in Python's gymnasium. In the Python version there are two preset maps: "4x4" and "8x8". The GridWorlds implementation includes the walls as part of the dimensions, so the equivalent maps in GridWorlds is "6x6" and "10x10" respectively. The start, goal, and holes are located in the same positions in the lake as the Python version. If specifying custom height and widths keep in mind it is going to add walls all around the map so the actual surface of the lake is (height - 2, width - 2). 
+
+    <img src="https://user-images.githubusercontent.com/32610387/126910030-d93a714d-10b7-4117-887c-773afe78c625.png">
+    <img src="https://user-images.githubusercontent.com/32610387/126909888-8fa8473f-deb6-4562-9004-419fa8080693.gif">
