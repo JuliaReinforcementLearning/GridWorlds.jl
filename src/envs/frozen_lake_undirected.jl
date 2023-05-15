@@ -3,7 +3,7 @@ module FrozenLakeUndirectedModule
 import ..GridWorlds as GW
 import Random
 import ReinforcementLearningBase as RLBase
-import AStarSearch
+import AStarSearch.astar
 
 #####
 ##### game logic 
@@ -109,7 +109,7 @@ function FrozenLakeUndirected(; map_name::String = "", R::Type = Float32, height
     return env
 end
 
-function update_holess_on_map(tile_map, hole_positions)
+function update_holes_on_map(tile_map, hole_positions)
     for position in hole_positions
         tile_map[HOLE, position] = true
     end
