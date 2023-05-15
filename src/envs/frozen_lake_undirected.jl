@@ -3,7 +3,7 @@ module FrozenLakeUndirectedModule
 import ..GridWorlds as GW
 import Random
 import ReinforcementLearningBase as RLBase
-using AStarSearch
+import AStarSearch
 
 #####
 ##### game logic 
@@ -26,26 +26,26 @@ mutable struct FrozenLakeUndirected{R, RNG} <: GW.AbstractGridWorld
     terminal_reward::R
     terminal_penalty::R
     goal_position::CartesianIndex{2}
-    num_obstacles::Int
-    obstacle_positions::Vector{CartesianIndex{2}}
+    num_holes::Int
+    hole_positions::Vector{CartesianIndex{2}}
     is_slippery::Bool
     randomize_start_end::Bool
 end
 
-function FrozenLakeUndirected(; map_name::String = "", R::Type = Float32, height::Int = 8, width::Int = 8, num_obstacles::Int = floor(Int, sqrt(height * width) / 2), rng = Random.GLOBAL_RNG, is_slippery::Bool = true, randomize_start_end::Bool = false)
-    obstacle_positions = Array{CartesianIndex{2}}(undef, num_obstacles)
+function FrozenLakeUndirected(; map_name::String = "", R::Type = Float32, height::Int = 8, width::Int = 8, num_holes::Int = floor(Int, sqrt(height * width) / 2), rng = Random.GLOBAL_RNG, is_slippery::Bool = true, randomize_start_end::Bool = false)
+    hole_positions = Array{CartesianIndex{2}}(undef, num_holes)
     if map_name == "6x6"
         height = 6
         width = 6
-        num_obstacles = 4
-        obstacle_positions = Array{CartesianIndex{2}}(undef, num_obstacles)
-        obstacle_positions = [CartesianIndex(3, 3), CartesianIndex(3, 5), CartesianIndex(4, 5), CartesianIndex(5, 2)]
+        num_holes = 4
+        hole_positions = Array{CartesianIndex{2}}(undef, num_holes)
+        hole_positions = [CartesianIndex(3, 3), CartesianIndex(3, 5), CartesianIndex(4, 5), CartesianIndex(5, 2)]
     elseif map_name == "10x10"
         height = 10
         width = 10
-        num_obstacles = 10
-        obstacle_positions = Array{CartesianIndex{2}}(undef, num_obstacles)
-        obstacle_positions = [CartesianIndex(4, 5), CartesianIndex(5, 7), CartesianIndex(6, 5), CartesianIndex(7, 3), CartesianIndex(7, 4), CartesianIndex(7, 8), CartesianIndex(8, 3), CartesianIndex(8, 6), CartesianIndex(8, 8), CartesianIndex(9, 5)]
+        num_holes = 10
+        hole_positions = Array{CartesianIndex{2}}(undef, num_holes)
+        hole_positions = [CartesianIndex(4, 5), CartesianIndex(5, 7), CartesianIndex(6, 5), CartesianIndex(7, 3), CartesianIndex(7, 4), CartesianIndex(7, 8), CartesianIndex(8, 3), CartesianIndex(8, 6), CartesianIndex(8, 8), CartesianIndex(9, 5)]
     elseif map_name != ""
         throw(ArgumentError("Unsupported map_name value: '$(map_name)'. Please use '6x6', '10x10', or undefined."))
     end
@@ -58,13 +58,7 @@ function FrozenLakeUndirected(; map_name::String = "", R::Type = Float32, height
     tile_map[WALL, :, width] .= true
 
     if randomize_start_end
-        agent_position = CartesionIndex(rand(rng, [i for i in 2:height - 1]), rand(rng, [i for i in 2:width - 1]))
-
-        #Find a goal that is not the same position as the start point
-        goal_position = agent_position
-        while agent_position == goal_position
-            goal_position = CartesianIndex(rand(rng, [i for i in 2:height - 1]), rand(rng, [i for i in 2:width - 1]))
-        end
+        GW.sample_two_positions_without_replacement(rng, tile_map[2:height - 1, 2:width - 1])
     else
         agent_position = CartesianIndex(2, 2)
         goal_position = CartesianIndex(height - 1, width - 1)
@@ -76,7 +70,7 @@ function FrozenLakeUndirected(; map_name::String = "", R::Type = Float32, height
     if map_name == ""
         function get_neighbors(state::CartesianIndex)
             return_list = []
-            for pos in [GW.move_up(state), GW.move_down(state), GW.move_left(state), GW.move_right(state)]
+            for pos in (GW.move_up(state), GW.move_down(state), GW.move_left(state), GW.move_right(state))
                     if !tile_map[WALL, pos] && !tile_map[HOLE, pos]
                         push!(return_list, pos)
                     end
@@ -90,33 +84,33 @@ function FrozenLakeUndirected(; map_name::String = "", R::Type = Float32, height
         distance_heuristic(state::CartesianIndex, end_state::CartesianIndex) = manhattan(state, end_state)
 
         path_exists = false
+        hole_positions = Array{CartesianIndex{2}}(undef, num_holes)
         while !path_exists
-            obstacle_positions = Array{CartesianIndex{2}}(undef, num_obstacles)
-            for i in 1:num_obstacles
-                obstacle_position = GW.sample_empty_position(rng, tile_map)
-                obstacle_positions[i] = obstacle_position
+            for i in 1:num_holes
+                hole_position = GW.sample_empty_position(rng, tile_map)
+                hole_positions[i] = hole_position
             end
-            tile_map = update_obstacles_on_map(tile_map, obstacle_positions)
+            tile_map = update_holes_on_map(tile_map, hole_positions)
             
             path_exists = astar(get_neighbors, agent_position, goal_position; heuristic = distance_heuristic, isgoal = is_goal).status == :success
             @debug "path_exists: $(path_exists)"
         end
     end
 
-    tile_map = update_obstacles_on_map(tile_map, obstacle_positions)
+    tile_map = update_holes_on_map(tile_map, hole_positions)
 
     reward = zero(R)
     done = false
     terminal_reward = one(R)
     terminal_penalty = -one(R)
 
-    env = FrozenLakeUndirected(tile_map, map_name, agent_position, reward, rng, done, terminal_reward, terminal_penalty, goal_position, num_obstacles, obstacle_positions, is_slippery, randomize_start_end)
+    env = FrozenLakeUndirected(tile_map, map_name, agent_position, reward, rng, done, terminal_reward, terminal_penalty, goal_position, num_holes, hole_positions, is_slippery, randomize_start_end)
 
     return env
 end
 
-function update_obstacles_on_map(tile_map, obstacle_positions)
-    for position in obstacle_positions
+function update_holess_on_map(tile_map, hole_positions)
+    for position in hole_positions
         tile_map[HOLE, position] = true
     end
     return tile_map
@@ -184,7 +178,7 @@ GW.get_height(env::FrozenLakeUndirected) = size(env.tile_map, 2)
 GW.get_width(env::FrozenLakeUndirected) = size(env.tile_map, 3)
 
 GW.get_action_names(env::FrozenLakeUndirected) = (:MOVE_UP, :MOVE_DOWN, :MOVE_LEFT, :MOVE_RIGHT)
-GW.get_object_names(env::FrozenLakeUndirected) = (:AGENT, :WALL, :GOAL, :OBSTACLE)
+GW.get_object_names(env::FrozenLakeUndirected) = (:AGENT, :WALL, :GOAL, :HOLE)
 
 function GW.get_pretty_tile_map(env::FrozenLakeUndirected, position::CartesianIndex{2})
     characters = ('☻', '█', '♥', '○', '⋅') 
