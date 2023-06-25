@@ -7,7 +7,14 @@ const CLEAR_SCREEN_BEFORE_CURSOR = ESC * "[1J"
 const EMPTY_SCREEN = CLEAR_SCREEN_BEFORE_CURSOR * MOVE_CURSOR_TO_ORIGIN
 const DEFAULT_FRAME_START_DELIMITER = "FRAME_START_DELIMITER"
 
-open_maybe(file_name::AbstractString) = open(file_name, "w")
+function open_maybe(file_name::AbstractString)
+    if isfile(file_name)
+        error("File $(file_name) already exists!")
+    else
+        open(file_name, "w")
+    end
+end
+
 open_maybe(::Nothing) = nothing
 
 close_maybe(io::IO) = close(io)
