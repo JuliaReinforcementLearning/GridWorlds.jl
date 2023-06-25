@@ -91,6 +91,7 @@ function replay(terminal::REPL.Terminals.UnixTerminal, file_name::AbstractString
             while true
                 replay_frame = replay_key_bindings
                 replay_frame = replay_frame * "\n" * "Last replay character read: $(char)"
+                replay_frame = replay_frame * "\n" * "frame number: $(current_frame)/$(num_frames)"
                 replay_frame = replay_frame * "\n" * "------------FRAME_START------------"
                 replay_frame = replay_frame * "\n" * frames[current_frame]
 
