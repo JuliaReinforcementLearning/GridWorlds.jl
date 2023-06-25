@@ -69,7 +69,7 @@ end
 
 play!(env::AbstractGridWorld; file_name = nothing, frame_start_delimiter = DEFAULT_FRAME_START_DELIMITER) = play!(REPL.TerminalMenus.terminal, env, file_name, frame_start_delimiter)
 
-function replay(terminal::REPL.Terminals.UnixTerminal, file_name::AbstractString, frame_start_delimiter::AbstractString, frame_rate = Union{Nothing, Real})
+function replay(terminal::REPL.Terminals.UnixTerminal, file_name::AbstractString, frame_start_delimiter::AbstractString, frame_rate::Union{Nothing, Real})
     terminal_out = terminal.out_stream
     strings = split(read(file_name, String), frame_start_delimiter)
     frames = @view strings[2:end]
