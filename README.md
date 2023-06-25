@@ -65,15 +65,15 @@ GW.play!(env)
 
 # play and record the interaction in a file called recording.txt
 
-GW.play!(env, file_name = "recording.txt", frame_start_delimiter = "FRAME_START_DELIMITER")
+GW.play!(env, file_name = "recording.txt")
 
 # manually step through the frames in the recording
 
-GW.replay(file_name = "recording.txt", frame_start_delimiter = "FRAME_START_DELIMITER")
+GW.replay(file_name = "recording.txt")
 
 # replay the recording inside the terminal at a given frame rate
 
-GW.replay(file_name = "recording.txt", frame_start_delimiter = "FRAME_START_DELIMITER", frame_rate = 2)
+GW.replay(file_name = "recording.txt", frame_rate = 2)
 
 # use the RLBase API
 
@@ -161,13 +161,14 @@ import ReinforcementLearningBase as RLBase
 
 game = GW.SingleRoomUndirectedModule.SingleRoomUndirected()
 env = GW.RLBaseEnv(game)
+frame_start_delimiter = "SOME_FRAME_START_DELIMITER"
 
 total_reward = zero(RLBase.reward(env))
 frame_number = 1
 
 str = ""
 
-str = str * "FRAME_START_DELIMITER"
+str = str * frame_start_delimiter
 str = str * "frame_number: $(frame_number)\n"
 str = str * repr(MIME"text/plain"(), env)
 str = str * "\ntotal_reward: $(total_reward)"
@@ -180,7 +181,7 @@ while !RLBase.is_terminated(env)
     global total_reward += reward
     global frame_number += 1
 
-    global str = str * "FRAME_START_DELIMITER"
+    global str = str * frame_start_delimiter
     global str = str * "frame_number: $(frame_number)\n"
     global str = str * repr(MIME"text/plain"(), env)
     global str = str * "\ntotal_reward: $(total_reward)"
@@ -188,7 +189,7 @@ end
 
 write("recording.txt", str)
 
-GW.replay(file_name = "recording.txt", frame_start_delimiter = "FRAME_START_DELIMITER")
+GW.replay(file_name = "recording.txt", frame_start_delimiter = frame_start_delimiter)
 ```
 
 In `ReinforcementLearning.jl`, you can create a [hook](https://juliareinforcementlearning.org/docs/How_to_use_hooks/) for recording the agent's behavior at any point during training.

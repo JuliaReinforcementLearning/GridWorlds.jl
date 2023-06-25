@@ -5,8 +5,16 @@ const CLEAR_SCREEN = ESC * "[2J"
 const MOVE_CURSOR_TO_ORIGIN = ESC * "[H"
 const CLEAR_SCREEN_BEFORE_CURSOR = ESC * "[1J"
 const EMPTY_SCREEN = CLEAR_SCREEN_BEFORE_CURSOR * MOVE_CURSOR_TO_ORIGIN
+const DEFAULT_FRAME_START_DELIMITER = "FRAME_START_DELIMITER"
 
-open_maybe(file_name::AbstractString) = open(file_name, "w")
+function open_maybe(file_name::AbstractString)
+    if isfile(file_name)
+        error("File $(file_name) already exists!")
+    else
+        open(file_name, "w")
+    end
+end
+
 open_maybe(::Nothing) = nothing
 
 close_maybe(io::IO) = close(io)
@@ -14,16 +22,8 @@ close_maybe(io::Nothing) = nothing
 
 write_maybe(io::IO, content) = write(io, content)
 write_maybe(io::Nothing, content) = 0
-write_maybe(io1, io2, content) = write_maybe(io1, content) + write_maybe(io2, content)
 
-function play!(terminal::REPL.Terminals.UnixTerminal, env::AbstractGridWorld, file_name::Union{Nothing, AbstractString}, frame_start_delimiter::Union{Nothing, AbstractString})
-    if !isnothing(file_name) && isnothing(frame_start_delimiter)
-        error("Please additionally specify a string for the keyword argument `frame_start_delimiter`, for example `frame_start_delimiter = \"FRAME_START_DELIMITER\"`. This is needed when you want to replay the recording.")
-    end
-    if isnothing(file_name) && !isnothing(frame_start_delimiter)
-        error("Please additionally specify a string for the keyword argument `file_name`, for example `file_name = \"recording.txt\"`. This is needed to save the recording in a text file and replay it later.")
-    end
-
+function play!(terminal::REPL.Terminals.UnixTerminal, env::AbstractGridWorld, file_name::Union{Nothing, AbstractString}, frame_start_delimiter::AbstractString)
     terminal_out = terminal.out_stream
     terminal_in = terminal.in_stream
     file = open_maybe(file_name)
@@ -47,7 +47,8 @@ function play!(terminal::REPL.Terminals.UnixTerminal, env::AbstractGridWorld, fi
             frame = frame * "\n" * "Last play character read: $(char)"
             frame = frame * "\n" * repr(MIME"text/plain"(), env)
 
-            write_maybe(terminal_out, file, frame)
+            write_maybe(terminal_out, frame)
+            write_maybe(file, frame)
 
             char = read(terminal_in, Char)
 
@@ -73,9 +74,9 @@ function play!(terminal::REPL.Terminals.UnixTerminal, env::AbstractGridWorld, fi
     return nothing
 end
 
-play!(env::AbstractGridWorld; file_name = nothing, frame_start_delimiter = nothing) = play!(REPL.TerminalMenus.terminal, env, file_name, frame_start_delimiter)
+play!(env::AbstractGridWorld; file_name = nothing, frame_start_delimiter = DEFAULT_FRAME_START_DELIMITER) = play!(REPL.TerminalMenus.terminal, env, file_name, frame_start_delimiter)
 
-function replay(terminal::REPL.Terminals.UnixTerminal, file_name::AbstractString, frame_start_delimiter::AbstractString, frame_rate = Union{Nothing, Real})
+function replay(terminal::REPL.Terminals.UnixTerminal, file_name::AbstractString, frame_start_delimiter::AbstractString, frame_rate::Union{Nothing, Real})
     terminal_out = terminal.out_stream
     strings = split(read(file_name, String), frame_start_delimiter)
     frames = @view strings[2:end]
@@ -97,6 +98,7 @@ function replay(terminal::REPL.Terminals.UnixTerminal, file_name::AbstractString
             while true
                 replay_frame = replay_key_bindings
                 replay_frame = replay_frame * "\n" * "Last replay character read: $(char)"
+                replay_frame = replay_frame * "\n" * "frame number: $(current_frame)/$(num_frames)"
                 replay_frame = replay_frame * "\n" * "------------FRAME_START------------"
                 replay_frame = replay_frame * "\n" * frames[current_frame]
 
@@ -139,4 +141,4 @@ function replay(terminal::REPL.Terminals.UnixTerminal, file_name::AbstractString
     end
 end
 
-replay(; file_name, frame_start_delimiter, frame_rate = nothing) = replay(REPL.TerminalMenus.terminal, file_name, frame_start_delimiter, frame_rate)
+replay(; file_name, frame_start_delimiter = DEFAULT_FRAME_START_DELIMITER, frame_rate = nothing) = replay(REPL.TerminalMenus.terminal, file_name, frame_start_delimiter, frame_rate)
