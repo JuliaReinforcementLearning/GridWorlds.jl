@@ -22,7 +22,6 @@ close_maybe(io::Nothing) = nothing
 
 write_maybe(io::IO, content) = write(io, content)
 write_maybe(io::Nothing, content) = 0
-write_maybe(io1, io2, content) = write_maybe(io1, content) + write_maybe(io2, content)
 
 function play!(terminal::REPL.Terminals.UnixTerminal, env::AbstractGridWorld, file_name::Union{Nothing, AbstractString}, frame_start_delimiter::AbstractString)
     terminal_out = terminal.out_stream
@@ -48,7 +47,8 @@ function play!(terminal::REPL.Terminals.UnixTerminal, env::AbstractGridWorld, fi
             frame = frame * "\n" * "Last play character read: $(char)"
             frame = frame * "\n" * repr(MIME"text/plain"(), env)
 
-            write_maybe(terminal_out, file, frame)
+            write_maybe(terminal_out, frame)
+            write_maybe(file, frame)
 
             char = read(terminal_in, Char)
 
