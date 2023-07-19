@@ -21,6 +21,7 @@ include("snake.jl")
 include("catcher.jl")
 include("transport_undirected.jl")
 include("transport_directed.jl")
+include("frozen_lake_undirected.jl")
 
 const ENVS = [
               SingleRoomUndirectedModule.SingleRoomUndirected,
@@ -46,4 +47,5 @@ const ENVS = [
               CatcherModule.Catcher,
               TransportUndirectedModule.TransportUndirected,
               TransportDirectedModule.TransportDirected,
+              FrozenLakeUndirectedModule.FrozenLakeUndirected
              ]
